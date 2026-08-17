@@ -82,20 +82,59 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       { type: 'knob', key: 'lfoRate', label: 'RATE', min: 0.1, max: 20, step: 0.1, def: 2.2, fmt: function (v) { return v.toFixed(1) + 'Hz'; } },
       { type: 'knob', key: 'lfoDepth', label: 'DEPTH', min: 0, max: 100, def: 35, fmt: fmtPct }
     ]},
-    { title: 'MOD MATRIX', color: '#fbbf24', items: [
-      { type: 'knob', key: 'lfoCutoff', label: 'LFO>CUT', min: 0, max: 100, def: 0, fmt: fmtPct },
-      { type: 'knob', key: 'lfoPitch', label: 'LFO>PIT', min: 0, max: 100, def: 0, fmt: fmtPct },
-      { type: 'knob', key: 'lfoAmp', label: 'LFO>AMP', min: 0, max: 100, def: 0, fmt: fmtPct },
-      { type: 'knob', key: 'lfoFM', label: 'LFO>FM', min: 0, max: 100, def: 0, fmt: fmtPct },
-      { type: 'knob', key: 'envPitch', label: 'ENV>PIT', min: 0, max: 100, def: 0, fmt: fmtPct },
-      { type: 'knob', key: 'envFM', label: 'ENV>FM', min: 0, max: 100, def: 0, fmt: fmtPct }
-    ]},
     { title: 'SPACE FX', color: '#f07dc2', items: [
       { type: 'knob', key: 'reverb', label: 'REVERB', min: 0, max: 100, def: 35, fmt: fmtPct },
       { type: 'knob', key: 'delay', label: 'DELAY', min: 0, max: 100, def: 22, fmt: fmtPct },
       { type: 'knob', key: 'master', label: 'MASTER', min: 0, max: 100, def: 80, fmt: fmtPct }
     ]}
   ];
+
+  function buildModMatrix() {
+    const s = document.createElement('div');
+    s.className = 'section matrix-section';
+    s.innerHTML = '<div class="stitle" style="--c:#fbbf24">MOD MATRIX</div>';
+    const grid = document.createElement('div');
+    grid.className = 'mod-matrix';
+    const sources = [
+      { pre: 'modL', label: 'LFO' },
+      { pre: 'modE', label: 'ENV' },
+      { pre: 'modV', label: 'VEL' }
+    ];
+    const dests = [
+      { suf: 'C', label: 'CUT' },
+      { suf: 'P', label: 'PIT' },
+      { suf: 'A', label: 'AMP' },
+      { suf: 'F', label: 'FM' },
+      { suf: 'R', label: 'RES' }
+    ];
+    const corner = document.createElement('div');
+    corner.className = 'matrix-corner';
+    grid.appendChild(corner);
+    dests.forEach(function (dst) {
+      const h = document.createElement('div');
+      h.className = 'matrix-collabel';
+      h.textContent = dst.label;
+      grid.appendChild(h);
+    });
+    sources.forEach(function (src) {
+      const rl = document.createElement('div');
+      rl.className = 'matrix-rowlabel';
+      rl.textContent = src.label;
+      grid.appendChild(rl);
+      dests.forEach(function (dst) {
+        const key = src.pre + dst.suf;
+        const knob = new Psy.Knob(grid, {
+          label: '', color: '#fbbf24', min: -100, max: 100, def: 0, size: 54,
+          value: engine.params[key] || 0,
+          fmt: function (v) { return (v > 0 ? '+' : '') + Math.round(v); },
+          onChange: function (v) { engine.set(key, v); }
+        });
+        REG[key] = knob;
+      });
+    });
+    s.appendChild(grid);
+    $('sections').appendChild(s);
+  }
 
   function buildSections() {
     const root = $('sections');
@@ -801,6 +840,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
   safeBuild('macros', buildMacros);
   safeBuild('sections', buildSections);
+  safeBuild('matrix', buildModMatrix);
   safeBuild('arp', buildArpPanel);
   safeBuild('seq', buildSeqPanel);
   safeBuild('wavetable', buildWavetableLab);
