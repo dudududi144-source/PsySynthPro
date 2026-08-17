@@ -13,6 +13,7 @@ A real DSP synthesizer in the browser — genuine sample-rate synthesis, not pre
 | FM | instantaneous-frequency modulation (DX7-style) |
 | Morph | continuous interpolation between any two presets |
 | MIDI/MPE | Web MIDI input: notes + velocity, CC automation, per-note pitch bend |
+| 3D Spectrum | perspective-projected log-spaced frequency bars with depth sorting |
 | Space FX | convolution reverb + feedback delay on master bus |
 | Output | tanh soft-clip stage |
 | Voices | 16-voice pool, oldest-note stealing |
