@@ -14,6 +14,8 @@ A real DSP synthesizer in the browser — genuine sample-rate synthesis, not pre
 | Morph | continuous interpolation between any two presets |
 | MIDI/MPE | Web MIDI input: notes + velocity, CC automation, per-note pitch bend |
 | 3D Spectrum | perspective-projected log-spaced frequency bars with depth sorting |
+| WAV Export | live capture from master bus -> real 16-bit stereo WAV download |
+| PWA | installable, offline-first (service worker caches all assets) |
 | Space FX | convolution reverb + feedback delay on master bus |
 | Output | tanh soft-clip stage |
 | Voices | 16-voice pool, oldest-note stealing |
@@ -35,6 +37,9 @@ Morph: choose presets A + B and sweep the MORPH knob.
 | src/presets.js | preset bank |
 | src/ui.js | panel builder, keyboard, OLED scope |
 | docs/ | architecture + design research |
+
+## Record
+Press REC, play, press STOP — a 16-bit stereo WAV downloads automatically.
 
 ## MIDI
 Connect a MIDI keyboard, press POWER, and play. CC1=mod/LFO depth, CC74=cutoff, CC71=resonance, CC7=master. Pitch bend is per-note (MPE-style).
