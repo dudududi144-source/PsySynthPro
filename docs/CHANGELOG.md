@@ -3,6 +3,20 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [1.5.0] — Reliability + Performance Macros
+### Fixed
+- Blank-panel failure mode: boot watchdog detects failed panel builds, shows captured
+  errors and a one-click REPAIR (unregisters service workers, clears caches, reloads)
+- Service worker moved cache-first -> **network-first** (v5): always fresh online,
+  cached offline; stale-cache failure class eliminated
+- Panel builders now run in isolated try/catch with error capture
+### Added
+- PERFORMANCE MACROS section (market gap per Serum/Pigments research):
+  M1 Cutoff, M2 Resonance, M3 Space (reverb+delay), M4 FM Drive — oversized knobs,
+  live-synced with the module knobs
+### Verified
+- Headless JS harness (quickjs): 11 sections, 8 presets, 25 keys, zero errors
+
 ## [1.4.0] — MIDI Export
 ### Added
 - MIDI capture: records every note event (manual / arp / seq) via engine method wrapping
