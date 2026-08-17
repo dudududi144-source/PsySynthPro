@@ -119,4 +119,27 @@ Psy.buildMidiFile = function (events, bpm, ppq) {
   return new Blob([new Uint8Array(out)], { type: 'audio/midi' });
 };
 
+Psy.exportSeqGroove = function (seq, notes, bars) {
+  const ARP = Psy.ARP_STEPS || [{ beats: 1 }, { beats: 0.5 }, { beats: 0.25 }];
+  const stepBeats = (ARP[seq.stepIdxDiv] && ARP[seq.stepIdxDiv].beats) ? ARP[seq.stepIdxDiv].beats : 0.25;
+  const bpm = seq.bpm || 120;
+  const stepDur = stepBeats * (60 / bpm);
+  const gateFrac = Math.max(0.05, Math.min(1, (seq.gate || 70) / 100));
+  const LEN = Psy.SEQ_LEN || 16;
+  const totalSteps = LEN * (bars || 2);
+  const events = [];
+  let ni = 0;
+  for (let s = 0; s < totalSteps; s++) {
+    const st = seq.steps[s % LEN];
+    const t = s * stepDur;
+    if (st.on && notes.length > 0) {
+      const note = notes[ni % notes.length]; ni++;
+      const vel = st.accent ? 120 : 90;
+      events.push({ on: true, note: note, vel: vel, t: t });
+      events.push({ on: false, note: note, vel: 0, t: t + stepDur * gateFrac });
+    }
+  }
+  return { events: events, bpm: bpm };
+};
+
 Psy.MidiRecorder = MidiRecorder;
