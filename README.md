@@ -6,30 +6,36 @@ A real DSP synthesizer in the browser — genuine sample-rate synthesis, not pre
 
 | Stage | Technique |
 |---|---|
-| Oscillators | **PolyBLEP** band-limited saw/square/tri — the standard anti-aliasing method in professional softsynths |
-| Filter | **ZDF State-Variable Filter** (zero-delay feedback, Simper/Zavalishin topology), per voice |
-| Envelopes | Analog-style one-pole exponential ADSR |
-| FM | Instantaneous-frequency modulation (DX7-style phase modulation) |
-| Space FX | Convolution reverb + feedback delay on the master bus |
+| Oscillators | **PolyBLEP** band-limited saw/square/tri + **wavetable mode** |
+| Wavetable Lab | draw your own wave on a canvas, or load 5 harmonic recipes |
+| Filter | **ZDF State-Variable Filter** (zero-delay feedback), per voice |
+| Envelopes | analog-style one-pole exponential ADSR |
+| FM | instantaneous-frequency modulation (DX7-style) |
+| Morph | continuous interpolation between any two presets |
+| Space FX | convolution reverb + feedback delay on master bus |
 | Output | tanh soft-clip stage |
 | Voices | 16-voice pool, oldest-note stealing |
 
 ## Play
-Open `index.html` (or enable GitHub Pages) → **POWER** → play with mouse or keys `A W S E D F T G Y H U J K`.
+Open index.html (or enable GitHub Pages) -> **POWER** -> play with mouse or keys `A W S E D F T G Y H U J K`.
+
+Wavetable Lab: pick a recipe (COSMIC/NEURO/GLASS/VOID/VOCAL) or draw your own wave and hit USE DRAWING, then set WAVE to USER.
+Morph: choose presets A + B and sweep the MORPH knob.
 
 ## Structure
 | Path | Role |
 |---|---|
-| `index.html` | Panel layout |
-| `css/synth.css` | Boutique hardware design system |
-| `src/synth-engine.js` | AudioWorklet DSP engine + master FX |
-| `src/knob.js` | SVG rotary knobs with tick marks |
-| `src/presets.js` | Preset bank |
-| `src/ui.js` | Panel builder, keyboard, OLED scope |
-| `docs/` | Architecture + design research |
+| index.html | panel layout |
+| css/synth.css | boutique hardware design system |
+| src/synth-engine.js | AudioWorklet DSP engine + master FX |
+| src/wavetable.js | wavetable rendering, editor, morph engine |
+| src/knob.js | SVG rotary knobs with tick marks |
+| src/presets.js | preset bank |
+| src/ui.js | panel builder, keyboard, OLED scope |
+| docs/ | architecture + design research |
 
 ## Security
-No tokens/keys in this repository. `.gitignore` blocks `.env` and key files.
+No tokens/keys in this repository. .gitignore blocks .env and key files.
 
 ## License
 MIT
