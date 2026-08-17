@@ -44,6 +44,42 @@
   <div class="kb" id="kb"></div>
   <div class="brand">PSYSYNTH PRO<span>POLYBLEP &bull; WAVETABLE &bull; ZDF SVF &bull; FM &bull; MORPH &bull; MIDI/MPE &bull; STEP SEQ &bull; ARPEGGIATOR &bull; WAV/MIDI EXPORT &bull; OFFLINE PWA</span></div>
 </div>
+<script>
+/* Boot watchdog — surfaces failures instead of a blank panel, one-click self-heal */
+window.__psyErrors = [];
+window.addEventListener('error', function (e) {
+  window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
+});
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    var s = document.getElementById('sections');
+    if (!s || s.children.length > 0 || window.__psyUiReady) return;
+    var d = document.createElement('div');
+    d.style.cssText = 'margin:14px 0;padding:16px 18px;border:1px solid #f85149;border-radius:10px;background:#1a0b0b;color:#ffb3ab;font-family:monospace;font-size:12px;line-height:1.9';
+    var msg = '<b>PANEL FAILED TO BUILD</b> \u2014 cached files are likely stale.<br>';
+    if (window.__psyErrors.length) msg += 'Captured: ' + window.__psyErrors.join(' | ').slice(0, 400) + '<br>';
+    msg += '<button id="bHeal" style="margin-top:8px;padding:10px 18px;background:#f85149;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-family:monospace">REPAIR \u2014 clear cache and reload</button>';
+    d.innerHTML = msg;
+    s.parentNode.insertBefore(d, s);
+    var b = document.getElementById('bHeal');
+    if (b) b.addEventListener('click', function () {
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+          navigator.serviceWorker.getRegistrations().then(function (rs) {
+            rs.forEach(function (r) { r.unregister(); });
+          });
+        }
+      } catch (e) {}
+      try {
+        if (window.caches && caches.keys) {
+          caches.keys().then(function (ks) { ks.forEach(function (k) { caches.delete(k); }); });
+        }
+      } catch (e) {}
+      setTimeout(function () { location.reload(); }, 200);
+    });
+  }, 1500);
+});
+</script>
 <script src="src/presets.js"></script>
 <script src="src/wavetable.js"></script>
 <script src="src/synth-engine.js"></script>
