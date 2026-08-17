@@ -1,28 +1,9 @@
 "use strict";
-/* PsySynthPro service worker v5 — network-first:
-   online  -> always fresh from network (cache updated in background)
-   offline -> last good copy from cache
-   This eliminates stale-cache failure modes from earlier cache-first versions. */
+/* PsySynthPro service worker v6 — network-first, minimal surface.
+   index.html is a self-contained bundle, so only 3 assets exist. */
 
-const CACHE = 'psysynthpro-v5';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './assets/icon.svg',
-  './css/synth.css',
-  './src/presets.js',
-  './src/wavetable.js',
-  './src/synth-engine.js',
-  './src/knob.js',
-  './src/midi.js',
-  './src/viz3d.js',
-  './src/recorder.js',
-  './src/arpeggiator.js',
-  './src/sequencer.js',
-  './src/midi-export.js',
-  './src/ui.js'
-];
+const CACHE = 'psysynthpro-v6';
+const ASSETS = ['./', './manifest.json', './assets/icon.svg'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
@@ -51,7 +32,7 @@ self.addEventListener('fetch', function (e) {
       return resp;
     }).catch(function () {
       return caches.match(e.request).then(function (hit) {
-        return hit || caches.match('./index.html');
+        return hit || caches.match('./');
       });
     })
   );
