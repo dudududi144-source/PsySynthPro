@@ -7,7 +7,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE: all CSS+JS inlined. Modular sources live in src/ for development. -->
+<!-- SELF-CONTAINED BUNDLE v1.7.0 | 159b271 | 2026-08-17: all CSS+JS inlined. -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -456,10 +456,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>PSYTRANCE INSTRUMENT &bull; POLYBLEP &bull; ZDF SVF &bull; FM &bull; WAVETABLE &bull; SEQ &bull; ARP &bull; TRANCE GATE</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v1.7.0 \u00B7 159b271 \u00B7 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; POLYBLEP &bull; ZDF SVF &bull; FM &bull; SEQ &bull; ARP &bull; TRANCE GATE</span></div>
 </div>
 <script>
 window.__psyErrors = [];
+window.__psyBuild = 'v1.7.0 \u00B7 159b271 \u00B7 2026-08-17';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
 });
@@ -469,8 +470,9 @@ window.addEventListener('load', function () {
     if (!s || s.children.length > 0 || window.__psyUiReady) return;
     var d = document.createElement('div');
     d.style.cssText = 'margin:14px 0;padding:16px 18px;border:1px solid #f85149;border-radius:10px;background:#1a0b0b;color:#ffb3ab;font-family:monospace;font-size:12px;line-height:1.9';
-    var msg = '<b>PANEL FAILED TO BUILD</b><br>';
+    var msg = '<b>PANEL FAILED TO BUILD</b> \u00B7 build ' + window.__psyBuild + '<br>';
     if (window.__psyErrors.length) msg += 'Captured: ' + window.__psyErrors.join(' | ').slice(0, 400) + '<br>';
+    msg += 'If you see this, your browser loaded a stale copy: press REPAIR, or hard-refresh (Ctrl+Shift+R), or open in a private/incognito window.<br>';
     msg += '<button id="bHeal" style="margin-top:8px;padding:10px 18px;background:#f85149;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-family:monospace">REPAIR \u2014 clear cache and reload</button>';
     d.innerHTML = msg;
     s.parentNode.insertBefore(d, s);
@@ -482,6 +484,25 @@ window.addEventListener('load', function () {
     });
   }, 1500);
 });
+</script>
+<script>
+/* No service worker: unregister leftovers + clear caches on every load. */
+(function () {
+  try {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        for (var i = 0; i < regs.length; i++) regs[i].unregister();
+      }).catch(function () {});
+    }
+  } catch (e) {}
+  try {
+    if (window.caches && caches.keys) {
+      caches.keys().then(function (ks) {
+        for (var i = 0; i < ks.length; i++) caches.delete(ks[i]);
+      }).catch(function () {});
+    }
+  } catch (e) {}
+})();
 </script>
 <script>
 "use strict";
@@ -812,7 +833,7 @@ class SynthProcessor extends AudioWorkletProcessor {
   polyblep(t, dt) {
     if (t < dt) { t /= dt; return t + t - t * t - 1; }
     if (t > 1 - dt) { t = (t - 1) / dt; return t * t + t + t + 1; }
-    return 1;
+    return 0;
   }
 
   readWavetable(phase) {
@@ -2611,27 +2632,6 @@ const Psy = (window.PsySynth = window.PsySynth || {});
 })();
 
 </script>
-<script>
-/* DELIVERY MODE: no service worker. Earlier SW versions cached stale pages and
-   caused the blank-panel bug, so on every load we now unregister any leftover
-   workers and clear all caches. The self-contained bundle below is then always
-   served fresh by the browser (single request = full instrument). */
-(function () {
-  try {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
-      navigator.serviceWorker.getRegistrations().then(function (regs) {
-        for (var i = 0; i < regs.length; i++) regs[i].unregister();
-      }).catch(function () {});
-    }
-  } catch (e) {}
-  try {
-    if (window.caches && caches.keys) {
-      caches.keys().then(function (ks) {
-        for (var i = 0; i < ks.length; i++) caches.delete(ks[i]);
-      }).catch(function () {});
-    }
-  } catch (e) {}
-})();
-</script>
+
 </body>
 </html>
