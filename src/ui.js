@@ -10,11 +10,26 @@ const Psy = (window.PsySynth = window.PsySynth || {});
     k.classList.add('arp-flash');
     setTimeout(function () { k.classList.remove('arp-flash'); }, 110);
   };
+  const seq = new Psy.Sequencer(engine);
+  const noteRouter = {
+    noteOn: function (n, v) {
+      if (seq.enabled) seq.noteOn(n, v);
+      else if (arp.enabled) arp.noteOn(n, v);
+      else engine.noteOn(n, v);
+    },
+    noteOff: function (n) {
+      if (seq.enabled) seq.noteOff(n);
+      else if (arp.enabled) arp.noteOff(n);
+      else engine.noteOff(n);
+    }
+  };
   const REG = {};
   const $ = function (id) { return document.getElementById(id); };
   let pendingTable = null;
   let midi = null;
   let viz = null;
+  let arpToggle = null;
+  let seqToggle = null;
   let recorder = null;
 
   function midiStatus(state, info) {
@@ -219,12 +234,16 @@ const Psy = (window.PsySynth = window.PsySynth || {});
     const row = document.createElement('div');
     row.className = 'krow';
 
-    const arpToggle = new Psy.CycleBtn(row, {
+    arpToggle = new Psy.CycleBtn(row, {
       color: '#f87171', label: 'ARP', options: ['OFF', 'ON'], value: 'OFF',
       display: function (v) { return v; },
       onChange: function (v) {
         arp.setEnabled(v === 'ON');
         arpToggle.btn.classList.toggle('armed', v === 'ON');
+        if (v === 'ON' && seq.enabled) {
+          seq.setEnabled(false);
+          if (seqToggle) { seqToggle.setValue('OFF'); seqToggle.btn.classList.remove('armed'); }
+        }
       }
     });
 
@@ -270,6 +289,86 @@ const Psy = (window.PsySynth = window.PsySynth || {});
     $('sections').appendChild(s);
   }
 
+  /* ═══════ STEP SEQUENCER panel ═══════ */
+  const seqBtns = [];
+  function buildSeqPanel() {
+    const s = document.createElement('div');
+    s.className = 'section seq-section';
+    s.innerHTML = '<div class="stitle" style="--c:#60a5fa">STEP SEQ</div>';
+
+    const grid = document.createElement('div');
+    grid.className = 'seq-grid';
+    for (let i = 0; i < Psy.SEQ_LEN; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'seq-btn on' + (seq.steps[i].accent ? ' accent' : '');
+      btn.addEventListener('click', (function (idx) {
+        return function () {
+          const st = seq.toggleStep(idx);
+          seqBtns[idx].classList.toggle('on', st.on);
+          seqBtns[idx].classList.toggle('accent', st.accent);
+        };
+      })(i));
+      seqBtns.push(btn);
+      grid.appendChild(btn);
+    }
+    s.appendChild(grid);
+
+    const row = document.createElement('div');
+    row.className = 'krow';
+
+    seqToggle = new Psy.CycleBtn(row, {
+      color: '#60a5fa', label: 'SEQ', options: ['OFF', 'ON'], value: 'OFF',
+      display: function (v) { return v; },
+      onChange: function (v) {
+        seq.setEnabled(v === 'ON');
+        seqToggle.btn.classList.toggle('armed', v === 'ON');
+        if (v === 'ON' && arp.enabled) {
+          arp.setEnabled(false);
+          if (arpToggle) { arpToggle.setValue('OFF'); arpToggle.btn.classList.remove('armed'); }
+        }
+      }
+    });
+
+    new Psy.CycleBtn(row, {
+      color: '#60a5fa', label: 'HOLD', options: ['OFF', 'ON'], value: 'OFF',
+      display: function (v) { return v; },
+      onChange: function (v) { seq.hold = (v === 'ON'); if (v === 'OFF') seq.held = []; }
+    });
+
+    new Psy.Knob(row, {
+      color: '#60a5fa', label: 'BPM', min: 60, max: 200, def: 138,
+      fmt: function (v) { return String(Math.round(v)); },
+      onChange: function (v) { seq.bpm = v; }
+    });
+
+    new Psy.CycleBtn(row, {
+      color: '#60a5fa', label: 'STEP', options: [0, 1, 2], value: 2,
+      display: function (v) { return Psy.ARP_STEPS[v].label; },
+      onChange: function (v) { seq.stepIdxDiv = v; }
+    });
+
+    new Psy.Knob(row, {
+      color: '#60a5fa', label: 'GATE', min: 10, max: 100, def: 70,
+      fmt: fmtPct,
+      onChange: function (v) { seq.gate = v; }
+    });
+
+    s.appendChild(row);
+    $('sections').appendChild(s);
+
+    seq.onStep = function (pos, note) {
+      for (let i = 0; i < seqBtns.length; i++) seqBtns[i].classList.remove('playing');
+      if (seqBtns[pos]) seqBtns[pos].classList.add('playing');
+      if (note >= 0) {
+        const k = document.querySelector('[data-n="' + note + '"]');
+        if (k) {
+          k.classList.add('seq-flash');
+          setTimeout(function () { k.classList.remove('seq-flash'); }, 100);
+        }
+      }
+    };
+  }
+
   /* ═══════ presets / keyboard / scope ═══════ */
   let pIdx = 0;
   function loadPreset(i) {
@@ -313,13 +412,13 @@ const Psy = (window.PsySynth = window.PsySynth || {});
 
   function noteOn(n) {
     if (!engine.ready) return;
-    if (arp) arp.noteOn(n, 0.8); else engine.noteOn(n, 0.8);
+    noteRouter.noteOn(n, 0.8);
     const k = document.querySelector('[data-n="' + n + '"]');
     if (k) k.classList.add('on');
   }
   function noteOff(n) {
     if (!engine.ready) return;
-    if (arp) arp.noteOff(n); else engine.noteOff(n);
+    noteRouter.noteOff(n);
     const k = document.querySelector('[data-n="' + n + '"]');
     if (k) k.classList.remove('on');
   }
@@ -373,7 +472,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
           status: midiStatus,
           event: function (txt) { const ev = $('midiEvent'); if (ev) ev.textContent = txt; }
         });
-        midi.input = arp;
+        midi.input = noteRouter;
         midi.init();
       }
       updateMeta();
@@ -385,7 +484,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   });
   $('bPrev').addEventListener('click', function () { loadPreset(pIdx - 1); });
   $('bNext').addEventListener('click', function () { loadPreset(pIdx + 1); });
-  $('bPanic').addEventListener('click', function () { engine.panic(); if (arp) arp.panic(); });
+  $('bPanic').addEventListener('click', function () { engine.panic(); if (arp) arp.panic(); if (seq) seq.panic(); });
 
   $('bRec').addEventListener('click', function () {
     if (!engine.ready) return;
@@ -421,6 +520,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
 
   buildSections();
   buildArpPanel();
+  buildSeqPanel();
   buildWavetableLab();
   buildMorph();
   buildPresets();
