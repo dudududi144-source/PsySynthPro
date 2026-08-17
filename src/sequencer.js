@@ -13,7 +13,7 @@ class Sequencer {
     this.engine = engine;
     this.enabled = false;
     this.hold = false;
-    this.bpm = 138;
+    this.bpm = 141;
     this.stepIdxDiv = 2;   /* Psy.ARP_STEPS index - 1/16 default */
     this.gate = 70;        /* % of step */
     this.steps = [];
