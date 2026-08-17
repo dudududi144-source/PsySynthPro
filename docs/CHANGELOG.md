@@ -3,6 +3,22 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [1.6.0] — Psytrance Edition + Bulletproof Delivery
+### Fixed
+- Panel-blank root cause eliminated: index.html is now a **self-contained bundle**
+  (all CSS+JS inlined) — no module load order, no missing file, no mixed-cache failure
+  modes possible. One request = full instrument.
+- Service worker v6: network-first, minimal 3-asset cache surface
+### Added — Psytrance content
+- Square-wave LFO (worklet) — enables tempo-synced **trance gating**
+- LFO WAVE selector (SIN/SQR) in UI
+- Psy-trance preset bank (12): PSY BASS 141, TRANCE GATE, ACID 303, GOA BLEEP,
+  PSY STAB, DARK PAD, ROLLING ARP + 5 classics
+- Sequencer default tempo 138 -> 141 BPM
+### Verified
+- Headless harness against the exact bundle artifact:
+  11 sections, 12 presets, 25 keys, ready=true, zero errors
+
 ## [1.5.0] — Reliability + Performance Macros
 ### Fixed
 - Blank-panel failure mode: boot watchdog detects failed panel builds, shows captured
