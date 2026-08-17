@@ -7,7 +7,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v1.7.0 | 159b271 | 2026-08-17: all CSS+JS inlined. -->
+<!-- SELF-CONTAINED BUNDLE v1.8.0 | edf09dd | 2026-08-17: all CSS+JS inlined. -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -426,6 +426,38 @@ body {
 }
 .macros-row { gap: 26px; padding: 4px 6px; }
 
+
+/* ══════════ SEQ PATTERNS + TEMPOS (Phase 12) ══════════ */
+.seq-patterns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.pat-btn {
+  padding: 7px 11px; border-radius: 7px; border: 1px solid #000;
+  background: linear-gradient(180deg, #1c2434, #101722);
+  color: #7fb6f0; font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; font-weight: 700; letter-spacing: 1px; cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: all 0.12s;
+}
+.pat-btn:hover { filter: brightness(1.3); }
+.pat-btn.active {
+  background: linear-gradient(180deg, #2563eb, #1e40af);
+  color: #fff; box-shadow: 0 0 12px rgba(96,165,250,0.5);
+}
+.seq-tempos { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; }
+.tempo-label { color: #5b6470; font-size: 8px; letter-spacing: 2px; font-weight: 700; margin-right: 4px; }
+.tempo-btn {
+  width: 42px; padding: 6px 0; border-radius: 6px; border: 1px solid #000;
+  background: linear-gradient(180deg, #1c2434, #101722);
+  color: #7fb6f0; font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  transition: all 0.12s;
+}
+.tempo-btn:hover { filter: brightness(1.3); }
+.tempo-btn.active {
+  background: linear-gradient(180deg, #2563eb, #1e40af);
+  color: #fff; box-shadow: 0 0 10px rgba(96,165,250,0.5);
+}
+
 </style>
 </head>
 <body>
@@ -456,11 +488,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v1.7.0 \u00B7 159b271 \u00B7 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; POLYBLEP &bull; ZDF SVF &bull; FM &bull; SEQ &bull; ARP &bull; TRANCE GATE</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v1.8.0 \u00B7 edf09dd \u00B7 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; POLYBLEP &bull; ZDF SVF &bull; FM &bull; SEQ &bull; ARP &bull; TRANCE GATE</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v1.7.0 \u00B7 159b271 \u00B7 2026-08-17';
+window.__psyBuild = 'v1.8.0 \u00B7 edf09dd \u00B7 2026-08-17';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
 });
@@ -486,7 +518,6 @@ window.addEventListener('load', function () {
 });
 </script>
 <script>
-/* No service worker: unregister leftovers + clear caches on every load. */
 (function () {
   try {
     if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
@@ -1444,6 +1475,16 @@ class Sequencer {
   }
   panic() { this.held = []; }
 
+  loadPattern(name) {
+    const p = Psy.SEQ_PATTERNS[name];
+    if (!p) return false;
+    for (let i = 0; i < SEQ_LEN; i++) {
+      this.steps[i].on = p.g[i] === 1;
+      this.steps[i].accent = p.a[i] === 1;
+    }
+    return true;
+  }
+
   tick() {
     if (!this.enabled || !this.engine.ctx) return;
     const ctx = this.engine.ctx;
@@ -1470,6 +1511,22 @@ class Sequencer {
     }
   }
 }
+
+
+/* ═══════════ PSY-TRANCE PATTERN BANK ═══════════
+   16-step gate/accent patterns. g = gate on, A = gate on + accent.
+   Step grid: 4 beats x 4 sixteenths (beat heads at 0, 4, 8, 12).   */
+
+Psy.SEQ_PATTERNS = {
+  'ROLLING 16':   { g: [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1], a: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0] },
+  'OFFBEAT BASS': { g: [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0], a: [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0] },
+  'PSY PUMP':     { g: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0], a: [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0] },
+  'ACID LINE':    { g: [1,0,0,1, 0,0,1,0, 0,1,0,0, 1,0,0,0], a: [1,0,0,0, 0,0,1,0, 0,0,0,0, 1,0,0,0] },
+  'TRANCE STAB':  { g: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,1,0], a: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0] },
+  'GATE 8':       { g: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0], a: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0] },
+  'DARK ROLL':    { g: [1,1,0,1, 1,0,1,1, 0,1,1,0, 1,1,0,1], a: [1,0,0,0, 0,0,1,0, 0,0,0,0, 0,1,0,0] },
+  'GOA BLEEP':    { g: [1,0,0,0, 0,1,0,0, 0,0,0,1, 0,0,0,0], a: [1,0,0,0, 0,1,0,0, 0,0,0,1, 0,0,0,0] }
+};
 
 Psy.SEQ_LEN = SEQ_LEN;
 Psy.Sequencer = Sequencer;
@@ -2381,6 +2438,53 @@ const Psy = (window.PsySynth = window.PsySynth || {});
     }
     s.appendChild(grid);
 
+    /* psy pattern bank */
+    const patRow = document.createElement('div');
+    patRow.className = 'seq-patterns';
+    function refreshGrid() {
+      for (let i = 0; i < seqBtns.length; i++) {
+        seqBtns[i].classList.toggle('on', seq.steps[i].on);
+        seqBtns[i].classList.toggle('accent', seq.steps[i].accent);
+      }
+    }
+    const patNames = Object.keys(Psy.SEQ_PATTERNS);
+    const patBtns = [];
+    patNames.forEach(function (name) {
+      const pb = document.createElement('button');
+      pb.className = 'pat-btn';
+      pb.textContent = name;
+      pb.addEventListener('click', function () {
+        seq.loadPattern(name);
+        refreshGrid();
+        patBtns.forEach(function (x) { x.classList.remove('active'); });
+        pb.classList.add('active');
+      });
+      patBtns.push(pb);
+      patRow.appendChild(pb);
+    });
+    s.appendChild(patRow);
+
+    /* psy tempo quick-set */
+    const tempoRow = document.createElement('div');
+    tempoRow.className = 'seq-tempos';
+    const lbl = document.createElement('span');
+    lbl.className = 'tempo-label';
+    lbl.textContent = 'TEMPO';
+    tempoRow.appendChild(lbl);
+    [138, 141, 145, 150].forEach(function (t) {
+      const tb = document.createElement('button');
+      tb.className = 'tempo-btn' + (t === 141 ? ' active' : '');
+      tb.textContent = String(t);
+      tb.addEventListener('click', function () {
+        seq.bpm = t;
+        bpmKnob.set(t, true);
+        tempoRow.querySelectorAll('.tempo-btn').forEach(function (x) { x.classList.remove('active'); });
+        tb.classList.add('active');
+      });
+      tempoRow.appendChild(tb);
+    });
+    s.appendChild(tempoRow);
+
     const row = document.createElement('div');
     row.className = 'krow';
 
@@ -2403,7 +2507,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
       onChange: function (v) { seq.hold = (v === 'ON'); if (v === 'OFF') seq.held = []; }
     });
 
-    new Psy.Knob(row, {
+    const bpmKnob = new Psy.Knob(row, {
       color: '#60a5fa', label: 'BPM', min: 60, max: 200, def: 138,
       fmt: function (v) { return String(Math.round(v)); },
       onChange: function (v) { seq.bpm = v; }
