@@ -7,6 +7,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   const $ = function (id) { return document.getElementById(id); };
   let pendingTable = null;
   let midi = null;
+  let viz = null;
 
   function midiStatus(state, info) {
     const el = $('midiStrip');
@@ -295,6 +296,10 @@ const Psy = (window.PsySynth = window.PsySynth || {});
         if (REG.wave) REG.wave.setValue(4);
         $('oName').textContent = 'WT: ' + pendingTable.name;
         pendingTable = null;
+      }
+      if (!viz && Psy.Viz3D) {
+        viz = new Psy.Viz3D($('viz3d'), engine.analyser);
+        viz.start();
       }
       if (!midi && Psy.MidiEngine) {
         midi = new Psy.MidiEngine(engine, {
