@@ -17,6 +17,7 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 | Arpeggiator | lookahead scheduler (25ms tick, 120ms horizon) with worklet event queue — UP/DOWN/UP-DOWN/RANDOM, multi-octave, hold/latch |
 | Step Sequencer | 16-step gate pattern with per-step accents, note router (SEQ > ARP > engine), mutual exclusion |
 | WAV Export | live PCM capture from master bus, encoded to 16-bit stereo WAV |
+| MIDI Export | note-event capture (manual/arp/seq) rendered to Standard MIDI File format 0, 480 PPQ |
 | PWA | manifest + offline-first service worker (installable, works without network) |
 | Space FX | convolution reverb (generated IR) + feedback delay |
 | Output | tanh soft-clip stage |
@@ -41,6 +42,7 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 - src/recorder.js — live PCM capture + WAV encoder
 - src/arpeggiator.js — lookahead arpeggiator
 - src/sequencer.js — 16-step gate sequencer
+- src/midi-export.js — MIDI capture + SMF renderer
 - manifest.json / sw.js / assets/icon.svg — PWA layer
 - src/knob.js — SVG rotary knobs with tick marks
 - src/presets.js — preset bank
@@ -57,6 +59,7 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 ## Post-roadmap extensions
 7. Arpeggiator with sample-accurate scheduling — **done**
 8. 16-step sequencer with accents — **done**
+9b. MIDI file export — **done**
 9. Repo engineering pass: LICENSE, SECURITY.md, CHANGELOG, releases — **done**
 
 ## Project status: COMPLETE (roadmap 1-6 + arpeggiator)
