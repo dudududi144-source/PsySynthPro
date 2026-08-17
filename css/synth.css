@@ -243,3 +243,46 @@ body {
   .key.w { width: 30px; height: 100px; }
   .key.b { width: 20px; height: 62px; margin: 0 -10px; }
 }
+
+
+/* ══════════ WAVETABLE LAB + MORPH (Phase 3) ══════════ */
+.wt-section {
+  width: 100%; border-left: none;
+  border-top: 1px solid #232932;
+  margin-top: 14px; padding-top: 14px;
+  display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-start;
+}
+.wt-box { display: flex; flex-direction: column; gap: 10px; }
+.wt-canvas {
+  width: 240px; height: 84px;
+  border-radius: 8px; border: 1px solid #0b2836; background: #03131a;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.04);
+  display: block;
+}
+.wt-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.wt-btn {
+  padding: 6px 10px; border-radius: 6px; border: 1px solid #000;
+  background: linear-gradient(180deg, #2b3038, #171b21);
+  color: #ffb454; font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; font-weight: 700; letter-spacing: 1px; cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: all 0.12s;
+}
+.wt-btn:hover { filter: brightness(1.3); }
+.wt-btn.wt-alt { color: #8b949e; }
+.wt-btn.wt-go {
+  color: #12100c; background: linear-gradient(135deg, #ff8a3c, #e05f10); border: none;
+  box-shadow: 0 2px 8px rgba(255,138,60,0.35);
+}
+.wt-hint { color: #5b6470; font-size: 8px; letter-spacing: 1.2px; }
+
+.morph-box { display: flex; align-items: center; gap: 18px; padding-top: 4px; }
+.msel {
+  background: linear-gradient(180deg, #2b3038, #171b21);
+  color: #c084fc; border: 1px solid #000; border-radius: 7px;
+  padding: 9px 10px; font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 1px; outline: none; cursor: pointer;
+  max-width: 140px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+.msel:focus { border-color: #7c3aed; }
+.morph-knob { display: flex; align-items: center; }
