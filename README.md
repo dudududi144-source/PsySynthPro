@@ -17,6 +17,7 @@ A real DSP synthesizer in the browser — genuine sample-rate synthesis, not pre
 | Arpeggiator | UP/DOWN/UP-DOWN/RANDOM, multi-octave, hold/latch, sample-accurate lookahead scheduling |
 | Step Sequencer | 16-step gates with per-step accents, 3-state step buttons, playing-step highlight |
 | WAV Export | live capture from master bus -> real 16-bit stereo WAV download |
+| MIDI Export | capture manual/arp/seq notes -> Standard MIDI File (.mid) for your DAW |
 | PWA | installable, offline-first (service worker caches all assets) |
 | Space FX | convolution reverb + feedback delay on master bus |
 | Output | tanh soft-clip stage |
@@ -48,6 +49,10 @@ Connect a MIDI keyboard, press POWER, and play. CC1=mod/LFO depth, CC74=cutoff, 
 
 ## Security
 No tokens/keys in this repository. .gitignore blocks .env and key files.
+
+## MIDI export
+Press the MIDI button, play (or let SEQ/ARP play), press STOP — a .mid file downloads.
+Tempo metadata is taken from the active sequencer/arpeggiator.
 
 ## Sequencer
 Toggle steps: click cycles OFF -> ON -> ACCENT. Hold a chord (or enable HOLD), press SEQ ON.
