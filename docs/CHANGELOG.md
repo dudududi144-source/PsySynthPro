@@ -3,6 +3,23 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [1.7.0] — Critical Audio Fix + Committed Tests + Build Stamp
+### Fixed (found by the new regression suite, not by claims)
+- **polyblep() returned 1 instead of 0 away from discontinuities**: every sawtooth
+  carried a -1.0 DC offset + doubled slope, which passed straight through the lowpass.
+  Measured impact before fix: 2kHz-through-200Hz-LP attenuation was 1.3 dB instead of ~40 dB.
+  After the one-line fix: DC=0, RMS 0.57, filter attenuates 39.9 dB. This degraded the
+  sound of every saw-based preset (PSY BASS, TRANCE GATE, ACID 303, COSMIC LEAD...).
+### Added
+- tests/dsp_tests.py — committed DSP regression suite (osc DC/RMS, filter attenuation,
+  full-voice bounds, trance-gate math)
+- **Visible BUILD stamp** in the footer (version + commit + date) so the served build
+  is always identifiable; watchdog shows the build id too
+- Watchdog message now explains stale-cache remedies (REPAIR / hard-refresh / incognito)
+### Verified
+- Headless harness on the exact bundle: 11 sections, 12 presets, 25 keys, 0 errors
+- DSP suite: all tests pass post-fix
+
 ## [1.6.1] — Service Worker Removed (final stale-cache fix)
 ### Fixed
 - Root cause of the persistent blank-panel reports: old cache-first service workers
