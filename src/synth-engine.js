@@ -20,12 +20,11 @@ class SynthProcessor extends AudioWorkletProcessor {
     for (let i = 0; i < 16; i++) {
       this.voices.push({
         active: false, note: -1, vel: 0, age: 0, bend: 0,
-        phase: 0, modPhase: 0, subPhase: 0,
+        phase: 0, modPhase: 0, subPhase: 0, triInt: 0,
         amp: 0, stage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0
       });
     }
     this.lfoPhase = 0;
-    this.triInt = 0;
     this.queue = [];
     this.wtable = this.renderDefaultTable();
     this.wtLen = this.wtable.length;
@@ -94,7 +93,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
     for (const x of this.voices) if (x !== v) x.age++;
     v.active = true; v.note = note; v.vel = vel; v.age = 0; v.bend = 0;
-    v.stage = 1; v.phase = 0; v.modPhase = 0; v.subPhase = 0;
+    v.stage = 1; v.phase = 0; v.modPhase = 0; v.subPhase = 0; v.triInt = 0;
     v.ic1eq = 0; v.ic2eq = 0;
   }
 
@@ -118,7 +117,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     return this.wtable[i0] + (this.wtable[i1] - this.wtable[i0]) * frac;
   }
 
-  oscSample(phase, inc, wave) {
+  oscSample(phase, inc, wave, v) {
     const TWO_PI = 6.28318530718;
     if (wave === 4) return this.readWavetable(phase);
     if (wave === 3) return Math.sin(TWO_PI * phase);
@@ -130,9 +129,9 @@ class SynthProcessor extends AudioWorkletProcessor {
     if (wave === 2) {
       const sq = phase < 0.5 ? 1 : -1;
       const c = sq + this.polyblep(phase, inc) - this.polyblep((phase + 0.5) % 1, inc);
-      this.triInt += c * inc * 4;
-      this.triInt = Math.max(-1.2, Math.min(1.2, this.triInt));
-      return Math.max(-1, Math.min(1, this.triInt));
+      v.triInt += c * inc * 4;
+      v.triInt = Math.max(-1.2, Math.min(1.2, v.triInt));
+      return Math.max(-1, Math.min(1, v.triInt));
     }
     return Math.sin(TWO_PI * phase);
   }
@@ -191,7 +190,7 @@ class SynthProcessor extends AudioWorkletProcessor {
           const inc = Math.max(0.00001, (f + fmHz) / sr);
           v.phase += inc;
           if (v.phase >= 1) v.phase -= 1;
-          sig += this.oscSample(v.phase, Math.min(inc, 0.49), p.wave);
+          sig += this.oscSample(v.phase, Math.min(inc, 0.49), p.wave, v);
         }
         sig /= un;
 
