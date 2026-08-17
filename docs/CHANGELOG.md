@@ -3,6 +3,15 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.3.0] — MIDI Groove Export (SEQ -> DAW)
+### Added
+- **EXPORT GROOVE (.mid)** button in the STEP SEQ panel: renders the current 16-step
+  pattern (2 loops) into a quantized Standard MIDI File using held/last-played notes,
+  per-step accents (vel 120/90), gate %, step subdivision and tempo. Drops straight into a DAW.
+- Note tracking: lastNotes captures the most recent 8 played notes as the groove pitch source.
+### Notes
+- Uses the existing SMF writer (Psy.buildMidiFile) + Psy.exportSeqGroove renderer.
+
 ## [2.2.0] — User Preset Bank + Playability
 ### Added
 - **User preset bank**: SAVE button snapshots the current sound to localStorage;
