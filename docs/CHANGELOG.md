@@ -3,6 +3,19 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.0.0] — MOD MATRIX (premium modulation routing)
+### Added
+- **MOD MATRIX section** (6 routable knobs): LFO>CUTOFF, LFO>PITCH, LFO>AMP, LFO>FM,
+  ENV>PITCH, ENV>FM. Each 0..100, applied at audio rate in the worklet.
+- Engine: additive modulation DSP (envNorm + multi-destination). With all matrix
+  params at 0 the output is identical to v1.9.0 (non-breaking by construction).
+- 2 showcase presets: **WARP BASS** (env pitch sweep + cutoff wobble),
+  **ACID SIREN** (LFO pitch + FM wobble).
+### Fixed (caught by the realistic per-script harness)
+- presets.js: missing comma before the showcase entries (SyntaxError) — fixed.
+### Verified
+- Realistic harness on the exact bundle: 13 scripts, 0 errors, 12 sections, 14 presets.
+
 ## [1.9.0] — THE BUG: global lexical collision (panel never built in real browsers)
 ### Root cause (proven, not assumed)
 Every module started with `const Psy = (window.PsySynth = ...)`. Top-level `const`
