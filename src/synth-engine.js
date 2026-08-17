@@ -1,11 +1,7 @@
 "use strict";
-/* PsySynthPro — Real DSP Engine
-   Per-sample synthesis in an AudioWorklet:
-   - PolyBLEP band-limited oscillators
-   - ZDF state-variable filter (Simper/Zavalishin)
-   - Analog one-pole envelopes
-   - FM via instantaneous frequency
-   - Master convolution reverb + feedback delay                    */
+/* PsySynthPro Engine — Phase 3
+   Per-sample AudioWorklet DSP: PolyBLEP + WAVETABLE oscillators,
+   ZDF SVF, analog envelopes, FM, master convolution reverb + delay.  */
 
 const WORKLET_SOURCE = String.raw`
 class SynthProcessor extends AudioWorkletProcessor {
@@ -17,7 +13,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
       attack: 12, decay: 260, sustain: 70, release: 650,
       lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35,
-      master: 80, reverb: 35, delay: 22
+      master: 80, reverb: 35, delay: 22, wtPos: 0
     };
     this.voices = [];
     for (let i = 0; i < 16; i++) {
@@ -29,13 +25,31 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
     this.lfoPhase = 0;
     this.triInt = 0;
+    /* default wavetable: rendered from a cosmic-ish harmonic set */
+    this.wtable = this.renderDefaultTable();
+    this.wtLen = this.wtable.length;
     this.port.onmessage = (e) => this.onMessage(e.data);
+  }
+
+  renderDefaultTable() {
+    const size = 2048;
+    const harms = [1, 0.6, 0.42, 0.3, 0.22, 0.16, 0.11, 0.07, 0.045, 0.028, 0.017, 0.01];
+    const t = new Float32Array(size);
+    for (let i = 0; i < size; i++) {
+      let s = 0; const ph = i / size;
+      for (let h = 0; h < harms.length; h++) s += harms[h] * Math.sin(6.28318530718 * (h + 1) * ph);
+      t[i] = s;
+    }
+    let mx = 0; for (let i = 0; i < size; i++) mx = Math.max(mx, Math.abs(t[i]));
+    if (mx > 0) for (let i = 0; i < size; i++) t[i] = (t[i] / mx) * 0.9;
+    return t;
   }
 
   onMessage(m) {
     if (m.type === 'params') Object.assign(this.p, m.values);
     else if (m.type === 'noteOn') this.noteOn(m.note, m.vel);
     else if (m.type === 'noteOff') this.noteOff(m.note);
+    else if (m.type === 'wavetable') { this.wtable = m.table; this.wtLen = m.table.length; }
     else if (m.type === 'panic') {
       for (const v of this.voices) { v.active = false; v.stage = 0; v.amp = 0; }
     }
@@ -61,15 +75,23 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
   }
 
-  /* PolyBLEP polynomial — cancels aliasing at the discontinuity */
   polyblep(t, dt) {
     if (t < dt) { t /= dt; return t + t - t * t - 1; }
     if (t > 1 - dt) { t = (t - 1) / dt; return t * t + t + t + 1; }
     return 1;
   }
 
+  readWavetable(phase) {
+    const pos = phase * this.wtLen;
+    const i0 = Math.floor(pos) % this.wtLen;
+    const i1 = (i0 + 1) % this.wtLen;
+    const frac = pos - Math.floor(pos);
+    return this.wtable[i0] + (this.wtable[i1] - this.wtable[i0]) * frac;
+  }
+
   oscSample(phase, inc, wave) {
     const TWO_PI = 6.28318530718;
+    if (wave === 4) return this.readWavetable(phase);
     if (wave === 3) return Math.sin(TWO_PI * phase);
     if (wave === 0) return (2 * phase - 1) - this.polyblep(phase, inc);
     if (wave === 1) {
@@ -110,7 +132,6 @@ class SynthProcessor extends AudioWorkletProcessor {
       for (const v of this.voices) {
         if (!v.active) continue;
 
-        /* analog one-pole envelope */
         let target = 0, coef = 0;
         if (v.stage === 1) { target = v.vel; coef = aC; if (v.amp >= v.vel * 0.995) v.stage = 2; }
         else if (v.stage === 2) { target = v.vel * sus; coef = dC; if (Math.abs(v.amp - target) < 0.002) v.stage = 3; }
@@ -123,7 +144,6 @@ class SynthProcessor extends AudioWorkletProcessor {
         let pitchMod = 1;
         if (p.lfoTarget === 1) pitchMod = Math.pow(2, (lfoVal * (p.lfoDepth / 100) * 80) / 1200);
 
-        /* unison bank with FM operator */
         let sig = 0;
         for (let u = 0; u < un; u++) {
           const off = un === 1 ? 0 : ((u - (un - 1) / 2) / ((un - 1) / 2)) * p.spread;
@@ -144,7 +164,6 @@ class SynthProcessor extends AudioWorkletProcessor {
           sig += (p.sub / 100) * Math.sin(TWO_PI * v.subPhase);
         }
 
-        /* ZDF state-variable filter */
         let fc = p.cutoff + (p.filterEnv / 100) * 9000 * (v.vel > 0 ? v.amp / v.vel : 0);
         if (p.lfoTarget === 0) fc += lfoVal * (p.lfoDepth / 100) * 3500;
         fc = Math.min(18000, Math.max(40, fc));
@@ -203,7 +222,6 @@ class SynthEngine {
         numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
       });
 
-      /* master bus + space FX */
       self.fxInput = self.ctx.createGain();
       self.node.connect(self.fxInput);
 
@@ -253,16 +271,17 @@ class SynthEngine {
     const buf = this.ctx.createBuffer(2, len, rate);
     for (let c = 0; c < 2; c++) {
       const d = buf.getChannelData(c);
-      for (let i = 0; i < len; i++) {
-        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
-      }
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
     }
     return buf;
   }
 
-  sendParams() {
-    if (this.node) this.node.port.postMessage({ type: 'params', values: this.params });
+  sendParams() { if (this.node) this.node.port.postMessage({ type: 'params', values: this.params }); }
+
+  setWavetable(table) {
+    if (this.node) this.node.port.postMessage({ type: 'wavetable', table: table });
   }
+
   set(key, value) {
     this.params[key] = value;
     if (key === 'delay' && this.delSend) this.delSend.gain.value = (value / 100) * 0.55;
