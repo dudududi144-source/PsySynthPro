@@ -38,6 +38,12 @@ A browser-based psytrance instrument with a **premium hardware-grade panel** and
 - v2.4: **NxM bipolar MOD MATRIX** — 3 sources (LFO/ENV/VEL) x 5 destinations
   (CUT/PIT/AMP/FM/RES), bipolar -100..+100, applied at audio rate; supersedes the
   6 fixed MOD knobs (kept in engine for preset compatibility)
+- v2.5: **DSP performance pass** (fixes load/latency):
+  - baseFreq & bendMul cached per voice (no per-sample Math.pow)
+  - unison detune multipliers precomputed once per buffer (not per sample)
+  - SVF coefficients cached, recomputed every 16 samples (~16x fewer Math.tan)
+  - pitch Math.pow consolidated into a single call
+  - mod-matrix fast-path skipped entirely when all 15 amounts are 0
 
 ## Tuning guide (user-reported)
 - **"Sounds too high / need lower octave"** -> use **OCT −** button above the keyboard or press **Z**
