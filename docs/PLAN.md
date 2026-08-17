@@ -33,6 +33,8 @@ A browser-based psytrance instrument with a **premium hardware-grade panel** and
 - v2.1: foundation pass — **octave control**, per-voice triangle integrator fix, PLAN doc
 - v2.2: **user preset bank (localStorage, save/load/delete)**, **key velocity** (Y-position),
   retina-sharp OLED scope
+- v2.3: **EXPORT GROOVE** — render the current SEQ pattern to a quantized .mid clip
+  (uses held/last notes, accents, gate%, tempo) for drop-in to a DAW
 
 ## Tuning guide (user-reported)
 - **"Sounds too high / need lower octave"** -> use **OCT −** button above the keyboard or press **Z**
@@ -47,7 +49,8 @@ A browser-based psytrance instrument with a **premium hardware-grade panel** and
 - [ ] retina scaling for the 3D spectrum canvas
 - [ ] step-sequencer per-step slide/glide
 - [ ] full NxM mod matrix with bipolar amounts
-- [ ] MIDI-out export of arp+seq (groove -> DAW)
+- [x] MIDI-out export of seq groove (groove -> DAW) — done v2.3 (EXPORT GROOVE button)
+- [ ] MIDI-out export of arpeggiator patterns
 
 ## Verification discipline (hard-won rules)
 1. Test with a REALISTIC harness: each script evaluated separately in one context
