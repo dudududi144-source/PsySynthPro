@@ -12,7 +12,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       fmRatio: 2, fmDepth: 12,
       filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
       attack: 12, decay: 260, sustain: 70, release: 650,
-      lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35,
+      lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35, lfoWave: 0,
       master: 80, reverb: 35, delay: 22
     };
     this.voices = [];
@@ -156,7 +156,8 @@ class SynthProcessor extends AudioWorkletProcessor {
     for (let i = 0; i < N; i++) {
       this.lfoPhase += lfoInc;
       if (this.lfoPhase >= 1) this.lfoPhase -= 1;
-      const lfoVal = Math.sin(TWO_PI * this.lfoPhase);
+      const lfoSin = Math.sin(TWO_PI * this.lfoPhase);
+      const lfoVal = p.lfoWave === 1 ? (lfoSin >= 0 ? 1 : -1) : lfoSin;
       let acc = 0;
 
       for (const v of this.voices) {
