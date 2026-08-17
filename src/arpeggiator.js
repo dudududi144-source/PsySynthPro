@@ -91,6 +91,8 @@ class Arpeggiator {
   tick() {
     if (!this.enabled || !this.engine.ctx) return;
     const ctx = this.engine.ctx;
+    /* self-heal: if the clock moved past our schedule, resync ahead */
+    if (this.nextTime < ctx.currentTime - 0.05) this.nextTime = ctx.currentTime + 0.05;
     const stepBeats = ARP_STEPS[this.stepIdxDiv].beats;
     const stepDur = (60 / this.bpm) * stepBeats;
 
