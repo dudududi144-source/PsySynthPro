@@ -227,6 +227,47 @@ const Psy = (window.PsySynth = window.PsySynth || {});
     selB.addEventListener('change', doMorph);
   }
 
+  /* ═══════ PERFORMANCE MACROS (Serum/Pigments-style) ═══════ */
+  function buildMacros() {
+    const s = document.createElement('div');
+    s.className = 'section macros-section';
+    s.innerHTML = '<div class="stitle" style="--c:#ffd166">PERFORMANCE MACROS</div>';
+    const row = document.createElement('div');
+    row.className = 'krow macros-row';
+
+    const MACROS = [
+      { label: 'M1 \u00B7 CUTOFF', color: '#4dd6e8', apply: function (v) {
+          engine.set('cutoff', 40 * Math.pow(400, v / 100));
+          if (REG.cutoff) REG.cutoff.set(engine.params.cutoff, true);
+        } },
+      { label: 'M2 \u00B7 RESO', color: '#ffb454', apply: function (v) {
+          engine.set('res', 0.1 + (v / 100) * 19.9);
+          if (REG.res) REG.res.set(engine.params.res, true);
+        } },
+      { label: 'M3 \u00B7 SPACE', color: '#f07dc2', apply: function (v) {
+          engine.set('reverb', v);
+          engine.set('delay', Math.round(v * 0.7));
+          if (REG.reverb) REG.reverb.set(v, true);
+          if (REG.delay) REG.delay.set(Math.round(v * 0.7), true);
+        } },
+      { label: 'M4 \u00B7 FM DRIVE', color: '#ffd166', apply: function (v) {
+          engine.set('fmDepth', v);
+          if (REG.fmDepth) REG.fmDepth.set(v, true);
+        } }
+    ];
+
+    MACROS.forEach(function (m) {
+      new Psy.Knob(row, {
+        label: m.label, color: m.color, min: 0, max: 100, def: 50, size: 76,
+        fmt: fmtPct,
+        onChange: m.apply
+      });
+    });
+
+    s.appendChild(row);
+    $('sections').appendChild(s);
+  }
+
   /* ═══════ ARPEGGIATOR panel ═══════ */
   function buildArpPanel() {
     const s = document.createElement('div');
@@ -543,13 +584,23 @@ const Psy = (window.PsySynth = window.PsySynth || {});
     if (n !== undefined) noteOff(n);
   });
 
-  buildSections();
-  buildArpPanel();
-  buildSeqPanel();
-  buildWavetableLab();
-  buildMorph();
-  buildPresets();
-  buildKeyboard();
-  loadPreset(0);
+  function safeBuild(name, fn) {
+    try { fn(); }
+    catch (err) {
+      if (window.__psyErrors) window.__psyErrors.push(name + ': ' + err.message);
+      else console.error(name, err);
+    }
+  }
+
+  safeBuild('macros', buildMacros);
+  safeBuild('sections', buildSections);
+  safeBuild('arp', buildArpPanel);
+  safeBuild('seq', buildSeqPanel);
+  safeBuild('wavetable', buildWavetableLab);
+  safeBuild('morph', buildMorph);
+  safeBuild('presets', buildPresets);
+  safeBuild('keyboard', buildKeyboard);
+  try { loadPreset(0); } catch (err) { /* preset load non-fatal */ }
+  window.__psyUiReady = true;
   scopeLoop();
 })();
