@@ -6,6 +6,16 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   const REG = {};
   const $ = function (id) { return document.getElementById(id); };
   let pendingTable = null;
+  let midi = null;
+
+  function midiStatus(state, info) {
+    const el = $('midiStrip');
+    if (!el) return;
+    if (state === 'connected') { el.textContent = 'MIDI \u25CF ' + info; el.classList.add('on'); el.classList.remove('off'); }
+    else if (state === 'no-device') { el.textContent = 'MIDI \u25CB waiting for device\u2026'; el.classList.remove('on', 'off'); }
+    else if (state === 'unsupported') { el.textContent = 'MIDI \u2715 not supported in this browser'; el.classList.add('off'); }
+    else if (state === 'denied') { el.textContent = 'MIDI \u2715 permission denied'; el.classList.add('off'); }
+  }
 
   const fmtHz = function (v) { return v >= 1000 ? (v / 1000).toFixed(1) + 'k' : Math.round(v) + 'Hz'; };
   const fmtMs = function (v) { return v >= 1000 ? (v / 1000).toFixed(2) + 's' : Math.round(v) + 'ms'; };
@@ -285,6 +295,13 @@ const Psy = (window.PsySynth = window.PsySynth || {});
         if (REG.wave) REG.wave.setValue(4);
         $('oName').textContent = 'WT: ' + pendingTable.name;
         pendingTable = null;
+      }
+      if (!midi && Psy.MidiEngine) {
+        midi = new Psy.MidiEngine(engine, {
+          status: midiStatus,
+          event: function (txt) { const ev = $('midiEvent'); if (ev) ev.textContent = txt; }
+        });
+        midi.init();
       }
       updateMeta();
       syncUI();
