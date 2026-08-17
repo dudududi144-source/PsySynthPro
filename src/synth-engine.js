@@ -1,7 +1,7 @@
 "use strict";
-/* PsySynthPro Engine — Phase 3
-   Per-sample AudioWorklet DSP: PolyBLEP + WAVETABLE oscillators,
-   ZDF SVF, analog envelopes, FM, master convolution reverb + delay.  */
+/* PsySynthPro Engine - Phase 4
+   AudioWorklet DSP: PolyBLEP + wavetable, ZDF SVF, analog envelopes, FM,
+   per-note pitch bend (MPE-ready), master convolution reverb + delay.   */
 
 const WORKLET_SOURCE = String.raw`
 class SynthProcessor extends AudioWorkletProcessor {
@@ -13,19 +13,18 @@ class SynthProcessor extends AudioWorkletProcessor {
       filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
       attack: 12, decay: 260, sustain: 70, release: 650,
       lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35,
-      master: 80, reverb: 35, delay: 22, wtPos: 0
+      master: 80, reverb: 35, delay: 22
     };
     this.voices = [];
     for (let i = 0; i < 16; i++) {
       this.voices.push({
-        active: false, note: -1, vel: 0, age: 0,
+        active: false, note: -1, vel: 0, age: 0, bend: 0,
         phase: 0, modPhase: 0, subPhase: 0,
         amp: 0, stage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0
       });
     }
     this.lfoPhase = 0;
     this.triInt = 0;
-    /* default wavetable: rendered from a cosmic-ish harmonic set */
     this.wtable = this.renderDefaultTable();
     this.wtLen = this.wtable.length;
     this.port.onmessage = (e) => this.onMessage(e.data);
@@ -45,10 +44,19 @@ class SynthProcessor extends AudioWorkletProcessor {
     return t;
   }
 
+  findVoice(note) {
+    for (const v of this.voices) if (v.note === note && v.active) return v;
+    return null;
+  }
+
   onMessage(m) {
     if (m.type === 'params') Object.assign(this.p, m.values);
     else if (m.type === 'noteOn') this.noteOn(m.note, m.vel);
     else if (m.type === 'noteOff') this.noteOff(m.note);
+    else if (m.type === 'noteBend') {
+      const v = this.findVoice(m.note);
+      if (v) v.bend = m.bend;
+    }
     else if (m.type === 'wavetable') { this.wtable = m.table; this.wtLen = m.table.length; }
     else if (m.type === 'panic') {
       for (const v of this.voices) { v.active = false; v.stage = 0; v.amp = 0; }
@@ -64,7 +72,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       v = oldest;
     }
     for (const x of this.voices) if (x !== v) x.age++;
-    v.active = true; v.note = note; v.vel = vel; v.age = 0;
+    v.active = true; v.note = note; v.vel = vel; v.age = 0; v.bend = 0;
     v.stage = 1; v.phase = 0; v.modPhase = 0; v.subPhase = 0;
     v.ic1eq = 0; v.ic2eq = 0;
   }
@@ -141,13 +149,14 @@ class SynthProcessor extends AudioWorkletProcessor {
         if (!v.active) continue;
 
         const baseFreq = 440 * Math.pow(2, (v.note - 69) / 12);
+        const bendMul = Math.pow(2, v.bend / 12);
         let pitchMod = 1;
         if (p.lfoTarget === 1) pitchMod = Math.pow(2, (lfoVal * (p.lfoDepth / 100) * 80) / 1200);
 
         let sig = 0;
         for (let u = 0; u < un; u++) {
           const off = un === 1 ? 0 : ((u - (un - 1) / 2) / ((un - 1) / 2)) * p.spread;
-          const f = baseFreq * pitchMod * Math.pow(2, (p.detune + off) / 1200);
+          const f = baseFreq * bendMul * pitchMod * Math.pow(2, (p.detune + off) / 1200);
           v.modPhase += (f * p.fmRatio) / sr;
           if (v.modPhase >= 1) v.modPhase -= 1;
           const fmHz = Math.sin(TWO_PI * v.modPhase) * (p.fmDepth / 100) * f * 2;
@@ -159,7 +168,7 @@ class SynthProcessor extends AudioWorkletProcessor {
         sig /= un;
 
         if (p.sub > 0) {
-          v.subPhase += (baseFreq / 2) / sr;
+          v.subPhase += (baseFreq * bendMul / 2) / sr;
           if (v.subPhase >= 1) v.subPhase -= 1;
           sig += (p.sub / 100) * Math.sin(TWO_PI * v.subPhase);
         }
@@ -277,10 +286,7 @@ class SynthEngine {
   }
 
   sendParams() { if (this.node) this.node.port.postMessage({ type: 'params', values: this.params }); }
-
-  setWavetable(table) {
-    if (this.node) this.node.port.postMessage({ type: 'wavetable', table: table });
-  }
+  setWavetable(table) { if (this.node) this.node.port.postMessage({ type: 'wavetable', table: table }); }
 
   set(key, value) {
     this.params[key] = value;
@@ -298,6 +304,7 @@ class SynthEngine {
   }
   noteOn(note, vel) { if (this.node) this.node.port.postMessage({ type: 'noteOn', note: note, vel: vel }); }
   noteOff(note) { if (this.node) this.node.port.postMessage({ type: 'noteOff', note: note }); }
+  noteBend(note, semis) { if (this.node) this.node.port.postMessage({ type: 'noteBend', note: note, bend: semis }); }
   panic() { if (this.node) this.node.port.postMessage({ type: 'panic' }); }
   latencyMs() {
     if (!this.ctx) return 0;
