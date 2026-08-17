@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v2.4.0 · modmatrix-nxm · 2026-08-17 -->
+<!-- SELF-CONTAINED BUNDLE v2.5.0 · perf · 2026-08-17 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -510,7 +510,7 @@ body {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.4.0 · modmatrix-nxm · 2026-08-17</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.5.0 · perf · 2026-08-17</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -539,11 +539,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v2.4.0 · modmatrix-nxm · 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; NxM MOD MATRIX &bull; GROOVE EXPORT &bull; SEQ &bull; ARP</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v2.5.0 · perf · 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; NxM MOD MATRIX &bull; OPTIMIZED DSP &bull; SEQ &bull; ARP</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v2.4.0 · modmatrix-nxm · 2026-08-17';
+window.__psyBuild = 'v2.5.0 · perf · 2026-08-17';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -849,9 +849,10 @@ class SynthProcessor extends AudioWorkletProcessor {
     this.voices = [];
     for (let i = 0; i < 16; i++) {
       this.voices.push({
-        active: false, note: -1, vel: 0, age: 0, bend: 0,
+        active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
         phase: 0, modPhase: 0, subPhase: 0, triInt: 0,
-        amp: 0, stage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0
+        amp: 0, stage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0,
+        coefTick: 0, a1: 0, a2: 0, a3: 0, resEffCached: -1
       });
     }
     this.lfoPhase = 0;
@@ -894,7 +895,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
     else if (m.type === 'noteBend') {
       const v = this.findVoice(m.note);
-      if (v) v.bend = m.bend;
+      if (v) { v.bend = m.bend; v.bendMul = Math.pow(2, v.bend / 12); }
     }
     else if (m.type === 'wavetable') { this.wtable = m.table; this.wtLen = m.table.length; }
     else if (m.type === 'panic') {
@@ -923,6 +924,9 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
     for (const x of this.voices) if (x !== v) x.age++;
     v.active = true; v.note = note; v.vel = vel; v.age = 0; v.bend = 0;
+    v.baseFreq = 440 * Math.pow(2, (note - 69) / 12);
+    v.bendMul = 1;
+    v.coefTick = 0; v.resEffCached = -1;
     v.stage = 1; v.phase = 0; v.modPhase = 0; v.subPhase = 0; v.triInt = 0;
     v.ic1eq = 0; v.ic2eq = 0;
   }
@@ -982,6 +986,12 @@ class SynthProcessor extends AudioWorkletProcessor {
     const un = Math.max(1, Math.round(p.unison));
     const lfoInc = p.lfoRate / sr;
     const TWO_PI = 6.28318530718;
+    const uniMuls = [];
+    for (let u = 0; u < un; u++) {
+      const off = un === 1 ? 0 : ((u - (un - 1) / 2) / ((un - 1) / 2)) * p.spread;
+      uniMuls.push(Math.pow(2, (p.detune + off) / 1200));
+    }
+    const matrixActive = (p.modLC || p.modLP || p.modLA || p.modLF || p.modLR || p.modEC || p.modEP || p.modEA || p.modEF || p.modER || p.modVC || p.modVP || p.modVA || p.modVF || p.modVR) !== 0;
 
     for (let i = 0; i < N; i++) {
       this.lfoPhase += lfoInc;
@@ -1001,27 +1011,30 @@ class SynthProcessor extends AudioWorkletProcessor {
         v.amp += (target - v.amp) * coef;
         if (!v.active) continue;
 
-        const baseFreq = 440 * Math.pow(2, (v.note - 69) / 12);
-        const bendMul = Math.pow(2, v.bend / 12);
+        const baseFreq = v.baseFreq;
+        const bendMul = v.bendMul;
         const envNorm = v.vel > 0 ? Math.min(1, v.amp / v.vel) : 0;
-        let pitchMod = 1;
-        if (p.lfoTarget === 1) pitchMod = Math.pow(2, (lfoVal * (p.lfoDepth / 100) * 80) / 1200);
-        pitchMod *= Math.pow(2, lfoVal * (p.lfoPitch / 100));
-        pitchMod *= Math.pow(2, envNorm * (p.envPitch / 100) * 2);
-        /* NxM bipolar matrix: sources LFO/ENV/VEL -> dest CUT/PIT/AMP/FM/RES */
-        const envSrc = (envNorm - 0.5) * 2;
-        const velSrc = (v.vel - 0.5) * 2;
-        const modCut = (lfoVal * p.modLC + envSrc * p.modEC + velSrc * p.modVC) * 40;
-        const modPitCents = (lfoVal * p.modLP + envSrc * p.modEP + velSrc * p.modVP) * 12;
-        const modAmp = (lfoVal * p.modLA + envSrc * p.modEA + velSrc * p.modVA) / 100;
-        const modFmCoef = (lfoVal * p.modLF + envSrc * p.modEF + velSrc * p.modVF) / 100;
-        const modRes = (lfoVal * p.modLR + envSrc * p.modER + velSrc * p.modVR) * 0.1;
-        pitchMod *= Math.pow(2, modPitCents / 1200);
+        let modCut = 0, modAmp = 0, modFmCoef = 0, modRes = 0;
+        let pitchExp = 0;
+        if (p.lfoTarget === 1) pitchExp += (lfoVal * (p.lfoDepth / 100) * 80) / 1200;
+        pitchExp += lfoVal * (p.lfoPitch / 100);
+        pitchExp += envNorm * (p.envPitch / 100) * 2;
+        if (matrixActive) {
+          /* NxM bipolar matrix: sources LFO/ENV/VEL -> dest CUT/PIT/AMP/FM/RES */
+          const envSrc = (envNorm - 0.5) * 2;
+          const velSrc = (v.vel - 0.5) * 2;
+          modCut = (lfoVal * p.modLC + envSrc * p.modEC + velSrc * p.modVC) * 40;
+          const modPitCents = (lfoVal * p.modLP + envSrc * p.modEP + velSrc * p.modVP) * 12;
+          modAmp = (lfoVal * p.modLA + envSrc * p.modEA + velSrc * p.modVA) / 100;
+          modFmCoef = (lfoVal * p.modLF + envSrc * p.modEF + velSrc * p.modVF) / 100;
+          modRes = (lfoVal * p.modLR + envSrc * p.modER + velSrc * p.modVR) * 0.1;
+          pitchExp += modPitCents / 1200;
+        }
+        const pitchMod = Math.pow(2, pitchExp);
 
         let sig = 0;
         for (let u = 0; u < un; u++) {
-          const off = un === 1 ? 0 : ((u - (un - 1) / 2) / ((un - 1) / 2)) * p.spread;
-          const f = baseFreq * bendMul * pitchMod * Math.pow(2, (p.detune + off) / 1200);
+          const f = baseFreq * bendMul * pitchMod * uniMuls[u];
           v.modPhase += (f * p.fmRatio) / sr;
           if (v.modPhase >= 1) v.modPhase -= 1;
           const fmDepthEff = (p.fmDepth / 100) * f * 2 + lfoVal * (p.lfoFM / 100) * f * 2 + envNorm * (p.envFM / 100) * f * 2 + modFmCoef * f * 2;
@@ -1045,12 +1058,18 @@ class SynthProcessor extends AudioWorkletProcessor {
         fc += modCut;
         fc = Math.min(18000, Math.max(40, fc));
         v.smoothFc = v.smoothFc === 0 ? fc : v.smoothFc + (fc - v.smoothFc) * 0.0015;
-        const g = Math.tan(3.14159265359 * v.smoothFc / sr);
         const resEff = Math.max(0.1, Math.min(25, p.res + modRes));
-        const k = Math.max(0.02, 2 - (resEff / 10));
-        const a1 = 1 / (1 + g * (g + k));
-        const a2 = g * a1;
-        const a3 = g * a2;
+        if (v.coefTick <= 0 || Math.abs(resEff - v.resEffCached) > 0.05) {
+          const g = Math.tan(3.14159265359 * v.smoothFc / sr);
+          const k = Math.max(0.02, 2 - (resEff / 10));
+          v.a1 = 1 / (1 + g * (g + k));
+          v.a2 = g * v.a1;
+          v.a3 = g * v.a2;
+          v.coefTick = 16;
+          v.resEffCached = resEff;
+        }
+        v.coefTick--;
+        const a1 = v.a1, a2 = v.a2, a3 = v.a3;
         const v3 = sig - v.ic2eq;
         const v1 = a1 * v.ic1eq + a2 * v3;
         const v2 = v.ic2eq + a2 * v.ic1eq + a3 * v3;
