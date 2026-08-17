@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v1.8.1 | autorepair | 2026-08-17: all CSS+JS inlined. -->
+<!-- SELF-CONTAINED BUNDLE v1.8.2 | diag | 2026-08-17 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -464,6 +464,8 @@ body {
 </style>
 </head>
 <body>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none;">BUILD v1.8.2 \u00B7 diag \u00B7 2026-08-17</div>
+<div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
   <div class="screw tl"></div><div class="screw tr"></div><div class="screw bl"></div><div class="screw br"></div>
@@ -491,38 +493,37 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v1.8.1 \u00B7 autorepair \u00B7 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; POLYBLEP &bull; ZDF SVF &bull; FM &bull; SEQ &bull; ARP &bull; TRANCE GATE</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v1.8.2 \u00B7 diag \u00B7 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; POLYBLEP &bull; ZDF SVF &bull; FM &bull; SEQ &bull; ARP &bull; TRANCE GATE</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v1.8.1 \u00B7 autorepair \u00B7 2026-08-17';
+window.__psyBuild = 'v1.8.2 \u00B7 diag \u00B7 2026-08-17';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
+  try {
+    var es = document.getElementById('psyErrStrip');
+    if (es) { es.style.display = 'block'; es.textContent = 'JS ERROR: ' + (e.message || 'unknown') + ' @ ' + (e.filename || ''); }
+  } catch (er) {}
 });
 window.addEventListener('load', function () {
   setTimeout(function () {
     var s = document.getElementById('sections');
     if (!s || s.children.length > 0 || window.__psyUiReady) return;
-
     var tried = false;
     try { tried = sessionStorage.getItem('psyAutoRepair') === '1'; } catch (e) {}
-
     if (!tried) {
-      /* ONE automatic repair: unregister service workers, clear caches, reload. */
       try { sessionStorage.setItem('psyAutoRepair', '1'); } catch (e) {}
       try { if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }); } catch (e) {}
       try { if (window.caches && caches.keys) caches.keys().then(function (ks) { ks.forEach(function (k) { caches.delete(k); }); }); } catch (e) {}
       setTimeout(function () { location.reload(); }, 300);
       return;
     }
-
-    /* Already auto-repaired once and still failing -> show manual box. */
     try { sessionStorage.removeItem('psyAutoRepair'); } catch (e) {}
     var d = document.createElement('div');
     d.style.cssText = 'margin:14px 0;padding:16px 18px;border:1px solid #f85149;border-radius:10px;background:#1a0b0b;color:#ffb3ab;font-family:monospace;font-size:12px;line-height:1.9';
     var msg = '<b>PANEL FAILED TO BUILD</b> \u00B7 build ' + window.__psyBuild + '<br>';
     if (window.__psyErrors.length) msg += 'Captured: ' + window.__psyErrors.join(' | ').slice(0, 400) + '<br>';
-    msg += 'Your browser is holding a stale copy. Do ONE of: (1) hard-refresh Ctrl+Shift+R, (2) open this page in a private/incognito window, (3) clear site data. Then press REPAIR.<br>';
+    msg += 'Stale copy detected. Do ONE of: (1) hard-refresh Ctrl+Shift+R, (2) open in a private/incognito window, (3) clear site data. Then press REPAIR.<br>';
     msg += '<button id="bHeal" style="margin-top:8px;padding:10px 18px;background:#f85149;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-family:monospace">REPAIR \u2014 clear cache and reload</button>';
     d.innerHTML = msg;
     s.parentNode.insertBefore(d, s);
