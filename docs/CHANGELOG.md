@@ -3,6 +3,14 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [1.4.0] — MIDI Export
+### Added
+- MIDI capture: records every note event (manual / arp / seq) via engine method wrapping
+- Standard MIDI File (format 0, 480 PPQ) renderer with tempo meta + VLQ deltas
+- MIDI capture button in transport bar (tempo taken from active SEQ/ARP)
+### Changed
+- Service worker cache bumped to v4
+
 ## [1.3.0] — Step Sequencer
 ### Added
 - 16-step gate sequencer with per-step accents (3-state step buttons)
