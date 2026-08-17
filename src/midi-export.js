@@ -56,7 +56,7 @@ class MidiRecorder {
     };
     eng.noteOffAt = function (note, when) {
       self.push(false, note, 0, when);
-      return self._orig.noteOff.apply !== undefined ? self._orig.noteOffAt.apply(eng, arguments) : null;
+      return self._orig.noteOffAt.apply(eng, arguments);
     };
     return true;
   }
