@@ -35,6 +35,9 @@ A browser-based psytrance instrument with a **premium hardware-grade panel** and
   retina-sharp OLED scope
 - v2.3: **EXPORT GROOVE** — render the current SEQ pattern to a quantized .mid clip
   (uses held/last notes, accents, gate%, tempo) for drop-in to a DAW
+- v2.4: **NxM bipolar MOD MATRIX** — 3 sources (LFO/ENV/VEL) x 5 destinations
+  (CUT/PIT/AMP/FM/RES), bipolar -100..+100, applied at audio rate; supersedes the
+  6 fixed MOD knobs (kept in engine for preset compatibility)
 
 ## Tuning guide (user-reported)
 - **"Sounds too high / need lower octave"** -> use **OCT −** button above the keyboard or press **Z**
@@ -51,6 +54,7 @@ A browser-based psytrance instrument with a **premium hardware-grade panel** and
 - [ ] full NxM mod matrix with bipolar amounts
 - [x] MIDI-out export of seq groove (groove -> DAW) — done v2.3 (EXPORT GROOVE button)
 - [ ] MIDI-out export of arpeggiator patterns
+- [x] NxM bipolar mod matrix — done v2.4 (3x5 grid, audio-rate)
 
 ## Verification discipline (hard-won rules)
 1. Test with a REALISTIC harness: each script evaluated separately in one context
