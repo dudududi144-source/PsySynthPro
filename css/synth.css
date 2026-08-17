@@ -414,3 +414,35 @@ body {
   border-radius: 10px; margin-bottom: 6px;
 }
 .macros-row { gap: 26px; padding: 4px 6px; }
+
+
+/* ══════════ SEQ PATTERNS + TEMPOS (Phase 12) ══════════ */
+.seq-patterns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.pat-btn {
+  padding: 7px 11px; border-radius: 7px; border: 1px solid #000;
+  background: linear-gradient(180deg, #1c2434, #101722);
+  color: #7fb6f0; font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; font-weight: 700; letter-spacing: 1px; cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: all 0.12s;
+}
+.pat-btn:hover { filter: brightness(1.3); }
+.pat-btn.active {
+  background: linear-gradient(180deg, #2563eb, #1e40af);
+  color: #fff; box-shadow: 0 0 12px rgba(96,165,250,0.5);
+}
+.seq-tempos { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; }
+.tempo-label { color: #5b6470; font-size: 8px; letter-spacing: 2px; font-weight: 700; margin-right: 4px; }
+.tempo-btn {
+  width: 42px; padding: 6px 0; border-radius: 6px; border: 1px solid #000;
+  background: linear-gradient(180deg, #1c2434, #101722);
+  color: #7fb6f0; font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  transition: all 0.12s;
+}
+.tempo-btn:hover { filter: brightness(1.3); }
+.tempo-btn.active {
+  background: linear-gradient(180deg, #2563eb, #1e40af);
+  color: #fff; box-shadow: 0 0 10px rgba(96,165,250,0.5);
+}
