@@ -3,6 +3,17 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.4.0] — NxM Bipolar Modulation Matrix
+### Added
+- **MOD MATRIX grid**: 3 sources (LFO / ENV / VEL) x 5 destinations (CUT / PIT / AMP / FM / RES),
+  15 bipolar knobs (-100..+100, center=0), applied at audio rate in the worklet.
+- Engine params modLC..modVR; ENV/VEL sources are midpoint-centered so amounts are truly bipolar.
+- Replaces the 6 fixed MOD knobs in the UI (those params stay in the engine for preset compat).
+### Scaling
+- CUT ±100 = ±4000 Hz · PIT ±100 = ±1 octave · AMP ±100 = ±100% gain · FM ±100 = full depth · RES ±100 = ±10 Q
+### Verified
+- Realistic per-script harness + functional matrix-sum test.
+
 ## [2.3.0] — MIDI Groove Export (SEQ -> DAW)
 ### Added
 - **EXPORT GROOVE (.mid)** button in the STEP SEQ panel: renders the current 16-step
