@@ -16,6 +16,7 @@ A real DSP synthesizer in the browser — genuine sample-rate synthesis, not pre
 | 3D Spectrum | perspective-projected log-spaced frequency bars with depth sorting |
 | Arpeggiator | UP/DOWN/UP-DOWN/RANDOM, multi-octave, hold/latch, sample-accurate lookahead scheduling |
 | Step Sequencer | 16-step gates with per-step accents, 3-state step buttons, playing-step highlight |
+| Performance Macros | 4 oversized live knobs: Cutoff / Resonance / Space / FM Drive (Serum-style) |
 | WAV Export | live capture from master bus -> real 16-bit stereo WAV download |
 | MIDI Export | capture manual/arp/seq notes -> Standard MIDI File (.mid) for your DAW |
 | PWA | installable, offline-first (service worker caches all assets) |
@@ -49,6 +50,12 @@ Connect a MIDI keyboard, press POWER, and play. CC1=mod/LFO depth, CC74=cutoff, 
 
 ## Security
 No tokens/keys in this repository. .gitignore blocks .env and key files.
+
+## Reliability
+The page self-diagnoses: if the panel fails to build (e.g. stale cache after a deploy),
+a red diagnostic box appears with the captured errors and a one-click **REPAIR** button
+(unregisters service workers, clears caches, reloads). The service worker is
+network-first, so online visits always get the latest build.
 
 ## MIDI export
 Press the MIDI button, play (or let SEQ/ARP play), press STOP — a .mid file downloads.
