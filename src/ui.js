@@ -469,22 +469,89 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
   /* ═══════ presets / keyboard / scope ═══════ */
   let pIdx = 0;
+  /* ── user preset bank (localStorage) ── */
+  const BANK_KEY = 'psysynth.userPresets.v1';
+  function loadBank() {
+    try { return JSON.parse(localStorage.getItem(BANK_KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function saveBank(bank) {
+    try { localStorage.setItem(BANK_KEY, JSON.stringify(bank)); } catch (e) {}
+  }
+  function clearPresetOn() {
+    document.querySelectorAll('.preset').forEach(function (x) { x.classList.remove('on'); });
+  }
+  function renderUserBank() {
+    const wrap = $('presets');
+    wrap.querySelectorAll('.preset.user').forEach(function (x) {
+      if (x.parentNode && x.parentNode.removeChild) x.parentNode.removeChild(x);
+    });
+    const saveBtn = wrap.querySelector ? wrap.querySelector('.preset.save') : null;
+    const bank = loadBank();
+    Object.keys(bank).forEach(function (name) {
+      const b = document.createElement('button');
+      b.className = 'preset user';
+      b.title = 'load · \u2715 delete';
+      const label = document.createElement('span');
+      label.textContent = name;
+      const del = document.createElement('span');
+      del.className = 'pdel';
+      del.textContent = '\u2715';
+      del.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (window.confirm && window.confirm('Delete preset "' + name + '"?') === false) return;
+        const bk = loadBank();
+        delete bk[name];
+        saveBank(bk);
+        renderUserBank();
+      });
+      b.appendChild(label);
+      b.appendChild(del);
+      b.addEventListener('click', function () {
+        engine.setAll(bank[name]);
+        syncUI();
+        $('oName').textContent = name;
+        clearPresetOn();
+        b.classList.add('on');
+      });
+      if (saveBtn && wrap.insertBefore) wrap.insertBefore(b, saveBtn); else wrap.appendChild(b);
+    });
+  }
+  function buildSaveBtn() {
+    const wrap = $('presets');
+    const b = document.createElement('button');
+    b.className = 'preset save';
+    b.textContent = 'SAVE \ud83d\udcbe';
+    b.addEventListener('click', function () {
+      const bank = loadBank();
+      let name = window.prompt ? window.prompt('Save current sound as:', 'MY PSY ' + (Object.keys(bank).length + 1)) : ('MY PSY ' + (Object.keys(bank).length + 1));
+      if (!name) return;
+      name = String(name).trim().slice(0, 24);
+      if (!name) return;
+      bank[name] = Object.assign({}, engine.params);
+      saveBank(bank);
+      renderUserBank();
+      $('oName').textContent = name;
+      clearPresetOn();
+    });
+    wrap.appendChild(b);
+  }
+
   function loadPreset(i) {
     pIdx = (i + NAMES.length) % NAMES.length;
     const name = NAMES[pIdx];
     engine.setAll(Psy.PRESETS[name]);
     syncUI();
     $('oName').textContent = name;
-    document.querySelectorAll('.preset').forEach(function (x, j) {
-      x.classList.toggle('on', j === pIdx);
-    });
+    clearPresetOn();
+    const btns = document.querySelectorAll('.preset.factory');
+    if (btns[pIdx]) btns[pIdx].classList.add('on');
   }
 
   function buildPresets() {
     const wrap = $('presets');
     NAMES.forEach(function (name, i) {
       const b = document.createElement('button');
-      b.className = 'preset';
+      b.className = 'preset factory';
       b.textContent = name;
       b.addEventListener('click', function () { loadPreset(i); });
       wrap.appendChild(b);
@@ -537,16 +604,21 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       k.dataset.base = n;
       k.dataset.n = n;
       k.title = noteName(n);
-      k.addEventListener('pointerdown', function () { noteOn(parseInt(k.dataset.n, 10)); });
+      k.addEventListener('pointerdown', function (e) {
+        const rect = k.getBoundingClientRect();
+        const rel = (e.clientY - rect.top) / Math.max(1, rect.height);
+        const vel = Math.max(0.25, Math.min(1, 1.05 - rel));
+        noteOn(parseInt(k.dataset.n, 10), vel);
+      });
       k.addEventListener('pointerup', function () { noteOff(parseInt(k.dataset.n, 10)); });
       k.addEventListener('pointerleave', function () { noteOff(parseInt(k.dataset.n, 10)); });
       kb.appendChild(k);
     }
   }
 
-  function noteOn(n) {
+  function noteOn(n, vel) {
     if (!engine.ready) return;
-    noteRouter.noteOn(n, 0.8);
+    noteRouter.noteOn(n, vel === undefined ? 0.8 : vel);
     const k = document.querySelector('[data-n="' + n + '"]');
     if (k) k.classList.add('on');
   }
@@ -557,11 +629,25 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     if (k) k.classList.remove('on');
   }
 
+  function setupCanvases() {
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    if (dpr === 1) return;
+    const cv = $('scope');
+    if (!cv) return;
+    const w = cv.width, h = cv.height;
+    cv._w = w; cv._h = h;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    const c2 = cv.getContext('2d');
+    if (c2 && c2.setTransform) c2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
   function scopeLoop() {
     requestAnimationFrame(scopeLoop);
     const cv = $('scope'), c = cv.getContext('2d');
+    const W = cv._w || cv.width, H = cv._h || cv.height;
     c.fillStyle = 'rgba(2, 10, 15, 0.42)';
-    c.fillRect(0, 0, cv.width, cv.height);
+    c.fillRect(0, 0, W, H);
     if (!engine.ready) return;
     const data = new Uint8Array(engine.analyser.fftSize);
     engine.analyser.getByteTimeDomainData(data);
@@ -571,8 +657,8 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     c.shadowBlur = 7;
     c.beginPath();
     for (let i = 0; i < data.length; i += 4) {
-      const x = (i / data.length) * cv.width;
-      const y = (data[i] / 255) * cv.height;
+      const x = (i / data.length) * W;
+      const y = (data[i] / 255) * H;
       if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
     }
     c.stroke();
@@ -694,6 +780,9 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   safeBuild('wavetable', buildWavetableLab);
   safeBuild('morph', buildMorph);
   safeBuild('presets', buildPresets);
+  safeBuild('userbank', renderUserBank);
+  safeBuild('savebtn', buildSaveBtn);
+  safeBuild('canvases', setupCanvases);
   safeBuild('keyboard', buildKeyboard);
   safeBuild('octrow', buildOctRow);
   try { loadPreset(0); } catch (err) { /* preset load non-fatal */ }
