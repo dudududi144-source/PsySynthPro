@@ -106,7 +106,7 @@ class SynthProcessor extends AudioWorkletProcessor {
   polyblep(t, dt) {
     if (t < dt) { t /= dt; return t + t - t * t - 1; }
     if (t > 1 - dt) { t = (t - 1) / dt; return t * t + t + t + 1; }
-    return 1;
+    return 0;
   }
 
   readWavetable(phase) {
