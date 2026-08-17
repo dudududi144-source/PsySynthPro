@@ -356,6 +356,53 @@ const Psy = (window.PsySynth = window.PsySynth || {});
     }
     s.appendChild(grid);
 
+    /* psy pattern bank */
+    const patRow = document.createElement('div');
+    patRow.className = 'seq-patterns';
+    function refreshGrid() {
+      for (let i = 0; i < seqBtns.length; i++) {
+        seqBtns[i].classList.toggle('on', seq.steps[i].on);
+        seqBtns[i].classList.toggle('accent', seq.steps[i].accent);
+      }
+    }
+    const patNames = Object.keys(Psy.SEQ_PATTERNS);
+    const patBtns = [];
+    patNames.forEach(function (name) {
+      const pb = document.createElement('button');
+      pb.className = 'pat-btn';
+      pb.textContent = name;
+      pb.addEventListener('click', function () {
+        seq.loadPattern(name);
+        refreshGrid();
+        patBtns.forEach(function (x) { x.classList.remove('active'); });
+        pb.classList.add('active');
+      });
+      patBtns.push(pb);
+      patRow.appendChild(pb);
+    });
+    s.appendChild(patRow);
+
+    /* psy tempo quick-set */
+    const tempoRow = document.createElement('div');
+    tempoRow.className = 'seq-tempos';
+    const lbl = document.createElement('span');
+    lbl.className = 'tempo-label';
+    lbl.textContent = 'TEMPO';
+    tempoRow.appendChild(lbl);
+    [138, 141, 145, 150].forEach(function (t) {
+      const tb = document.createElement('button');
+      tb.className = 'tempo-btn' + (t === 141 ? ' active' : '');
+      tb.textContent = String(t);
+      tb.addEventListener('click', function () {
+        seq.bpm = t;
+        bpmKnob.set(t, true);
+        tempoRow.querySelectorAll('.tempo-btn').forEach(function (x) { x.classList.remove('active'); });
+        tb.classList.add('active');
+      });
+      tempoRow.appendChild(tb);
+    });
+    s.appendChild(tempoRow);
+
     const row = document.createElement('div');
     row.className = 'krow';
 
@@ -378,7 +425,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
       onChange: function (v) { seq.hold = (v === 'ON'); if (v === 'OFF') seq.held = []; }
     });
 
-    new Psy.Knob(row, {
+    const bpmKnob = new Psy.Knob(row, {
       color: '#60a5fa', label: 'BPM', min: 60, max: 200, def: 138,
       fmt: function (v) { return String(Math.round(v)); },
       onChange: function (v) { seq.bpm = v; }
