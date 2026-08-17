@@ -13,6 +13,7 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 | FM | instantaneous-frequency modulation (DX7-style) |
 | Morph | continuous interpolation between any two presets |
 | MIDI/MPE | Web MIDI input: notes+velocity, CC automation, **per-note pitch bend** (channel->note tracking) |
+| 3D Spectrum | perspective-projected frequency bars (log-spaced bins, depth-sorted, shaded faces) |
 | Space FX | convolution reverb (generated IR) + feedback delay |
 | Output | tanh soft-clip stage |
 | Voices | 16-voice pool, oldest-note stealing |
@@ -32,6 +33,7 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 - src/synth-engine.js — AudioWorklet DSP (PolyBLEP + wavetable + per-note bend) + master FX
 - src/wavetable.js — wavetable rendering, editor, preset morphing
 - src/midi.js — Web MIDI engine with MPE-style per-note bend
+- src/viz3d.js — 3D spectrum analyzer (perspective projection)
 - src/knob.js — SVG rotary knobs with tick marks
 - src/presets.js — preset bank
 - src/ui.js — panel builder, Wavetable Lab, Morph, MIDI, keyboard, OLED scope
@@ -41,5 +43,5 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 2. Space FX + boutique UI redesign — **done**
 3. Wavetable editor + preset morphing — **done**
 4. MIDI/MPE support — **done**
-5. 3D spectrum visualizer — next
-6. PWA offline + WAV export
+5. 3D spectrum visualizer — **done**
+6. PWA offline + WAV export — next
