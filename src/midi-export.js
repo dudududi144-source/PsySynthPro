@@ -1,5 +1,5 @@
 "use strict";
-const Psy = (window.PsySynth = window.PsySynth || {});
+var Psy = (window.PsySynth = window.PsySynth || {});
 
 /* ═══════════ MIDI File Export (Phase 9) ═══════════
    Captures every note event (manual, arpeggiator or sequencer) by

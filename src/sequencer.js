@@ -1,5 +1,5 @@
 "use strict";
-const Psy = (window.PsySynth = window.PsySynth || {});
+var Psy = (window.PsySynth = window.PsySynth || {});
 
 /* ═══════════ Step Sequencer (Phase 8) ═══════════
    16-step gate pattern with per-step accents. Held notes cycle through

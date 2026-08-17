@@ -1,5 +1,5 @@
 "use strict";
-const Psy = (window.PsySynth = window.PsySynth || {});
+var Psy = (window.PsySynth = window.PsySynth || {});
 
 /* ═══════════ Arpeggiator (Phase 7) ═══════════
    Web-Audio lookahead scheduler: a 25ms timer schedules steps up to

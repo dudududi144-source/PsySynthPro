@@ -3,6 +3,20 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [1.9.0] — THE BUG: global lexical collision (panel never built in real browsers)
+### Root cause (proven, not assumed)
+Every module started with `const Psy = (window.PsySynth = ...)`. Top-level `const`
+declarations of separate `<script>` tags share ONE global lexical scope in browsers,
+so the 2nd..11th declarations were **SyntaxError: redeclaration of 'Psy'** and those
+scripts (knob, arp, seq, midi, viz, recorder, midi-export, wavetable, **ui**) never
+executed. Reproduced in a per-script JS harness: OLD bundle fails 9/13 scripts with
+`sections=0`; fixed bundle passes 13/13 with `sections=11`.
+### Fix
+- Namespace line changed to `var Psy = ...` / `var PsySynth = ...` in all 11 modules
+- Bundle rebuilt; single atomic commit for all 13 files
+### Also (v1.8.2, no changelog at the time)
+- Always-visible BUILD badge + instant on-page JS-error strip
+
 ## [1.8.1] — Auto-Repair Delivery
 ### Fixed
 - Watchdog now **auto-repairs once** on panel-build failure: unregisters leftover

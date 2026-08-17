@@ -231,7 +231,7 @@ class SynthProcessor extends AudioWorkletProcessor {
 registerProcessor('psysynth-processor', SynthProcessor);
 `;
 
-const PsySynth = (window.PsySynth = window.PsySynth || {});
+var PsySynth = (window.PsySynth = window.PsySynth || {});
 
 class SynthEngine {
   constructor() {

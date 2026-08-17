@@ -1,5 +1,5 @@
 "use strict";
-const Psy = (window.PsySynth = window.PsySynth || {});
+var Psy = (window.PsySynth = window.PsySynth || {});
 
 /* SVG rotary knob — hardware style with tick marks.
    Drag vertically, scroll wheel, double-click = reset.   */

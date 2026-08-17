@@ -1,5 +1,5 @@
 "use strict";
-const Psy = (window.PsySynth = window.PsySynth || {});
+var Psy = (window.PsySynth = window.PsySynth || {});
 
 Psy.DEFAULT = {
   wave: 0, detune: 0, unison: 3, spread: 12, sub: 25,

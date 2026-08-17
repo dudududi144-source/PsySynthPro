@@ -1,5 +1,5 @@
 "use strict";
-const Psy = (window.PsySynth = window.PsySynth || {});
+var Psy = (window.PsySynth = window.PsySynth || {});
 
 /* ═══════════ WAV Recorder (Phase 6) ═══════════
    Captures raw PCM from the master bus via ScriptProcessor,

@@ -1,5 +1,5 @@
 "use strict";
-const Psy = (window.PsySynth = window.PsySynth || {});
+var Psy = (window.PsySynth = window.PsySynth || {});
 
 /* ═══════════ 3D Spectrum Visualizer (Phase 5) ═══════════
    Real perspective projection of frequency bars as 3D boxes,

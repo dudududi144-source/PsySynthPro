@@ -1,5 +1,5 @@
 "use strict";
-const Psy = (window.PsySynth = window.PsySynth || {});
+var Psy = (window.PsySynth = window.PsySynth || {});
 
 /* ═══════════ MIDI Engine (Phase 4) ═══════════
    Web MIDI input: note on/off with velocity, CC automation,
