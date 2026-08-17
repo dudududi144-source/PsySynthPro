@@ -1,7 +1,10 @@
 "use strict";
-/* PsySynthPro service worker — offline-first cache (Phase 9) */
+/* PsySynthPro service worker v5 — network-first:
+   online  -> always fresh from network (cache updated in background)
+   offline -> last good copy from cache
+   This eliminates stale-cache failure modes from earlier cache-first versions. */
 
-const CACHE = 'psysynthpro-v4';
+const CACHE = 'psysynthpro-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -40,15 +43,16 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(function (hit) {
-      if (hit) return hit;
-      return fetch(e.request).then(function (resp) {
-        if (resp && resp.status === 200 && resp.type === 'basic') {
-          const clone = resp.clone();
-          caches.open(CACHE).then(function (c) { c.put(e.request, clone); });
-        }
-        return resp;
-      }).catch(function () { return caches.match('./index.html'); });
+    fetch(e.request).then(function (resp) {
+      if (resp && resp.status === 200 && resp.type === 'basic') {
+        const clone = resp.clone();
+        caches.open(CACHE).then(function (c) { c.put(e.request, clone); });
+      }
+      return resp;
+    }).catch(function () {
+      return caches.match(e.request).then(function (hit) {
+        return hit || caches.match('./index.html');
+      });
     })
   );
 });
