@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v2.3.0 · grooveexport · 2026-08-17 -->
+<!-- SELF-CONTAINED BUNDLE v2.4.0 · modmatrix-nxm · 2026-08-17 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -492,10 +492,25 @@ body {
 .tempo-btn.exp { border-color: #3a5a3f; color: #9fe8a8; }
 .tempo-btn.exp:hover { filter: brightness(1.3); color: #c6f6d0; }
 
+
+/* ══════════ NxM MOD MATRIX (v2.4) ══════════ */
+.mod-matrix {
+  display: grid;
+  grid-template-columns: 44px repeat(5, 64px);
+  gap: 10px 12px;
+  align-items: center;
+  justify-content: start;
+}
+.matrix-corner { width: 44px; height: 1px; }
+.matrix-collabel { color: #fbbf24; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-align: center; }
+.matrix-rowlabel { color: #fbbf24; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-align: right; padding-right: 6px; }
+.mod-matrix .kwrap { width: 64px; }
+.mod-matrix .klabel { display: none; }
+
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.3.0 · grooveexport · 2026-08-17</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.4.0 · modmatrix-nxm · 2026-08-17</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -524,11 +539,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v2.3.0 · grooveexport · 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; GROOVE EXPORT &bull; USER BANK &bull; MOD MATRIX &bull; SEQ &bull; ARP</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v2.4.0 · modmatrix-nxm · 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; NxM MOD MATRIX &bull; GROOVE EXPORT &bull; SEQ &bull; ARP</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v2.3.0 · grooveexport · 2026-08-17';
+window.__psyBuild = 'v2.4.0 · modmatrix-nxm · 2026-08-17';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -826,6 +841,9 @@ class SynthProcessor extends AudioWorkletProcessor {
       attack: 12, decay: 260, sustain: 70, release: 650,
       lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35, lfoWave: 0,
       lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0,
+      modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0,
+      modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0,
+      modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0,
       master: 80, reverb: 35, delay: 22
     };
     this.voices = [];
@@ -990,6 +1008,15 @@ class SynthProcessor extends AudioWorkletProcessor {
         if (p.lfoTarget === 1) pitchMod = Math.pow(2, (lfoVal * (p.lfoDepth / 100) * 80) / 1200);
         pitchMod *= Math.pow(2, lfoVal * (p.lfoPitch / 100));
         pitchMod *= Math.pow(2, envNorm * (p.envPitch / 100) * 2);
+        /* NxM bipolar matrix: sources LFO/ENV/VEL -> dest CUT/PIT/AMP/FM/RES */
+        const envSrc = (envNorm - 0.5) * 2;
+        const velSrc = (v.vel - 0.5) * 2;
+        const modCut = (lfoVal * p.modLC + envSrc * p.modEC + velSrc * p.modVC) * 40;
+        const modPitCents = (lfoVal * p.modLP + envSrc * p.modEP + velSrc * p.modVP) * 12;
+        const modAmp = (lfoVal * p.modLA + envSrc * p.modEA + velSrc * p.modVA) / 100;
+        const modFmCoef = (lfoVal * p.modLF + envSrc * p.modEF + velSrc * p.modVF) / 100;
+        const modRes = (lfoVal * p.modLR + envSrc * p.modER + velSrc * p.modVR) * 0.1;
+        pitchMod *= Math.pow(2, modPitCents / 1200);
 
         let sig = 0;
         for (let u = 0; u < un; u++) {
@@ -997,7 +1024,7 @@ class SynthProcessor extends AudioWorkletProcessor {
           const f = baseFreq * bendMul * pitchMod * Math.pow(2, (p.detune + off) / 1200);
           v.modPhase += (f * p.fmRatio) / sr;
           if (v.modPhase >= 1) v.modPhase -= 1;
-          const fmDepthEff = (p.fmDepth / 100) * f * 2 + lfoVal * (p.lfoFM / 100) * f * 2 + envNorm * (p.envFM / 100) * f * 2;
+          const fmDepthEff = (p.fmDepth / 100) * f * 2 + lfoVal * (p.lfoFM / 100) * f * 2 + envNorm * (p.envFM / 100) * f * 2 + modFmCoef * f * 2;
           const fmHz = Math.sin(TWO_PI * v.modPhase) * fmDepthEff;
           const inc = Math.max(0.00001, (f + fmHz) / sr);
           v.phase += inc;
@@ -1015,10 +1042,12 @@ class SynthProcessor extends AudioWorkletProcessor {
         let fc = p.cutoff + (p.filterEnv / 100) * 9000 * (v.vel > 0 ? v.amp / v.vel : 0);
         if (p.lfoTarget === 0) fc += lfoVal * (p.lfoDepth / 100) * 3500;
         fc += lfoVal * (p.lfoCutoff / 100) * 4000;
+        fc += modCut;
         fc = Math.min(18000, Math.max(40, fc));
         v.smoothFc = v.smoothFc === 0 ? fc : v.smoothFc + (fc - v.smoothFc) * 0.0015;
         const g = Math.tan(3.14159265359 * v.smoothFc / sr);
-        const k = Math.max(0.02, 2 - (p.res / 10));
+        const resEff = Math.max(0.1, Math.min(25, p.res + modRes));
+        const k = Math.max(0.02, 2 - (resEff / 10));
         const a1 = 1 / (1 + g * (g + k));
         const a2 = g * a1;
         const a3 = g * a2;
@@ -1036,6 +1065,7 @@ class SynthProcessor extends AudioWorkletProcessor {
         let ampMod = 1;
         if (p.lfoTarget === 2) ampMod = 1 - (p.lfoDepth / 200) + lfoVal * (p.lfoDepth / 200);
         ampMod *= 1 - (p.lfoAmp / 200) + lfoVal * (p.lfoAmp / 200);
+        ampMod *= Math.max(0, 1 + modAmp);
         acc += fsig * v.amp * ampMod;
       }
 
@@ -2247,20 +2277,59 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       { type: 'knob', key: 'lfoRate', label: 'RATE', min: 0.1, max: 20, step: 0.1, def: 2.2, fmt: function (v) { return v.toFixed(1) + 'Hz'; } },
       { type: 'knob', key: 'lfoDepth', label: 'DEPTH', min: 0, max: 100, def: 35, fmt: fmtPct }
     ]},
-    { title: 'MOD MATRIX', color: '#fbbf24', items: [
-      { type: 'knob', key: 'lfoCutoff', label: 'LFO>CUT', min: 0, max: 100, def: 0, fmt: fmtPct },
-      { type: 'knob', key: 'lfoPitch', label: 'LFO>PIT', min: 0, max: 100, def: 0, fmt: fmtPct },
-      { type: 'knob', key: 'lfoAmp', label: 'LFO>AMP', min: 0, max: 100, def: 0, fmt: fmtPct },
-      { type: 'knob', key: 'lfoFM', label: 'LFO>FM', min: 0, max: 100, def: 0, fmt: fmtPct },
-      { type: 'knob', key: 'envPitch', label: 'ENV>PIT', min: 0, max: 100, def: 0, fmt: fmtPct },
-      { type: 'knob', key: 'envFM', label: 'ENV>FM', min: 0, max: 100, def: 0, fmt: fmtPct }
-    ]},
     { title: 'SPACE FX', color: '#f07dc2', items: [
       { type: 'knob', key: 'reverb', label: 'REVERB', min: 0, max: 100, def: 35, fmt: fmtPct },
       { type: 'knob', key: 'delay', label: 'DELAY', min: 0, max: 100, def: 22, fmt: fmtPct },
       { type: 'knob', key: 'master', label: 'MASTER', min: 0, max: 100, def: 80, fmt: fmtPct }
     ]}
   ];
+
+  function buildModMatrix() {
+    const s = document.createElement('div');
+    s.className = 'section matrix-section';
+    s.innerHTML = '<div class="stitle" style="--c:#fbbf24">MOD MATRIX</div>';
+    const grid = document.createElement('div');
+    grid.className = 'mod-matrix';
+    const sources = [
+      { pre: 'modL', label: 'LFO' },
+      { pre: 'modE', label: 'ENV' },
+      { pre: 'modV', label: 'VEL' }
+    ];
+    const dests = [
+      { suf: 'C', label: 'CUT' },
+      { suf: 'P', label: 'PIT' },
+      { suf: 'A', label: 'AMP' },
+      { suf: 'F', label: 'FM' },
+      { suf: 'R', label: 'RES' }
+    ];
+    const corner = document.createElement('div');
+    corner.className = 'matrix-corner';
+    grid.appendChild(corner);
+    dests.forEach(function (dst) {
+      const h = document.createElement('div');
+      h.className = 'matrix-collabel';
+      h.textContent = dst.label;
+      grid.appendChild(h);
+    });
+    sources.forEach(function (src) {
+      const rl = document.createElement('div');
+      rl.className = 'matrix-rowlabel';
+      rl.textContent = src.label;
+      grid.appendChild(rl);
+      dests.forEach(function (dst) {
+        const key = src.pre + dst.suf;
+        const knob = new Psy.Knob(grid, {
+          label: '', color: '#fbbf24', min: -100, max: 100, def: 0, size: 54,
+          value: engine.params[key] || 0,
+          fmt: function (v) { return (v > 0 ? '+' : '') + Math.round(v); },
+          onChange: function (v) { engine.set(key, v); }
+        });
+        REG[key] = knob;
+      });
+    });
+    s.appendChild(grid);
+    $('sections').appendChild(s);
+  }
 
   function buildSections() {
     const root = $('sections');
@@ -2966,6 +3035,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
   safeBuild('macros', buildMacros);
   safeBuild('sections', buildSections);
+  safeBuild('matrix', buildModMatrix);
   safeBuild('arp', buildArpPanel);
   safeBuild('seq', buildSeqPanel);
   safeBuild('wavetable', buildWavetableLab);
