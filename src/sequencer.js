@@ -74,6 +74,16 @@ class Sequencer {
   }
   panic() { this.held = []; }
 
+  loadPattern(name) {
+    const p = Psy.SEQ_PATTERNS[name];
+    if (!p) return false;
+    for (let i = 0; i < SEQ_LEN; i++) {
+      this.steps[i].on = p.g[i] === 1;
+      this.steps[i].accent = p.a[i] === 1;
+    }
+    return true;
+  }
+
   tick() {
     if (!this.enabled || !this.engine.ctx) return;
     const ctx = this.engine.ctx;
@@ -100,6 +110,22 @@ class Sequencer {
     }
   }
 }
+
+
+/* ═══════════ PSY-TRANCE PATTERN BANK ═══════════
+   16-step gate/accent patterns. g = gate on, A = gate on + accent.
+   Step grid: 4 beats x 4 sixteenths (beat heads at 0, 4, 8, 12).   */
+
+Psy.SEQ_PATTERNS = {
+  'ROLLING 16':   { g: [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1], a: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0] },
+  'OFFBEAT BASS': { g: [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0], a: [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0] },
+  'PSY PUMP':     { g: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0], a: [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0] },
+  'ACID LINE':    { g: [1,0,0,1, 0,0,1,0, 0,1,0,0, 1,0,0,0], a: [1,0,0,0, 0,0,1,0, 0,0,0,0, 1,0,0,0] },
+  'TRANCE STAB':  { g: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,1,0], a: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0] },
+  'GATE 8':       { g: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0], a: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0] },
+  'DARK ROLL':    { g: [1,1,0,1, 1,0,1,1, 0,1,1,0, 1,1,0,1], a: [1,0,0,0, 0,0,1,0, 0,0,0,0, 0,1,0,0] },
+  'GOA BLEEP':    { g: [1,0,0,0, 0,1,0,0, 0,0,0,1, 0,0,0,0], a: [1,0,0,0, 0,1,0,0, 0,0,0,1, 0,0,0,0] }
+};
 
 Psy.SEQ_LEN = SEQ_LEN;
 Psy.Sequencer = Sequencer;
