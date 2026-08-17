@@ -15,6 +15,7 @@ A real DSP synthesizer in the browser — genuine sample-rate synthesis, not pre
 | MIDI/MPE | Web MIDI input: notes + velocity, CC automation, per-note pitch bend |
 | 3D Spectrum | perspective-projected log-spaced frequency bars with depth sorting |
 | Arpeggiator | UP/DOWN/UP-DOWN/RANDOM, multi-octave, hold/latch, sample-accurate lookahead scheduling |
+| Step Sequencer | 16-step gates with per-step accents, 3-state step buttons, playing-step highlight |
 | WAV Export | live capture from master bus -> real 16-bit stereo WAV download |
 | PWA | installable, offline-first (service worker caches all assets) |
 | Space FX | convolution reverb + feedback delay on master bus |
@@ -48,5 +49,9 @@ Connect a MIDI keyboard, press POWER, and play. CC1=mod/LFO depth, CC74=cutoff, 
 ## Security
 No tokens/keys in this repository. .gitignore blocks .env and key files.
 
+## Sequencer
+Toggle steps: click cycles OFF -> ON -> ACCENT. Hold a chord (or enable HOLD), press SEQ ON.
+Sequencer and arpeggiator are mutually exclusive — enabling one disarms the other.
+
 ## License
-MIT
+MIT (see LICENSE)
