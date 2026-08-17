@@ -81,6 +81,14 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       { type: 'knob', key: 'lfoRate', label: 'RATE', min: 0.1, max: 20, step: 0.1, def: 2.2, fmt: function (v) { return v.toFixed(1) + 'Hz'; } },
       { type: 'knob', key: 'lfoDepth', label: 'DEPTH', min: 0, max: 100, def: 35, fmt: fmtPct }
     ]},
+    { title: 'MOD MATRIX', color: '#fbbf24', items: [
+      { type: 'knob', key: 'lfoCutoff', label: 'LFO>CUT', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'lfoPitch', label: 'LFO>PIT', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'lfoAmp', label: 'LFO>AMP', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'lfoFM', label: 'LFO>FM', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'envPitch', label: 'ENV>PIT', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'envFM', label: 'ENV>FM', min: 0, max: 100, def: 0, fmt: fmtPct }
+    ]},
     { title: 'SPACE FX', color: '#f07dc2', items: [
       { type: 'knob', key: 'reverb', label: 'REVERB', min: 0, max: 100, def: 35, fmt: fmtPct },
       { type: 'knob', key: 'delay', label: 'DELAY', min: 0, max: 100, def: 22, fmt: fmtPct },
