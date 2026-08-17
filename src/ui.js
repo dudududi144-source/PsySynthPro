@@ -493,17 +493,53 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
   const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
 
+  /* ── Octave shift: OCT -/+ buttons + Z/X keys ── */
+  let octShift = 0;
+  function noteName(n) {
+    const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[n % 12] + (Math.floor(n / 12) - 1);
+  }
+  function updateOctLabel() {
+    const lbl = $('octLabel');
+    if (lbl) lbl.textContent = noteName(48 + octShift * 12) + ' \u2013 ' + noteName(72 + octShift * 12) + '  [Z/X]';
+  }
+  function applyOctave() {
+    document.querySelectorAll('#kb .key').forEach(function (k) {
+      const base = parseInt(k.dataset.base, 10);
+      k.dataset.n = String(base + octShift * 12);
+      k.title = noteName(base + octShift * 12);
+    });
+    updateOctLabel();
+  }
+  function buildOctRow() {
+    const kb = $('kb');
+    const row = document.createElement('div');
+    row.className = 'oct-row';
+    const dn = document.createElement('button');
+    dn.className = 'oct-btn'; dn.textContent = 'OCT \u2212';
+    const lbl = document.createElement('span');
+    lbl.className = 'oct-label'; lbl.id = 'octLabel';
+    const up = document.createElement('button');
+    up.className = 'oct-btn'; up.textContent = 'OCT +';
+    dn.addEventListener('click', function () { if (octShift > -2) { octShift--; applyOctave(); } });
+    up.addEventListener('click', function () { if (octShift < 2) { octShift++; applyOctave(); } });
+    row.appendChild(dn); row.appendChild(lbl); row.appendChild(up);
+    kb.parentNode.insertBefore(row, kb);
+    updateOctLabel();
+  }
+
   function buildKeyboard() {
     const kb = $('kb');
     for (let n = 48; n <= 72; n++) {
       const black = [1, 3, 6, 8, 10].indexOf(n % 12) >= 0;
       const k = document.createElement('div');
       k.className = 'key ' + (black ? 'b' : 'w');
+      k.dataset.base = n;
       k.dataset.n = n;
-      k.title = LABEL[n] || '';
-      k.addEventListener('pointerdown', function () { noteOn(n); });
-      k.addEventListener('pointerup', function () { noteOff(n); });
-      k.addEventListener('pointerleave', function () { noteOff(n); });
+      k.title = noteName(n);
+      k.addEventListener('pointerdown', function () { noteOn(parseInt(k.dataset.n, 10)); });
+      k.addEventListener('pointerup', function () { noteOff(parseInt(k.dataset.n, 10)); });
+      k.addEventListener('pointerleave', function () { noteOff(parseInt(k.dataset.n, 10)); });
       kb.appendChild(k);
     }
   }
@@ -632,12 +668,15 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   const KEYMAP = { a: 60, w: 61, s: 62, e: 63, d: 64, f: 65, t: 66, g: 67, y: 68, h: 69, u: 70, j: 71, k: 72, o: 73, l: 74, p: 75 };
   document.addEventListener('keydown', function (e) {
     if (e.repeat) return;
-    const n = KEYMAP[e.key.toLowerCase()];
-    if (n !== undefined) noteOn(n);
+    const key = e.key.toLowerCase();
+    if (key === 'z') { if (octShift > -2) { octShift--; applyOctave(); } return; }
+    if (key === 'x') { if (octShift < 2) { octShift++; applyOctave(); } return; }
+    const n = KEYMAP[key];
+    if (n !== undefined) noteOn(n + octShift * 12);
   });
   document.addEventListener('keyup', function (e) {
     const n = KEYMAP[e.key.toLowerCase()];
-    if (n !== undefined) noteOff(n);
+    if (n !== undefined) noteOff(n + octShift * 12);
   });
 
   function safeBuild(name, fn) {
@@ -656,6 +695,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   safeBuild('morph', buildMorph);
   safeBuild('presets', buildPresets);
   safeBuild('keyboard', buildKeyboard);
+  safeBuild('octrow', buildOctRow);
   try { loadPreset(0); } catch (err) { /* preset load non-fatal */ }
   window.__psyUiReady = true;
   scopeLoop();
