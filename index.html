@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#12141a">
 <title>PsySynthPro - Real DSP Synthesizer</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/synth.css">
 </head>
 <body>
@@ -21,6 +24,7 @@
     </div>
     <button id="bPrev" class="tbtn">&#9664;</button>
     <button id="bNext" class="tbtn">&#9654;</button>
+    <button id="bRec" class="tbtn rec">&#9679; REC</button>
     <button id="bPanic" class="tbtn panic">PANIC</button>
   </div>
 
@@ -37,7 +41,7 @@
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>POLYBLEP &bull; WAVETABLE &bull; ZDF SVF &bull; FM &bull; MORPH &bull; MIDI/MPE &bull; 3D SPECTRUM</span></div>
+  <div class="brand">PSYSYNTH PRO<span>POLYBLEP &bull; WAVETABLE &bull; ZDF SVF &bull; FM &bull; MORPH &bull; MIDI/MPE &bull; WAV EXPORT &bull; OFFLINE PWA</span></div>
 </div>
 <script src="src/presets.js"></script>
 <script src="src/wavetable.js"></script>
@@ -45,6 +49,14 @@
 <script src="src/knob.js"></script>
 <script src="src/midi.js"></script>
 <script src="src/viz3d.js"></script>
+<script src="src/recorder.js"></script>
 <script src="src/ui.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+</script>
 </body>
 </html>
