@@ -396,3 +396,12 @@ body {
   filter: brightness(1.5);
 }
 .key.seq-flash { box-shadow: 0 0 24px rgba(96, 165, 250, 0.95) !important; }
+
+
+/* ══════════ MIDI CAPTURE (Phase 9) ══════════ */
+.tbtn.midi { color: #93c5fd; }
+.tbtn.midi.armed {
+  background: linear-gradient(180deg, #1e3a5f, #101f38);
+  box-shadow: inset 0 0 14px rgba(96, 165, 250, 0.4), 0 0 18px rgba(96, 165, 250, 0.2);
+  animation: recblink 1s ease-in-out infinite;
+}
