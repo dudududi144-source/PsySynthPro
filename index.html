@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v2.0.0 · modmatrix · 2026-08-17 -->
+<!-- SELF-CONTAINED BUNDLE v2.1.0 · foundation · 2026-08-17 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -461,10 +461,29 @@ body {
   color: #fff; box-shadow: 0 0 10px rgba(96,165,250,0.5);
 }
 
+
+/* ══════════ OCTAVE CONTROL (v2.1) ══════════ */
+.oct-row { display: flex; gap: 10px; align-items: center; justify-content: center; margin: 0 0 10px; }
+.oct-btn {
+  padding: 7px 16px; border-radius: 7px; border: 1px solid #000;
+  background: linear-gradient(180deg, #262d38, #161b22);
+  color: #9fb4c8; font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: 1px; cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07);
+  transition: all 0.12s;
+}
+.oct-btn:hover { filter: brightness(1.3); color: #cfe6ff; }
+.oct-btn:active { transform: translateY(1px); }
+.oct-label {
+  color: #7ff3ff; font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 1px; min-width: 150px; text-align: center;
+  text-shadow: 0 0 8px rgba(0,229,255,0.35);
+}
+
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none;">BUILD v2.0.0 · modmatrix · 2026-08-17</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.1.0 · foundation · 2026-08-17</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -493,11 +512,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v2.0.0 · modmatrix · 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; POLYBLEP &bull; ZDF SVF &bull; FM &bull; MOD MATRIX &bull; SEQ &bull; ARP</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v2.1.0 · foundation · 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; OCTAVE Z/X &bull; MOD MATRIX &bull; SEQ &bull; ARP</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v2.0.0 · modmatrix · 2026-08-17';
+window.__psyBuild = 'v2.1.0 · foundation · 2026-08-17';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -801,12 +820,11 @@ class SynthProcessor extends AudioWorkletProcessor {
     for (let i = 0; i < 16; i++) {
       this.voices.push({
         active: false, note: -1, vel: 0, age: 0, bend: 0,
-        phase: 0, modPhase: 0, subPhase: 0,
+        phase: 0, modPhase: 0, subPhase: 0, triInt: 0,
         amp: 0, stage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0
       });
     }
     this.lfoPhase = 0;
-    this.triInt = 0;
     this.queue = [];
     this.wtable = this.renderDefaultTable();
     this.wtLen = this.wtable.length;
@@ -875,7 +893,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
     for (const x of this.voices) if (x !== v) x.age++;
     v.active = true; v.note = note; v.vel = vel; v.age = 0; v.bend = 0;
-    v.stage = 1; v.phase = 0; v.modPhase = 0; v.subPhase = 0;
+    v.stage = 1; v.phase = 0; v.modPhase = 0; v.subPhase = 0; v.triInt = 0;
     v.ic1eq = 0; v.ic2eq = 0;
   }
 
@@ -899,7 +917,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     return this.wtable[i0] + (this.wtable[i1] - this.wtable[i0]) * frac;
   }
 
-  oscSample(phase, inc, wave) {
+  oscSample(phase, inc, wave, v) {
     const TWO_PI = 6.28318530718;
     if (wave === 4) return this.readWavetable(phase);
     if (wave === 3) return Math.sin(TWO_PI * phase);
@@ -911,9 +929,9 @@ class SynthProcessor extends AudioWorkletProcessor {
     if (wave === 2) {
       const sq = phase < 0.5 ? 1 : -1;
       const c = sq + this.polyblep(phase, inc) - this.polyblep((phase + 0.5) % 1, inc);
-      this.triInt += c * inc * 4;
-      this.triInt = Math.max(-1.2, Math.min(1.2, this.triInt));
-      return Math.max(-1, Math.min(1, this.triInt));
+      v.triInt += c * inc * 4;
+      v.triInt = Math.max(-1.2, Math.min(1.2, v.triInt));
+      return Math.max(-1, Math.min(1, v.triInt));
     }
     return Math.sin(TWO_PI * phase);
   }
@@ -972,7 +990,7 @@ class SynthProcessor extends AudioWorkletProcessor {
           const inc = Math.max(0.00001, (f + fmHz) / sr);
           v.phase += inc;
           if (v.phase >= 1) v.phase -= 1;
-          sig += this.oscSample(v.phase, Math.min(inc, 0.49), p.wave);
+          sig += this.oscSample(v.phase, Math.min(inc, 0.49), p.wave, v);
         }
         sig /= un;
 
@@ -2605,17 +2623,53 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
   const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
 
+  /* ── Octave shift: OCT -/+ buttons + Z/X keys ── */
+  let octShift = 0;
+  function noteName(n) {
+    const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[n % 12] + (Math.floor(n / 12) - 1);
+  }
+  function updateOctLabel() {
+    const lbl = $('octLabel');
+    if (lbl) lbl.textContent = noteName(48 + octShift * 12) + ' \u2013 ' + noteName(72 + octShift * 12) + '  [Z/X]';
+  }
+  function applyOctave() {
+    document.querySelectorAll('#kb .key').forEach(function (k) {
+      const base = parseInt(k.dataset.base, 10);
+      k.dataset.n = String(base + octShift * 12);
+      k.title = noteName(base + octShift * 12);
+    });
+    updateOctLabel();
+  }
+  function buildOctRow() {
+    const kb = $('kb');
+    const row = document.createElement('div');
+    row.className = 'oct-row';
+    const dn = document.createElement('button');
+    dn.className = 'oct-btn'; dn.textContent = 'OCT \u2212';
+    const lbl = document.createElement('span');
+    lbl.className = 'oct-label'; lbl.id = 'octLabel';
+    const up = document.createElement('button');
+    up.className = 'oct-btn'; up.textContent = 'OCT +';
+    dn.addEventListener('click', function () { if (octShift > -2) { octShift--; applyOctave(); } });
+    up.addEventListener('click', function () { if (octShift < 2) { octShift++; applyOctave(); } });
+    row.appendChild(dn); row.appendChild(lbl); row.appendChild(up);
+    kb.parentNode.insertBefore(row, kb);
+    updateOctLabel();
+  }
+
   function buildKeyboard() {
     const kb = $('kb');
     for (let n = 48; n <= 72; n++) {
       const black = [1, 3, 6, 8, 10].indexOf(n % 12) >= 0;
       const k = document.createElement('div');
       k.className = 'key ' + (black ? 'b' : 'w');
+      k.dataset.base = n;
       k.dataset.n = n;
-      k.title = LABEL[n] || '';
-      k.addEventListener('pointerdown', function () { noteOn(n); });
-      k.addEventListener('pointerup', function () { noteOff(n); });
-      k.addEventListener('pointerleave', function () { noteOff(n); });
+      k.title = noteName(n);
+      k.addEventListener('pointerdown', function () { noteOn(parseInt(k.dataset.n, 10)); });
+      k.addEventListener('pointerup', function () { noteOff(parseInt(k.dataset.n, 10)); });
+      k.addEventListener('pointerleave', function () { noteOff(parseInt(k.dataset.n, 10)); });
       kb.appendChild(k);
     }
   }
@@ -2744,12 +2798,15 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   const KEYMAP = { a: 60, w: 61, s: 62, e: 63, d: 64, f: 65, t: 66, g: 67, y: 68, h: 69, u: 70, j: 71, k: 72, o: 73, l: 74, p: 75 };
   document.addEventListener('keydown', function (e) {
     if (e.repeat) return;
-    const n = KEYMAP[e.key.toLowerCase()];
-    if (n !== undefined) noteOn(n);
+    const key = e.key.toLowerCase();
+    if (key === 'z') { if (octShift > -2) { octShift--; applyOctave(); } return; }
+    if (key === 'x') { if (octShift < 2) { octShift++; applyOctave(); } return; }
+    const n = KEYMAP[key];
+    if (n !== undefined) noteOn(n + octShift * 12);
   });
   document.addEventListener('keyup', function (e) {
     const n = KEYMAP[e.key.toLowerCase()];
-    if (n !== undefined) noteOff(n);
+    if (n !== undefined) noteOff(n + octShift * 12);
   });
 
   function safeBuild(name, fn) {
@@ -2768,6 +2825,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   safeBuild('morph', buildMorph);
   safeBuild('presets', buildPresets);
   safeBuild('keyboard', buildKeyboard);
+  safeBuild('octrow', buildOctRow);
   try { loadPreset(0); } catch (err) { /* preset load non-fatal */ }
   window.__psyUiReady = true;
   scopeLoop();
