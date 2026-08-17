@@ -3,6 +3,18 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [1.8.0] — Psy-Trance Pattern Bank
+### Added
+- **8 psy-trance step patterns** in the SEQ panel (one-click load into the 16-step grid):
+  ROLLING 16, OFFBEAT BASS, PSY PUMP, ACID LINE, TRANCE STAB, GATE 8, DARK ROLL, GOA BLEEP
+- **Tempo quick-set**: 138 (progressive) / 141 (full-on) / 145 (hi-tech) / 150 (psycore),
+  synced with the BPM knob
+- Sequencer API: Psy.SEQ_PATTERNS + sequencer.loadPattern(name)
+- tests/pattern_tests.py — committed suite: structure, offbeat correctness, density span,
+  accent validity (accent must imply gate)
+### Verified
+- Harness on the exact bundle: 11 sections, 12 presets, 25 keys, 8 patterns, 0 errors
+
 ## [1.7.0] — Critical Audio Fix + Committed Tests + Build Stamp
 ### Fixed (found by the new regression suite, not by claims)
 - **polyblep() returned 1 instead of 0 away from discontinuities**: every sawtooth
