@@ -12,6 +12,7 @@ A real DSP synthesizer in the browser — genuine sample-rate synthesis, not pre
 | Envelopes | analog-style one-pole exponential ADSR |
 | FM | instantaneous-frequency modulation (DX7-style) |
 | Morph | continuous interpolation between any two presets |
+| MIDI/MPE | Web MIDI input: notes + velocity, CC automation, per-note pitch bend |
 | Space FX | convolution reverb + feedback delay on master bus |
 | Output | tanh soft-clip stage |
 | Voices | 16-voice pool, oldest-note stealing |
@@ -33,6 +34,9 @@ Morph: choose presets A + B and sweep the MORPH knob.
 | src/presets.js | preset bank |
 | src/ui.js | panel builder, keyboard, OLED scope |
 | docs/ | architecture + design research |
+
+## MIDI
+Connect a MIDI keyboard, press POWER, and play. CC1=mod/LFO depth, CC74=cutoff, CC71=resonance, CC7=master. Pitch bend is per-note (MPE-style).
 
 ## Security
 No tokens/keys in this repository. .gitignore blocks .env and key files.
