@@ -286,3 +286,27 @@ body {
 }
 .msel:focus { border-color: #7c3aed; }
 .morph-knob { display: flex; align-items: center; }
+
+
+/* ══════════ MIDI STATUS (Phase 4) ══════════ */
+.midi-row {
+  display: flex; align-items: center; gap: 12px;
+  margin: 0 0 14px;
+}
+.midi-strip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 1.2px;
+  color: #8b949e;
+  background: linear-gradient(180deg, #14171d, #0e1015);
+  border: 1px solid #000; border-radius: 7px;
+  padding: 6px 12px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
+  transition: color 0.2s;
+}
+.midi-strip.on { color: #3fb950; text-shadow: 0 0 6px rgba(63,185,80,0.5); }
+.midi-strip.off { color: #f85149; }
+.midi-event {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 1px;
+  color: #86f7ff; opacity: 0.8;
+}
