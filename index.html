@@ -24,6 +24,11 @@
     <button id="bPanic" class="tbtn panic">PANIC</button>
   </div>
 
+  <div class="viz3d-bezel">
+    <div class="viz3d-label">SPECTRUM 3D</div>
+    <canvas id="viz3d" width="1100" height="180"></canvas>
+  </div>
+
   <div class="midi-row">
     <div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER to enable</div>
     <div class="midi-event" id="midiEvent"></div>
@@ -32,13 +37,14 @@
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>POLYBLEP &bull; WAVETABLE &bull; ZDF SVF &bull; FM &bull; MORPH &bull; MIDI/MPE &bull; SPACE FX</span></div>
+  <div class="brand">PSYSYNTH PRO<span>POLYBLEP &bull; WAVETABLE &bull; ZDF SVF &bull; FM &bull; MORPH &bull; MIDI/MPE &bull; 3D SPECTRUM</span></div>
 </div>
 <script src="src/presets.js"></script>
 <script src="src/wavetable.js"></script>
 <script src="src/synth-engine.js"></script>
 <script src="src/knob.js"></script>
 <script src="src/midi.js"></script>
+<script src="src/viz3d.js"></script>
 <script src="src/ui.js"></script>
 </body>
 </html>
