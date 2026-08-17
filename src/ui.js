@@ -32,6 +32,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   let seqToggle = null;
   let recorder = null;
   let midiRec = null;
+  let lastNotes = [];
 
   function midiStatus(state, info) {
     const el = $('midiStrip');
@@ -411,6 +412,30 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     });
     s.appendChild(tempoRow);
 
+    /* groove export — render current SEQ pattern to a .mid clip for the DAW */
+    const expRow = document.createElement('div');
+    expRow.className = 'seq-tempos';
+    const expBtn = document.createElement('button');
+    expBtn.className = 'tempo-btn exp';
+    expBtn.style.width = 'auto';
+    expBtn.style.padding = '6px 14px';
+    expBtn.innerHTML = '&#11015; EXPORT GROOVE (.mid)';
+    expBtn.addEventListener('click', function () {
+      let notes = seq.held.map(function (h) { return h.note; });
+      if (notes.length === 0) notes = lastNotes.slice();
+      if (notes.length === 0) notes = [36];
+      notes.sort(function (x, y) { return x - y; });
+      const g = Psy.exportSeqGroove(seq, notes, 2);
+      if (!g.events.length) return;
+      const blob = Psy.buildMidiFile(g.events, g.bpm, 480);
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      Psy.downloadBlob(blob, 'psysynthpro-groove-' + g.bpm + 'bpm-' + stamp + '.mid');
+      expBtn.innerHTML = '&#10003; SAVED';
+      setTimeout(function () { expBtn.innerHTML = '&#11015; EXPORT GROOVE (.mid)'; }, 1200);
+    });
+    expRow.appendChild(expBtn);
+    s.appendChild(expRow);
+
     const row = document.createElement('div');
     row.className = 'krow';
 
@@ -618,6 +643,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
   function noteOn(n, vel) {
     if (!engine.ready) return;
+    if (lastNotes.indexOf(n) < 0) { lastNotes.push(n); if (lastNotes.length > 8) lastNotes.shift(); }
     noteRouter.noteOn(n, vel === undefined ? 0.8 : vel);
     const k = document.querySelector('[data-n="' + n + '"]');
     if (k) k.classList.add('on');
