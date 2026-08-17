@@ -14,6 +14,7 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 | Morph | continuous interpolation between any two presets |
 | MIDI/MPE | Web MIDI input: notes+velocity, CC automation, **per-note pitch bend** (channel->note tracking) |
 | 3D Spectrum | perspective-projected frequency bars (log-spaced bins, depth-sorted, shaded faces) |
+| Arpeggiator | lookahead scheduler (25ms tick, 120ms horizon) with worklet event queue — UP/DOWN/UP-DOWN/RANDOM, multi-octave, hold/latch |
 | WAV Export | live PCM capture from master bus, encoded to 16-bit stereo WAV |
 | PWA | manifest + offline-first service worker (installable, works without network) |
 | Space FX | convolution reverb (generated IR) + feedback delay |
@@ -37,6 +38,7 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 - src/midi.js — Web MIDI engine with MPE-style per-note bend
 - src/viz3d.js — 3D spectrum analyzer (perspective projection)
 - src/recorder.js — live PCM capture + WAV encoder
+- src/arpeggiator.js — lookahead arpeggiator
 - manifest.json / sw.js / assets/icon.svg — PWA layer
 - src/knob.js — SVG rotary knobs with tick marks
 - src/presets.js — preset bank
@@ -50,4 +52,7 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 5. 3D spectrum visualizer — **done**
 6. PWA offline + WAV export — **done**
 
-## Project status: COMPLETE (all 6 phases shipped)
+## Post-roadmap extensions
+7. Arpeggiator with sample-accurate scheduling — **done**
+
+## Project status: COMPLETE (roadmap 1-6 + arpeggiator)
