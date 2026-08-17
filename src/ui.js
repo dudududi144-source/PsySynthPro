@@ -8,6 +8,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   let pendingTable = null;
   let midi = null;
   let viz = null;
+  let recorder = null;
 
   function midiStatus(state, info) {
     const el = $('midiStrip');
@@ -318,6 +319,27 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   $('bPrev').addEventListener('click', function () { loadPreset(pIdx - 1); });
   $('bNext').addEventListener('click', function () { loadPreset(pIdx + 1); });
   $('bPanic').addEventListener('click', function () { engine.panic(); });
+
+  $('bRec').addEventListener('click', function () {
+    if (!engine.ready) return;
+    if (!recorder) recorder = new Psy.Recorder(engine);
+    const btn = $('bRec');
+    if (!recorder.recording) {
+      if (recorder.start()) {
+        btn.classList.add('armed');
+        btn.innerHTML = '&#9632; STOP';
+      }
+    } else {
+      const blob = recorder.stop();
+      btn.classList.remove('armed');
+      btn.innerHTML = '&#9679; REC';
+      if (blob) {
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        Psy.downloadBlob(blob, 'psysynthpro-' + stamp + '.wav');
+        $('oName').textContent = 'WAV SAVED';
+      }
+    }
+  });
 
   const KEYMAP = { a: 60, w: 61, s: 62, e: 63, d: 64, f: 65, t: 66, g: 67, y: 68, h: 69, u: 70, j: 71, k: 72, o: 73, l: 74, p: 75 };
   document.addEventListener('keydown', function (e) {
