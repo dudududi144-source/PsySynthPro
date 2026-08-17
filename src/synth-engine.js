@@ -1,0 +1,289 @@
+"use strict";
+/* PsySynthPro — Real DSP Engine
+   Per-sample synthesis in an AudioWorklet:
+   - PolyBLEP band-limited oscillators
+   - ZDF state-variable filter (Simper/Zavalishin)
+   - Analog one-pole envelopes
+   - FM via instantaneous frequency
+   - Master convolution reverb + feedback delay                    */
+
+const WORKLET_SOURCE = String.raw`
+class SynthProcessor extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    this.p = {
+      wave: 0, detune: 0, unison: 3, spread: 12, sub: 25,
+      fmRatio: 2, fmDepth: 12,
+      filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
+      attack: 12, decay: 260, sustain: 70, release: 650,
+      lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35,
+      master: 80, reverb: 35, delay: 22
+    };
+    this.voices = [];
+    for (let i = 0; i < 16; i++) {
+      this.voices.push({
+        active: false, note: -1, vel: 0, age: 0,
+        phase: 0, modPhase: 0, subPhase: 0,
+        amp: 0, stage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0
+      });
+    }
+    this.lfoPhase = 0;
+    this.triInt = 0;
+    this.port.onmessage = (e) => this.onMessage(e.data);
+  }
+
+  onMessage(m) {
+    if (m.type === 'params') Object.assign(this.p, m.values);
+    else if (m.type === 'noteOn') this.noteOn(m.note, m.vel);
+    else if (m.type === 'noteOff') this.noteOff(m.note);
+    else if (m.type === 'panic') {
+      for (const v of this.voices) { v.active = false; v.stage = 0; v.amp = 0; }
+    }
+  }
+
+  noteOn(note, vel) {
+    let v = this.voices.find(x => x.note === note && x.active && x.stage !== 4);
+    if (!v) v = this.voices.find(x => !x.active);
+    if (!v) {
+      let oldest = this.voices[0];
+      for (const x of this.voices) if (x.age > oldest.age) oldest = x;
+      v = oldest;
+    }
+    for (const x of this.voices) if (x !== v) x.age++;
+    v.active = true; v.note = note; v.vel = vel; v.age = 0;
+    v.stage = 1; v.phase = 0; v.modPhase = 0; v.subPhase = 0;
+    v.ic1eq = 0; v.ic2eq = 0;
+  }
+
+  noteOff(note) {
+    for (const v of this.voices) {
+      if (v.note === note && v.active && v.stage !== 4) v.stage = 4;
+    }
+  }
+
+  /* PolyBLEP polynomial — cancels aliasing at the discontinuity */
+  polyblep(t, dt) {
+    if (t < dt) { t /= dt; return t + t - t * t - 1; }
+    if (t > 1 - dt) { t = (t - 1) / dt; return t * t + t + t + 1; }
+    return 1;
+  }
+
+  oscSample(phase, inc, wave) {
+    const TWO_PI = 6.28318530718;
+    if (wave === 3) return Math.sin(TWO_PI * phase);
+    if (wave === 0) return (2 * phase - 1) - this.polyblep(phase, inc);
+    if (wave === 1) {
+      const sq = phase < 0.5 ? 1 : -1;
+      return sq + this.polyblep(phase, inc) - this.polyblep((phase + 0.5) % 1, inc);
+    }
+    if (wave === 2) {
+      const sq = phase < 0.5 ? 1 : -1;
+      const c = sq + this.polyblep(phase, inc) - this.polyblep((phase + 0.5) % 1, inc);
+      this.triInt += c * inc * 4;
+      this.triInt = Math.max(-1.2, Math.min(1.2, this.triInt));
+      return Math.max(-1, Math.min(1, this.triInt));
+    }
+    return Math.sin(TWO_PI * phase);
+  }
+
+  process(inputs, outputs) {
+    const out = outputs[0];
+    const nCh = out.length;
+    const N = out[0].length;
+    const p = this.p;
+    const sr = sampleRate;
+
+    const aC = 1 - Math.exp(-1 / (Math.max(1, p.attack) / 1000 * sr));
+    const dC = 1 - Math.exp(-1 / (Math.max(10, p.decay) / 1000 * sr));
+    const rC = 1 - Math.exp(-1 / (Math.max(30, p.release) / 1000 * sr));
+    const sus = p.sustain / 100;
+    const un = Math.max(1, Math.round(p.unison));
+    const lfoInc = p.lfoRate / sr;
+    const TWO_PI = 6.28318530718;
+
+    for (let i = 0; i < N; i++) {
+      this.lfoPhase += lfoInc;
+      if (this.lfoPhase >= 1) this.lfoPhase -= 1;
+      const lfoVal = Math.sin(TWO_PI * this.lfoPhase);
+      let acc = 0;
+
+      for (const v of this.voices) {
+        if (!v.active) continue;
+
+        /* analog one-pole envelope */
+        let target = 0, coef = 0;
+        if (v.stage === 1) { target = v.vel; coef = aC; if (v.amp >= v.vel * 0.995) v.stage = 2; }
+        else if (v.stage === 2) { target = v.vel * sus; coef = dC; if (Math.abs(v.amp - target) < 0.002) v.stage = 3; }
+        else if (v.stage === 3) { target = v.vel * sus; coef = dC * 0.2; }
+        else if (v.stage === 4) { target = 0; coef = rC; if (v.amp < 0.0004) { v.active = false; v.stage = 0; } }
+        v.amp += (target - v.amp) * coef;
+        if (!v.active) continue;
+
+        const baseFreq = 440 * Math.pow(2, (v.note - 69) / 12);
+        let pitchMod = 1;
+        if (p.lfoTarget === 1) pitchMod = Math.pow(2, (lfoVal * (p.lfoDepth / 100) * 80) / 1200);
+
+        /* unison bank with FM operator */
+        let sig = 0;
+        for (let u = 0; u < un; u++) {
+          const off = un === 1 ? 0 : ((u - (un - 1) / 2) / ((un - 1) / 2)) * p.spread;
+          const f = baseFreq * pitchMod * Math.pow(2, (p.detune + off) / 1200);
+          v.modPhase += (f * p.fmRatio) / sr;
+          if (v.modPhase >= 1) v.modPhase -= 1;
+          const fmHz = Math.sin(TWO_PI * v.modPhase) * (p.fmDepth / 100) * f * 2;
+          const inc = Math.max(0.00001, (f + fmHz) / sr);
+          v.phase += inc;
+          if (v.phase >= 1) v.phase -= 1;
+          sig += this.oscSample(v.phase, Math.min(inc, 0.49), p.wave);
+        }
+        sig /= un;
+
+        if (p.sub > 0) {
+          v.subPhase += (baseFreq / 2) / sr;
+          if (v.subPhase >= 1) v.subPhase -= 1;
+          sig += (p.sub / 100) * Math.sin(TWO_PI * v.subPhase);
+        }
+
+        /* ZDF state-variable filter */
+        let fc = p.cutoff + (p.filterEnv / 100) * 9000 * (v.vel > 0 ? v.amp / v.vel : 0);
+        if (p.lfoTarget === 0) fc += lfoVal * (p.lfoDepth / 100) * 3500;
+        fc = Math.min(18000, Math.max(40, fc));
+        v.smoothFc = v.smoothFc === 0 ? fc : v.smoothFc + (fc - v.smoothFc) * 0.0015;
+        const g = Math.tan(3.14159265359 * v.smoothFc / sr);
+        const k = Math.max(0.02, 2 - (p.res / 10));
+        const a1 = 1 / (1 + g * (g + k));
+        const a2 = g * a1;
+        const a3 = g * a2;
+        const v3 = sig - v.ic2eq;
+        const v1 = a1 * v.ic1eq + a2 * v3;
+        const v2 = v.ic2eq + a2 * v.ic1eq + a3 * v3;
+        v.ic1eq = 2 * v1 - v.ic1eq;
+        v.ic2eq = 2 * v2 - v.ic2eq;
+        let fsig;
+        if (p.filterType === 0) fsig = v2;
+        else if (p.filterType === 1) fsig = sig - k * v1 - v2;
+        else if (p.filterType === 2) fsig = v1;
+        else fsig = sig - v1;
+
+        let ampMod = 1;
+        if (p.lfoTarget === 2) ampMod = 1 - (p.lfoDepth / 200) + lfoVal * (p.lfoDepth / 200);
+        acc += fsig * v.amp * ampMod;
+      }
+
+      const master = p.master / 100;
+      const s = Math.tanh(acc * master * 0.28);
+      for (let c = 0; c < nCh; c++) out[c][i] = s;
+    }
+    return true;
+  }
+}
+registerProcessor('psysynth-processor', SynthProcessor);
+`;
+
+const PsySynth = (window.PsySynth = window.PsySynth || {});
+
+class SynthEngine {
+  constructor() {
+    this.ctx = null;
+    this.node = null;
+    this.analyser = null;
+    this.ready = false;
+    this.params = Object.assign({}, PsySynth.DEFAULT);
+  }
+
+  boot() {
+    if (this.ready) return Promise.resolve();
+    const AC = window.AudioContext || window.webkitAudioContext;
+    this.ctx = new AC({ latencyHint: 'interactive' });
+    const blob = new Blob([WORKLET_SOURCE], { type: 'application/javascript' });
+    const url = URL.createObjectURL(blob);
+    const self = this;
+    return this.ctx.audioWorklet.addModule(url).then(function () {
+      self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
+        numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
+      });
+
+      /* master bus + space FX */
+      self.fxInput = self.ctx.createGain();
+      self.node.connect(self.fxInput);
+
+      self.master = self.ctx.createGain();
+      self.master.gain.value = self.params.master / 100;
+
+      self.dry = self.ctx.createGain();
+      self.dry.gain.value = 0.9;
+      self.fxInput.connect(self.dry);
+      self.dry.connect(self.master);
+
+      self.delSend = self.ctx.createGain();
+      self.delSend.gain.value = (self.params.delay / 100) * 0.55;
+      self.delay = self.ctx.createDelay(2);
+      self.delay.delayTime.value = 0.32;
+      self.delFb = self.ctx.createGain();
+      self.delFb.gain.value = 0.38;
+      self.fxInput.connect(self.delSend);
+      self.delSend.connect(self.delay);
+      self.delay.connect(self.delFb);
+      self.delFb.connect(self.delay);
+      self.delay.connect(self.master);
+
+      self.revSend = self.ctx.createGain();
+      self.revSend.gain.value = (self.params.reverb / 100) * 0.85;
+      self.conv = self.ctx.createConvolver();
+      self.conv.buffer = self.makeIR(2.6, 3.1);
+      self.fxInput.connect(self.revSend);
+      self.revSend.connect(self.conv);
+      self.conv.connect(self.master);
+
+      self.analyser = self.ctx.createAnalyser();
+      self.analyser.fftSize = 2048;
+      self.master.connect(self.analyser);
+      self.analyser.connect(self.ctx.destination);
+
+      self.ready = true;
+      self.sendParams();
+      URL.revokeObjectURL(url);
+      return self.ctx.resume();
+    });
+  }
+
+  makeIR(seconds, decay) {
+    const rate = this.ctx.sampleRate;
+    const len = Math.floor(rate * seconds);
+    const buf = this.ctx.createBuffer(2, len, rate);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < len; i++) {
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+      }
+    }
+    return buf;
+  }
+
+  sendParams() {
+    if (this.node) this.node.port.postMessage({ type: 'params', values: this.params });
+  }
+  set(key, value) {
+    this.params[key] = value;
+    if (key === 'delay' && this.delSend) this.delSend.gain.value = (value / 100) * 0.55;
+    else if (key === 'reverb' && this.revSend) this.revSend.gain.value = (value / 100) * 0.85;
+    else if (key === 'master' && this.master) this.master.gain.value = value / 100;
+    else this.sendParams();
+  }
+  setAll(obj) {
+    Object.assign(this.params, obj);
+    if (this.delSend) this.delSend.gain.value = (this.params.delay / 100) * 0.55;
+    if (this.revSend) this.revSend.gain.value = (this.params.reverb / 100) * 0.85;
+    if (this.master) this.master.gain.value = this.params.master / 100;
+    this.sendParams();
+  }
+  noteOn(note, vel) { if (this.node) this.node.port.postMessage({ type: 'noteOn', note: note, vel: vel }); }
+  noteOff(note) { if (this.node) this.node.port.postMessage({ type: 'noteOff', note: note }); }
+  panic() { if (this.node) this.node.port.postMessage({ type: 'panic' }); }
+  latencyMs() {
+    if (!this.ctx) return 0;
+    return ((this.ctx.baseLatency || 0) + (this.ctx.outputLatency || 0)) * 1000;
+  }
+}
+
+PsySynth.SynthEngine = SynthEngine;
