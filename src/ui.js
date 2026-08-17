@@ -31,6 +31,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   let arpToggle = null;
   let seqToggle = null;
   let recorder = null;
+  let midiRec = null;
 
   function midiStatus(state, info) {
     const el = $('midiStrip');
@@ -503,6 +504,30 @@ const Psy = (window.PsySynth = window.PsySynth || {});
         const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
         Psy.downloadBlob(blob, 'psysynthpro-' + stamp + '.wav');
         $('oName').textContent = 'WAV SAVED';
+      }
+    }
+  });
+
+  $('bMidi').addEventListener('click', function () {
+    if (!engine.ready) return;
+    if (!midiRec) midiRec = new Psy.MidiRecorder(engine);
+    const btn = $('bMidi');
+    if (!midiRec.capturing) {
+      if (midiRec.start()) {
+        btn.classList.add('armed');
+        btn.innerHTML = '&#9632; STOP';
+      }
+    } else {
+      const bpm = seq.enabled ? seq.bpm : (arp.enabled ? arp.bpm : 120);
+      const blob = midiRec.stop(bpm);
+      btn.classList.remove('armed');
+      btn.innerHTML = '&#9836; MIDI';
+      if (blob) {
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        Psy.downloadBlob(blob, 'psysynthpro-' + stamp + '.mid');
+        $('oName').textContent = 'MIDI SAVED';
+      } else {
+        $('oName').textContent = 'NO NOTES';
       }
     }
   });
