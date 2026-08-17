@@ -2612,11 +2612,26 @@ const Psy = (window.PsySynth = window.PsySynth || {});
 
 </script>
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js').catch(function () {});
-  });
-}
+/* DELIVERY MODE: no service worker. Earlier SW versions cached stale pages and
+   caused the blank-panel bug, so on every load we now unregister any leftover
+   workers and clear all caches. The self-contained bundle below is then always
+   served fresh by the browser (single request = full instrument). */
+(function () {
+  try {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        for (var i = 0; i < regs.length; i++) regs[i].unregister();
+      }).catch(function () {});
+    }
+  } catch (e) {}
+  try {
+    if (window.caches && caches.keys) {
+      caches.keys().then(function (ks) {
+        for (var i = 0; i < ks.length; i++) caches.delete(ks[i]);
+      }).catch(function () {});
+    }
+  } catch (e) {}
+})();
 </script>
 </body>
 </html>
