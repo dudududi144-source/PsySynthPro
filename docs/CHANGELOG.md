@@ -3,6 +3,18 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.1.0] — Foundation & Tuning pass
+### Added
+- **OCTAVE control**: OCT −/+ buttons above the keyboard + **Z/X** shortcuts,
+  ±2 octaves, live range label (answers "how do I play lower").
+- docs/PLAN.md — saved master plan, status, tuning guide, verification rules.
+### Fixed
+- Triangle-wave integrator was shared across all voices (processor-global `this.triInt`)
+  -> poly playback distortion. Now per-voice (`v.triInt`), reset on noteOn.
+### Audited
+- REC/MIDI export handlers present and intact; preset isolation verified
+  (every preset carries all params, no bleed).
+
 ## [2.0.0] — MOD MATRIX (premium modulation routing)
 ### Added
 - **MOD MATRIX section** (6 routable knobs): LFO>CUTOFF, LFO>PITCH, LFO>AMP, LFO>FM,
