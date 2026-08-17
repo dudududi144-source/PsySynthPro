@@ -8,6 +8,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
 class MidiEngine {
   constructor(engine, callbacks) {
     this.engine = engine;
+    this.input = engine; /* note target — UI may reroute through the arpeggiator */
     this.cb = callbacks || {};
     this.access = null;
     this.deviceNames = [];
@@ -63,12 +64,12 @@ class MidiEngine {
 
     if (cmd === 0x90 && d2 > 0) {
       this.chanNote[ch] = d1;
-      this.engine.noteOn(d1, d2 / 127);
+      this.input.noteOn(d1, d2 / 127);
       this.setLast('NOTE ON ' + this.noteName(d1) + ' vel ' + d2);
       this.emit('event', this.lastEvent);
     } else if (cmd === 0x80 || (cmd === 0x90 && d2 === 0)) {
       if (this.chanNote[ch] === d1) delete this.chanNote[ch];
-      this.engine.noteOff(d1);
+      this.input.noteOff(d1);
       this.setLast('NOTE OFF ' + this.noteName(d1));
       this.emit('event', this.lastEvent);
     } else if (cmd === 0xB0) {
