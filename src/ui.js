@@ -5,20 +5,20 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   const engine = new Psy.SynthEngine();
   const REG = {};
   const $ = function (id) { return document.getElementById(id); };
+  let pendingTable = null;
 
-  /* formatters */
   const fmtHz = function (v) { return v >= 1000 ? (v / 1000).toFixed(1) + 'k' : Math.round(v) + 'Hz'; };
   const fmtMs = function (v) { return v >= 1000 ? (v / 1000).toFixed(2) + 's' : Math.round(v) + 'ms'; };
   const fmtPct = function (v) { return Math.round(v) + '%'; };
   const fmtCt = function (v) { return (v > 0 ? '+' : '') + Math.round(v); };
 
-  const WAVES = ['SAW', 'SQR', 'TRI', 'SINE'];
+  const WAVES = ['SAW', 'SQR', 'TRI', 'SINE', 'USER'];
   const FTYPES = ['LP', 'HP', 'BP', 'NOTCH'];
   const LTYPES = ['FILTER', 'PITCH', 'AMP'];
 
   const LAYOUT = [
     { title: 'POLYBLEP OSC', color: '#ffb454', items: [
-      { type: 'cycle', key: 'wave', label: 'WAVE', options: [0, 1, 2, 3], display: function (v) { return WAVES[v]; } },
+      { type: 'cycle', key: 'wave', label: 'WAVE', options: [0, 1, 2, 3, 4], display: function (v) { return WAVES[v]; } },
       { type: 'knob', key: 'detune', label: 'DETUNE', min: -100, max: 100, def: 0, fmt: fmtCt },
       { type: 'knob', key: 'unison', label: 'UNISON', min: 1, max: 7, step: 2, def: 3 },
       { type: 'knob', key: 'spread', label: 'SPREAD', min: 0, max: 50, def: 12, fmt: fmtCt },
@@ -80,7 +80,119 @@ const Psy = (window.PsySynth = window.PsySynth || {});
     });
   }
 
+  /* ═══════ WAVETABLE LAB ═══════ */
+  let editor = null;
+  function applyTable(table, name) {
+    if (engine.ready) {
+      engine.setWavetable(table);
+      engine.set('wave', 4);
+      if (REG.wave) REG.wave.setValue(4);
+      $('oName').textContent = 'WT: ' + name;
+    } else {
+      pendingTable = { table: table, name: name };
+      $('oName').textContent = 'WT QUEUED';
+    }
+  }
+
+  function buildWavetableLab() {
+    const s = document.createElement('div');
+    s.className = 'section wt-section';
+    s.innerHTML = '<div class="stitle" style="--c:#ff8a3c">WAVETABLE LAB</div>';
+
+    const box = document.createElement('div');
+    box.className = 'wt-box';
+
+    const cv = document.createElement('canvas');
+    cv.className = 'wt-canvas';
+    cv.width = 240; cv.height = 84;
+    box.appendChild(cv);
+
+    const btnRow = document.createElement('div');
+    btnRow.className = 'wt-btns';
+    Object.keys(Psy.WT_PRESETS).forEach(function (name) {
+      const b = document.createElement('button');
+      b.className = 'wt-btn';
+      b.textContent = name;
+      b.addEventListener('click', function () {
+        const table = Psy.renderTable(Psy.WT_PRESETS[name]);
+        editor.loadTable(table);
+        applyTable(table, name);
+      });
+      btnRow.appendChild(b);
+    });
+
+    const clearB = document.createElement('button');
+    clearB.className = 'wt-btn wt-alt';
+    clearB.textContent = 'CLEAR';
+    clearB.addEventListener('click', function () { editor.clear(); });
+    btnRow.appendChild(clearB);
+
+    const applyB = document.createElement('button');
+    applyB.className = 'wt-btn wt-go';
+    applyB.textContent = 'USE DRAWING';
+    applyB.addEventListener('click', function () {
+      applyTable(editor.toTable(), 'CUSTOM');
+    });
+    btnRow.appendChild(applyB);
+
+    const hint = document.createElement('div');
+    hint.className = 'wt-hint';
+    hint.textContent = 'draw a wave with your mouse, then USE DRAWING';
+    box.appendChild(hint);
+    box.appendChild(btnRow);
+    s.appendChild(box);
+    $('sections').appendChild(s);
+
+    editor = new Psy.WavetableEditor(cv);
+  }
+
+  /* ═══════ MORPH ═══════ */
   const NAMES = Object.keys(Psy.PRESETS);
+  function buildMorph() {
+    const s = document.createElement('div');
+    s.className = 'section wt-section';
+    s.innerHTML = '<div class="stitle" style="--c:#c084fc">MORPH</div>';
+    const box = document.createElement('div');
+    box.className = 'morph-box';
+
+    const selA = document.createElement('select');
+    const selB = document.createElement('select');
+    selA.className = 'msel'; selB.className = 'msel';
+    NAMES.forEach(function (n, i) {
+      selA.appendChild(new Option(n, i));
+      selB.appendChild(new Option(n, i));
+    });
+    selB.selectedIndex = Math.min(2, NAMES.length - 1);
+
+    const knobHost = document.createElement('div');
+    knobHost.className = 'morph-knob';
+
+    box.appendChild(selA);
+    box.appendChild(knobHost);
+    box.appendChild(selB);
+    s.appendChild(box);
+    $('sections').appendChild(s);
+
+    const morphKnob = new Psy.Knob(knobHost, {
+      label: 'MORPH', color: '#c084fc', min: 0, max: 100, def: 0,
+      fmt: fmtPct,
+      onChange: function () { doMorph(); }
+    });
+
+    function doMorph() {
+      const a = Psy.PRESETS[NAMES[parseInt(selA.value, 10)]];
+      const b = Psy.PRESETS[NAMES[parseInt(selB.value, 10)]];
+      const t = morphKnob.value / 100;
+      const mixed = Psy.morphPresets(a, b, t);
+      engine.setAll(mixed);
+      syncUI();
+      $('oName').textContent = NAMES[parseInt(selA.value, 10)].split(' ')[0] + ' > ' + NAMES[parseInt(selB.value, 10)].split(' ')[0] + ' ' + Math.round(t * 100) + '%';
+    }
+    selA.addEventListener('change', doMorph);
+    selB.addEventListener('change', doMorph);
+  }
+
+  /* ═══════ presets / keyboard / scope ═══════ */
   let pIdx = 0;
   function loadPreset(i) {
     pIdx = (i + NAMES.length) % NAMES.length;
@@ -163,11 +275,17 @@ const Psy = (window.PsySynth = window.PsySynth || {});
       'LAT ' + engine.latencyMs().toFixed(1) + 'ms • 16 VOX';
   }
 
-  /* transport */
   $('bPower').addEventListener('click', function () {
     if (engine.ready) return;
     engine.boot().then(function () {
       $('bPower').classList.add('on');
+      if (pendingTable) {
+        engine.setWavetable(pendingTable.table);
+        engine.set('wave', 4);
+        if (REG.wave) REG.wave.setValue(4);
+        $('oName').textContent = 'WT: ' + pendingTable.name;
+        pendingTable = null;
+      }
       updateMeta();
       syncUI();
     }).catch(function (err) {
@@ -179,7 +297,6 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   $('bNext').addEventListener('click', function () { loadPreset(pIdx + 1); });
   $('bPanic').addEventListener('click', function () { engine.panic(); });
 
-  /* computer keyboard */
   const KEYMAP = { a: 60, w: 61, s: 62, e: 63, d: 64, f: 65, t: 66, g: 67, y: 68, h: 69, u: 70, j: 71, k: 72, o: 73, l: 74, p: 75 };
   document.addEventListener('keydown', function (e) {
     if (e.repeat) return;
@@ -192,6 +309,8 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   });
 
   buildSections();
+  buildWavetableLab();
+  buildMorph();
   buildPresets();
   buildKeyboard();
   loadPreset(0);
