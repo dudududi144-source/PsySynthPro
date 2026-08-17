@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsySynthPro - Real DSP Synthesizer</title>
+<link rel="stylesheet" href="css/synth.css">
+</head>
+<body>
+<div class="chassis">
+  <div class="cheek l"></div><div class="cheek r"></div>
+  <div class="screw tl"></div><div class="screw tr"></div>
+  <div class="screw bl"></div><div class="screw br"></div>
+
+  <div class="topbar">
+    <button id="bPower" class="tbtn power">&#9211; POWER</button>
+    <div class="oled">
+      <div class="pname" id="oName">PSYSYNTH PRO</div>
+      <canvas id="scope" width="520" height="54"></canvas>
+      <div class="meta" id="oMeta">AUDIO-WORKLET<br>STANDBY</div>
+    </div>
+    <button id="bPrev" class="tbtn">&#9664;</button>
+    <button id="bNext" class="tbtn">&#9654;</button>
+    <button id="bPanic" class="tbtn panic">PANIC</button>
+  </div>
+
+  <div class="sections" id="sections"></div>
+  <div class="prow" id="presets"></div>
+  <div class="kb" id="kb"></div>
+  <div class="brand">PSYSYNTH PRO<span>POLYBLEP &bull; ZDF SVF &bull; ANALOG ENV &bull; FM &bull; SPACE FX</span></div>
+</div>
+<script src="src/presets.js"></script>
+<script src="src/synth-engine.js"></script>
+<script src="src/knob.js"></script>
+<script src="src/ui.js"></script>
+</body>
+</html>
