@@ -31,6 +31,8 @@ A browser-based psytrance instrument with a **premium hardware-grade panel** and
 - v1.9: fixed THE bug — `const Psy` redeclaration across `<script>` tags (panel never built in real browsers)
 - v2.0: MOD MATRIX (6 routable knobs) + WARP BASS / ACID SIREN presets
 - v2.1: foundation pass — **octave control**, per-voice triangle integrator fix, PLAN doc
+- v2.2: **user preset bank (localStorage, save/load/delete)**, **key velocity** (Y-position),
+  retina-sharp OLED scope
 
 ## Tuning guide (user-reported)
 - **"Sounds too high / need lower octave"** -> use **OCT −** button above the keyboard or press **Z**
@@ -39,9 +41,10 @@ A browser-based psytrance instrument with a **premium hardware-grade panel** and
 - All mod-matrix knobs at 0 = identical to the pre-matrix sound (safe default).
 
 ## Known issues / next polish
-- [ ] velocity sensitivity for mouse keyboard (currently fixed 0.8)
-- [ ] preset save/recall in localStorage (user bank)
-- [ ] retina (devicePixelRatio) scaling for scope/spectrum canvases
+- [x] velocity sensitivity for mouse keyboard — done v2.2 (Y-position on key)
+- [x] preset save/recall in localStorage (user bank) — done v2.2 (SAVE button + user chips)
+- [x] retina scaling for OLED scope — done v2.2 (spectrum canvas still pending)
+- [ ] retina scaling for the 3D spectrum canvas
 - [ ] step-sequencer per-step slide/glide
 - [ ] full NxM mod matrix with bipolar amounts
 - [ ] MIDI-out export of arp+seq (groove -> DAW)
