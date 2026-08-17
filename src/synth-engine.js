@@ -14,6 +14,9 @@ class SynthProcessor extends AudioWorkletProcessor {
       attack: 12, decay: 260, sustain: 70, release: 650,
       lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35, lfoWave: 0,
       lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0,
+      modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0,
+      modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0,
+      modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0,
       master: 80, reverb: 35, delay: 22
     };
     this.voices = [];
@@ -178,6 +181,15 @@ class SynthProcessor extends AudioWorkletProcessor {
         if (p.lfoTarget === 1) pitchMod = Math.pow(2, (lfoVal * (p.lfoDepth / 100) * 80) / 1200);
         pitchMod *= Math.pow(2, lfoVal * (p.lfoPitch / 100));
         pitchMod *= Math.pow(2, envNorm * (p.envPitch / 100) * 2);
+        /* NxM bipolar matrix: sources LFO/ENV/VEL -> dest CUT/PIT/AMP/FM/RES */
+        const envSrc = (envNorm - 0.5) * 2;
+        const velSrc = (v.vel - 0.5) * 2;
+        const modCut = (lfoVal * p.modLC + envSrc * p.modEC + velSrc * p.modVC) * 40;
+        const modPitCents = (lfoVal * p.modLP + envSrc * p.modEP + velSrc * p.modVP) * 12;
+        const modAmp = (lfoVal * p.modLA + envSrc * p.modEA + velSrc * p.modVA) / 100;
+        const modFmCoef = (lfoVal * p.modLF + envSrc * p.modEF + velSrc * p.modVF) / 100;
+        const modRes = (lfoVal * p.modLR + envSrc * p.modER + velSrc * p.modVR) * 0.1;
+        pitchMod *= Math.pow(2, modPitCents / 1200);
 
         let sig = 0;
         for (let u = 0; u < un; u++) {
@@ -185,7 +197,7 @@ class SynthProcessor extends AudioWorkletProcessor {
           const f = baseFreq * bendMul * pitchMod * Math.pow(2, (p.detune + off) / 1200);
           v.modPhase += (f * p.fmRatio) / sr;
           if (v.modPhase >= 1) v.modPhase -= 1;
-          const fmDepthEff = (p.fmDepth / 100) * f * 2 + lfoVal * (p.lfoFM / 100) * f * 2 + envNorm * (p.envFM / 100) * f * 2;
+          const fmDepthEff = (p.fmDepth / 100) * f * 2 + lfoVal * (p.lfoFM / 100) * f * 2 + envNorm * (p.envFM / 100) * f * 2 + modFmCoef * f * 2;
           const fmHz = Math.sin(TWO_PI * v.modPhase) * fmDepthEff;
           const inc = Math.max(0.00001, (f + fmHz) / sr);
           v.phase += inc;
@@ -203,10 +215,12 @@ class SynthProcessor extends AudioWorkletProcessor {
         let fc = p.cutoff + (p.filterEnv / 100) * 9000 * (v.vel > 0 ? v.amp / v.vel : 0);
         if (p.lfoTarget === 0) fc += lfoVal * (p.lfoDepth / 100) * 3500;
         fc += lfoVal * (p.lfoCutoff / 100) * 4000;
+        fc += modCut;
         fc = Math.min(18000, Math.max(40, fc));
         v.smoothFc = v.smoothFc === 0 ? fc : v.smoothFc + (fc - v.smoothFc) * 0.0015;
         const g = Math.tan(3.14159265359 * v.smoothFc / sr);
-        const k = Math.max(0.02, 2 - (p.res / 10));
+        const resEff = Math.max(0.1, Math.min(25, p.res + modRes));
+        const k = Math.max(0.02, 2 - (resEff / 10));
         const a1 = 1 / (1 + g * (g + k));
         const a2 = g * a1;
         const a3 = g * a2;
@@ -224,6 +238,7 @@ class SynthProcessor extends AudioWorkletProcessor {
         let ampMod = 1;
         if (p.lfoTarget === 2) ampMod = 1 - (p.lfoDepth / 200) + lfoVal * (p.lfoDepth / 200);
         ampMod *= 1 - (p.lfoAmp / 200) + lfoVal * (p.lfoAmp / 200);
+        ampMod *= Math.max(0, 1 + modAmp);
         acc += fsig * v.amp * ampMod;
       }
 
