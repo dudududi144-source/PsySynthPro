@@ -3,6 +3,21 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.5.0] — DSP Performance Pass (load/latency fix)
+### Changed (worklet hot path)
+- **baseFreq & bendMul cached per voice** — removes 2 Math.pow per voice per sample.
+- **Unison detune multipliers precomputed once per audio buffer** — removes unison×16
+  Math.pow calls per second-scale; they only change with detune/spread/unison.
+- **SVF coefficients cached, recomputed every 16 samples** (or on res change) —
+  ~16x fewer Math.tan calls; inaudible at 0.33ms granularity.
+- **Pitch Math.pow consolidated** — up to 4 pow calls reduced to 1.
+- **Mod-matrix fast-path** — when all 15 matrix amounts are 0 (the common case),
+  the entire matrix (envSrc/velSrc + 5 dest sums) is skipped.
+### Why
+- Heavy per-sample cost caused CPU load -> audio-thread dropouts perceived as latency.
+### Verified
+- Realistic per-script harness: 13 scripts, 0 errors, panel builds.
+
 ## [2.4.0] — NxM Bipolar Modulation Matrix
 ### Added
 - **MOD MATRIX grid**: 3 sources (LFO / ENV / VEL) x 5 destinations (CUT / PIT / AMP / FM / RES),
