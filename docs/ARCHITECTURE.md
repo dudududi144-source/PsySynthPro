@@ -14,6 +14,8 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 | Morph | continuous interpolation between any two presets |
 | MIDI/MPE | Web MIDI input: notes+velocity, CC automation, **per-note pitch bend** (channel->note tracking) |
 | 3D Spectrum | perspective-projected frequency bars (log-spaced bins, depth-sorted, shaded faces) |
+| WAV Export | live PCM capture from master bus, encoded to 16-bit stereo WAV |
+| PWA | manifest + offline-first service worker (installable, works without network) |
 | Space FX | convolution reverb (generated IR) + feedback delay |
 | Output | tanh soft-clip stage |
 | Voices | 16-voice pool, oldest-note stealing |
@@ -34,6 +36,8 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 - src/wavetable.js — wavetable rendering, editor, preset morphing
 - src/midi.js — Web MIDI engine with MPE-style per-note bend
 - src/viz3d.js — 3D spectrum analyzer (perspective projection)
+- src/recorder.js — live PCM capture + WAV encoder
+- manifest.json / sw.js / assets/icon.svg — PWA layer
 - src/knob.js — SVG rotary knobs with tick marks
 - src/presets.js — preset bank
 - src/ui.js — panel builder, Wavetable Lab, Morph, MIDI, keyboard, OLED scope
@@ -44,4 +48,6 @@ Runs in an **AudioWorklet** — per-sample DSP at 48kHz, exactly like native syn
 3. Wavetable editor + preset morphing — **done**
 4. MIDI/MPE support — **done**
 5. 3D spectrum visualizer — **done**
-6. PWA offline + WAV export — next
+6. PWA offline + WAV export — **done**
+
+## Project status: COMPLETE (all 6 phases shipped)
