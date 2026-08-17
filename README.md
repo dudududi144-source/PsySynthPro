@@ -1,4 +1,4 @@
-# PsySynthPro 🎹
+# PsySynthPro — Psytrance Edition 🎹
 
 A real DSP synthesizer in the browser — genuine sample-rate synthesis, not preset OscillatorNode toys.
 
@@ -50,6 +50,17 @@ Connect a MIDI keyboard, press POWER, and play. CC1=mod/LFO depth, CC74=cutoff, 
 
 ## Security
 No tokens/keys in this repository. .gitignore blocks .env and key files.
+
+## Psytrance-first
+- **PSY BASS 141** — the rolling psy bass, built for the step sequencer
+- **TRANCE GATE** — square-wave amp LFO at 4.7Hz (141 BPM 1/8 gate) — the classic gated trance lead
+- **ACID 303 / GOA BLEEP / PSY STAB / DARK PAD / ROLLING ARP** — psy staples
+- Sequencer defaults to 141 BPM
+
+## Delivery
+index.html is a **self-contained bundle** (all CSS+JS inlined, ~93KB): one request,
+full instrument, zero module-load failure modes. Modular sources stay in src/ for
+development; the bundle is the built artifact.
 
 ## Reliability
 The page self-diagnoses: if the panel fails to build (e.g. stale cache after a deploy),
