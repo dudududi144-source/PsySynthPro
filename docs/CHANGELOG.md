@@ -3,6 +3,20 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.2.0] — User Preset Bank + Playability
+### Added
+- **User preset bank**: SAVE button snapshots the current sound to localStorage;
+  user presets appear as blue chips (click = load, ✕ = delete with confirm).
+  Survives reloads, isolated per browser.
+- **Key velocity**: click position on a key sets velocity (top = loud, bottom = soft,
+  range 0.25..1.0). Computer keys stay at fixed 0.8. Sequencer/arpeggiator accents unchanged.
+- **Retina OLED scope**: devicePixelRatio-aware backing store (capped at 2x).
+### Changed
+- Factory preset chips carry a `factory` class; selection highlight no longer
+  collides with user chips.
+### Verified
+- Realistic per-script harness (details in PLAN.md verification discipline).
+
 ## [2.1.0] — Foundation & Tuning pass
 ### Added
 - **OCTAVE control**: OCT −/+ buttons above the keyboard + **Z/X** shortcuts,
