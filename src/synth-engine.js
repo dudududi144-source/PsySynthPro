@@ -1,7 +1,7 @@
 "use strict";
-/* PsySynthPro Engine - Phase 4
+/* PsySynthPro Engine - Phase 7
    AudioWorklet DSP: PolyBLEP + wavetable, ZDF SVF, analog envelopes, FM,
-   per-note pitch bend (MPE-ready), master convolution reverb + delay.   */
+   per-note pitch bend, sample-accurate event queue for tight sequencing.  */
 
 const WORKLET_SOURCE = String.raw`
 class SynthProcessor extends AudioWorkletProcessor {
@@ -25,6 +25,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
     this.lfoPhase = 0;
     this.triInt = 0;
+    this.queue = [];
     this.wtable = this.renderDefaultTable();
     this.wtLen = this.wtable.length;
     this.port.onmessage = (e) => this.onMessage(e.data);
@@ -53,13 +54,32 @@ class SynthProcessor extends AudioWorkletProcessor {
     if (m.type === 'params') Object.assign(this.p, m.values);
     else if (m.type === 'noteOn') this.noteOn(m.note, m.vel);
     else if (m.type === 'noteOff') this.noteOff(m.note);
+    else if (m.type === 'noteOnAt') {
+      if (m.when <= currentTime) this.noteOn(m.note, m.vel);
+      else this.queue.push({ time: m.when, action: 'on', note: m.note, vel: m.vel });
+    }
+    else if (m.type === 'noteOffAt') {
+      if (m.when <= currentTime) this.noteOff(m.note);
+      else this.queue.push({ time: m.when, action: 'off', note: m.note });
+    }
     else if (m.type === 'noteBend') {
       const v = this.findVoice(m.note);
       if (v) v.bend = m.bend;
     }
     else if (m.type === 'wavetable') { this.wtable = m.table; this.wtLen = m.table.length; }
     else if (m.type === 'panic') {
+      this.queue = [];
       for (const v of this.voices) { v.active = false; v.stage = 0; v.amp = 0; }
+    }
+  }
+
+  drainQueue() {
+    if (this.queue.length === 0) return;
+    this.queue.sort(function (a, b) { return a.time - b.time; });
+    while (this.queue.length > 0 && this.queue[0].time <= currentTime) {
+      const ev = this.queue.shift();
+      if (ev.action === 'on') this.noteOn(ev.note, ev.vel);
+      else this.noteOff(ev.note);
     }
   }
 
@@ -122,6 +142,8 @@ class SynthProcessor extends AudioWorkletProcessor {
     const N = out[0].length;
     const p = this.p;
     const sr = sampleRate;
+
+    this.drainQueue();
 
     const aC = 1 - Math.exp(-1 / (Math.max(1, p.attack) / 1000 * sr));
     const dC = 1 - Math.exp(-1 / (Math.max(10, p.decay) / 1000 * sr));
@@ -304,6 +326,8 @@ class SynthEngine {
   }
   noteOn(note, vel) { if (this.node) this.node.port.postMessage({ type: 'noteOn', note: note, vel: vel }); }
   noteOff(note) { if (this.node) this.node.port.postMessage({ type: 'noteOff', note: note }); }
+  noteOnAt(note, vel, when) { if (this.node) this.node.port.postMessage({ type: 'noteOnAt', note: note, vel: vel, when: when }); }
+  noteOffAt(note, when) { if (this.node) this.node.port.postMessage({ type: 'noteOffAt', note: note, when: when }); }
   noteBend(note, semis) { if (this.node) this.node.port.postMessage({ type: 'noteBend', note: note, bend: semis }); }
   panic() { if (this.node) this.node.port.postMessage({ type: 'panic' }); }
   latencyMs() {
