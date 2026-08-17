@@ -1,7 +1,7 @@
 "use strict";
-/* PsySynthPro service worker — offline-first cache (Phase 8) */
+/* PsySynthPro service worker — offline-first cache (Phase 9) */
 
-const CACHE = 'psysynthpro-v3';
+const CACHE = 'psysynthpro-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,7 @@ const ASSETS = [
   './src/recorder.js',
   './src/arpeggiator.js',
   './src/sequencer.js',
+  './src/midi-export.js',
   './src/ui.js'
 ];
 
