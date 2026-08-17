@@ -3,6 +3,14 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [1.6.1] — Service Worker Removed (final stale-cache fix)
+### Fixed
+- Root cause of the persistent blank-panel reports: old cache-first service workers
+  kept serving outdated page versions even after refresh
+- index.html now **unregisters all leftover service workers and clears caches on every load**
+- sw.js replaced with a self-destructing stub (safety net for old registrations)
+- Delivery model is now: one self-contained HTML bundle, always fresh, zero workers
+
 ## [1.6.0] — Psytrance Edition + Bulletproof Delivery
 ### Fixed
 - Panel-blank root cause eliminated: index.html is now a **self-contained bundle**
