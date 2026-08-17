@@ -14,6 +14,7 @@ A real DSP synthesizer in the browser — genuine sample-rate synthesis, not pre
 | Morph | continuous interpolation between any two presets |
 | MIDI/MPE | Web MIDI input: notes + velocity, CC automation, per-note pitch bend |
 | 3D Spectrum | perspective-projected log-spaced frequency bars with depth sorting |
+| Arpeggiator | UP/DOWN/UP-DOWN/RANDOM, multi-octave, hold/latch, sample-accurate lookahead scheduling |
 | WAV Export | live capture from master bus -> real 16-bit stereo WAV download |
 | PWA | installable, offline-first (service worker caches all assets) |
 | Space FX | convolution reverb + feedback delay on master bus |
