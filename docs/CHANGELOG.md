@@ -3,6 +3,15 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [1.8.1] — Auto-Repair Delivery
+### Fixed
+- Watchdog now **auto-repairs once** on panel-build failure: unregisters leftover
+  service workers, clears all caches, reloads (guarded by sessionStorage so it cannot loop)
+- Added no-cache meta headers so proxies/browsers stop pinning stale copies
+- Manual REPAIR box now explains the three definitive fixes (hard-refresh / incognito / clear site data)
+### Verified
+- Harness on the exact bundle: 11 sections, 12 presets, 25 keys, 8 patterns, 0 errors
+
 ## [1.8.0] — Psy-Trance Pattern Bank
 ### Added
 - **8 psy-trance step patterns** in the SEQ panel (one-click load into the 16-step grid):
