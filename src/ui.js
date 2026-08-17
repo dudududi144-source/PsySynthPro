@@ -3,6 +3,13 @@ const Psy = (window.PsySynth = window.PsySynth || {});
 
 (function () {
   const engine = new Psy.SynthEngine();
+  const arp = new Psy.Arpeggiator(engine);
+  arp.onStep = function (note) {
+    const k = document.querySelector('[data-n="' + note + '"]');
+    if (!k) return;
+    k.classList.add('arp-flash');
+    setTimeout(function () { k.classList.remove('arp-flash'); }, 110);
+  };
   const REG = {};
   const $ = function (id) { return document.getElementById(id); };
   let pendingTable = null;
@@ -204,6 +211,65 @@ const Psy = (window.PsySynth = window.PsySynth || {});
     selB.addEventListener('change', doMorph);
   }
 
+  /* ═══════ ARPEGGIATOR panel ═══════ */
+  function buildArpPanel() {
+    const s = document.createElement('div');
+    s.className = 'section';
+    s.innerHTML = '<div class="stitle" style="--c:#f87171">ARPEGGIATOR</div>';
+    const row = document.createElement('div');
+    row.className = 'krow';
+
+    const arpToggle = new Psy.CycleBtn(row, {
+      color: '#f87171', label: 'ARP', options: ['OFF', 'ON'], value: 'OFF',
+      display: function (v) { return v; },
+      onChange: function (v) {
+        arp.setEnabled(v === 'ON');
+        arpToggle.btn.classList.toggle('armed', v === 'ON');
+      }
+    });
+
+    new Psy.CycleBtn(row, {
+      color: '#f87171', label: 'HOLD', options: ['OFF', 'ON'], value: 'OFF',
+      display: function (v) { return v; },
+      onChange: function (v) {
+        arp.hold = (v === 'ON');
+        if (v === 'OFF') arp.held = [];
+      }
+    });
+
+    new Psy.Knob(row, {
+      color: '#f87171', label: 'BPM', min: 60, max: 200, def: 132,
+      fmt: function (v) { return String(Math.round(v)); },
+      onChange: function (v) { arp.bpm = v; }
+    });
+
+    new Psy.CycleBtn(row, {
+      color: '#f87171', label: 'STEP', options: [0, 1, 2], value: 2,
+      display: function (v) { return Psy.ARP_STEPS[v].label; },
+      onChange: function (v) { arp.stepIdxDiv = v; }
+    });
+
+    new Psy.CycleBtn(row, {
+      color: '#f87171', label: 'MODE', options: [0, 1, 2, 3], value: 0,
+      display: function (v) { return Psy.ARP_PATTERNS[v]; },
+      onChange: function (v) { arp.pattern = v; }
+    });
+
+    new Psy.Knob(row, {
+      color: '#f87171', label: 'GATE', min: 10, max: 100, def: 60,
+      fmt: fmtPct,
+      onChange: function (v) { arp.gate = v; }
+    });
+
+    new Psy.Knob(row, {
+      color: '#f87171', label: 'OCTAVE', min: 1, max: 3, step: 1, def: 1,
+      onChange: function (v) { arp.octaves = Math.round(v); }
+    });
+
+    s.appendChild(row);
+    $('sections').appendChild(s);
+  }
+
   /* ═══════ presets / keyboard / scope ═══════ */
   let pIdx = 0;
   function loadPreset(i) {
@@ -247,13 +313,13 @@ const Psy = (window.PsySynth = window.PsySynth || {});
 
   function noteOn(n) {
     if (!engine.ready) return;
-    engine.noteOn(n, 0.8);
+    if (arp) arp.noteOn(n, 0.8); else engine.noteOn(n, 0.8);
     const k = document.querySelector('[data-n="' + n + '"]');
     if (k) k.classList.add('on');
   }
   function noteOff(n) {
     if (!engine.ready) return;
-    engine.noteOff(n);
+    if (arp) arp.noteOff(n); else engine.noteOff(n);
     const k = document.querySelector('[data-n="' + n + '"]');
     if (k) k.classList.remove('on');
   }
@@ -307,6 +373,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
           status: midiStatus,
           event: function (txt) { const ev = $('midiEvent'); if (ev) ev.textContent = txt; }
         });
+        midi.input = arp;
         midi.init();
       }
       updateMeta();
@@ -318,7 +385,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   });
   $('bPrev').addEventListener('click', function () { loadPreset(pIdx - 1); });
   $('bNext').addEventListener('click', function () { loadPreset(pIdx + 1); });
-  $('bPanic').addEventListener('click', function () { engine.panic(); });
+  $('bPanic').addEventListener('click', function () { engine.panic(); if (arp) arp.panic(); });
 
   $('bRec').addEventListener('click', function () {
     if (!engine.ready) return;
@@ -353,6 +420,7 @@ const Psy = (window.PsySynth = window.PsySynth || {});
   });
 
   buildSections();
+  buildArpPanel();
   buildWavetableLab();
   buildMorph();
   buildPresets();
