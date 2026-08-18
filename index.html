@@ -8,8 +8,9 @@
 <meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#12141a">
 <title>PsySynthPro - Psytrance Synthesizer</title>
+<link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.6.0 · no-sw · 2026-08-18 (no service worker) -->
+<!-- SELF-CONTAINED BUNDLE v3.6.0 · psy-pack2 · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -552,7 +553,7 @@ body {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.6.0 · no-sw · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.6.0 · psy-pack2 · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -582,11 +583,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.6.0 · no-sw · 2026-08-18 &bull; 38 PSY PRESETS &bull; VARIATIONS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.6.0 · psy-pack2 · 2026-08-18 &bull; 46 PSY PRESETS &bull; VARIATIONS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v3.6.0 · no-sw · 2026-08-18';
+window.__psyBuild = 'v3.6.0 · psy-pack2 · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -625,16 +626,21 @@ window.addEventListener('load', function () {
 });
 </script>
 <script>
-/* No service worker (removed to prevent stale-cache breakage). Unregister leftovers. */
 (function () {
   try {
-    if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
       navigator.serviceWorker.getRegistrations().then(function (regs) {
         for (var i = 0; i < regs.length; i++) regs[i].unregister();
-      });
+      }).catch(function () {});
     }
   } catch (e) {}
-  try { if (window.caches && caches.keys) caches.keys().then(function (ks) { for (var i=0;i<ks.length;i++) caches.delete(ks[i]); }); } catch (e) {}
+  try {
+    if (window.caches && caches.keys) {
+      caches.keys().then(function (ks) {
+        for (var i = 0; i < ks.length; i++) caches.delete(ks[i]);
+      }).catch(function () {});
+    }
+  } catch (e) {}
 })();
 </script>
 <script>
@@ -715,6 +721,16 @@ Psy.PRESETS = {
   'PSY ARPGATE': { wave: 0, detune: 3, unison: 3, spread: 10, sub: 12, noise: 0, fmRatio: 2, fmDepth: 20, filterType: 0, cutoff: 3200, res: 4, filterEnv: 70, attack: 2, decay: 180, sustain: 20, release: 260, lfoWave: 1, lfoTarget: 2, lfoRate: 6, lfoDepth: 55, lfoCutoff: 15, lfoPitch: 0, lfoAmp: 55, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 82, reverb: 28, delay: 22 },
   'PSYCHADELIC PAD': { wave: 4, detune: 9, unison: 5, spread: 20, sub: 28, noise: 6, fmRatio: 2, fmDepth: 10, filterType: 0, cutoff: 1500, res: 1, filterEnv: 26, attack: 850, decay: 950, sustain: 84, release: 2700, lfoWave: 0, lfoTarget: 1, lfoRate: 0.55, lfoDepth: 14, lfoCutoff: 0, lfoPitch: 11, lfoAmp: 6, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 78, reverb: 72, delay: 40 },
   'SQUELCH LEAD': { wave: 0, detune: 2, unison: 1, spread: 0, sub: 30, noise: 0, fmRatio: 2, fmDepth: 12, filterType: 0, cutoff: 850, res: 18, filterEnv: 90, attack: 2, decay: 150, sustain: 30, release: 180, lfoWave: 0, lfoTarget: 0, lfoRate: 5, lfoDepth: 38, lfoCutoff: 42, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 83, reverb: 22, delay: 18 },
+
+  /* ── PSY SUBGENRES II (Phase 12) ──────────────────────────── */
+  'SUOMI BASS': { wave: 0, detune: 3, unison: 1, spread: 0, sub: 78, noise: 6, fmRatio: 1.5, fmDepth: 18, filterType: 0, cutoff: 560, res: 7, filterEnv: 58, attack: 2, decay: 190, sustain: 36, release: 140, lfoWave: 0, lfoTarget: 0, lfoRate: 2.2, lfoDepth: 12, lfoCutoff: 15, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 3, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 86, reverb: 12, delay: 8 },
+  'TWILIGHT BASS': { wave: 0, detune: -2, unison: 1, spread: 0, sub: 80, noise: 4, fmRatio: 1, fmDepth: 10, filterType: 0, cutoff: 480, res: 6, filterEnv: 50, attack: 6, decay: 280, sustain: 48, release: 220, lfoWave: 0, lfoTarget: 0, lfoRate: 1.8, lfoDepth: 12, lfoCutoff: 14, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 60, master: 84, reverb: 20, delay: 12 },
+  'DARKPSY SCREAM': { wave: 4, detune: 6, unison: 3, spread: 18, sub: 10, noise: 10, fmRatio: 4, fmDepth: 45, filterType: 2, cutoff: 2200, res: 8, filterEnv: 65, attack: 4, decay: 220, sustain: 55, release: 450, lfoWave: 0, lfoTarget: 0, lfoRate: 4, lfoDepth: 35, lfoCutoff: 25, lfoPitch: 10, lfoAmp: 0, lfoFM: 0, envPitch: 5, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 80, reverb: 42, delay: 30 },
+  'PSY STAB LEAD': { wave: 1, detune: 4, unison: 3, spread: 12, sub: 8, noise: 0, fmRatio: 2, fmDepth: 22, filterType: 0, cutoff: 3000, res: 4, filterEnv: 72, attack: 2, decay: 160, sustain: 15, release: 240, lfoWave: 0, lfoTarget: 0, lfoRate: 3, lfoDepth: 20, lfoCutoff: 18, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 82, reverb: 26, delay: 20 },
+  'TWILIGHT PAD': { wave: 3, detune: 8, unison: 5, spread: 22, sub: 25, noise: 5, fmRatio: 2, fmDepth: 9, filterType: 0, cutoff: 1400, res: 1, filterEnv: 24, attack: 950, decay: 1000, sustain: 86, release: 2900, lfoWave: 0, lfoTarget: 1, lfoRate: 0.5, lfoDepth: 13, lfoCutoff: 0, lfoPitch: 10, lfoAmp: 5, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 77, reverb: 75, delay: 42 },
+  'ACID PLUCK': { wave: 0, detune: 2, unison: 1, spread: 0, sub: 25, noise: 0, fmRatio: 2, fmDepth: 14, filterType: 0, cutoff: 900, res: 17, filterEnv: 88, attack: 2, decay: 140, sustain: 25, release: 160, lfoWave: 0, lfoTarget: 0, lfoRate: 5.5, lfoDepth: 40, lfoCutoff: 45, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 83, reverb: 20, delay: 16 },
+  'PSY RISER FX': { wave: 0, detune: 5, unison: 3, spread: 16, sub: 15, noise: 45, fmRatio: 2, fmDepth: 25, filterType: 0, cutoff: 700, res: 3, filterEnv: 75, attack: 1800, decay: 700, sustain: 55, release: 1000, lfoWave: 0, lfoTarget: 0, lfoRate: 3.5, lfoDepth: 45, lfoCutoff: 50, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 18, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 80, reverb: 65, delay: 35 },
+  'NIGHT DRIVE': { wave: 0, detune: 1, unison: 1, spread: 0, sub: 72, noise: 3, fmRatio: 1, fmDepth: 6, filterType: 0, cutoff: 620, res: 5, filterEnv: 46, attack: 8, decay: 300, sustain: 50, release: 250, lfoWave: 0, lfoTarget: 0, lfoRate: 1.6, lfoDepth: 10, lfoCutoff: 10, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 80, master: 84, reverb: 18, delay: 14 },
 };
 
 </script>
