@@ -665,6 +665,10 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   let searchTerm = '';
   let paramHistory = [];
   let slotA = null, slotB = null;
+  let pageVisible = true;
+  document.addEventListener('visibilitychange', function () {
+    pageVisible = !document.hidden;
+  });
   function getRecents() {
     try { return JSON.parse(localStorage.getItem('psy.recents') || '[]'); } catch (e) { return []; }
   }
@@ -955,6 +959,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
 
   function scopeLoop() {
     requestAnimationFrame(scopeLoop);
+    if (!pageVisible) return;
     if (document.hidden) return;
     const cv = $('scope'), c = cv.getContext('2d');
     const W = cv._w || cv.width, H = cv._h || cv.height;
