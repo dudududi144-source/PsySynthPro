@@ -38,6 +38,8 @@ A browser-based psytrance instrument with a **premium hardware-grade panel** and
 - v2.4: **NxM bipolar MOD MATRIX** — 3 sources (LFO/ENV/VEL) x 5 destinations
   (CUT/PIT/AMP/FM/RES), bipolar -100..+100, applied at audio rate; supersedes the
   6 fixed MOD knobs (kept in engine for preset compatibility)
+- v2.7: **Monophonic legato GLIDE** — signature psy-bass portamento. GLIDE knob (0-500ms);
+  playing a note while one voice sounds glides its pitch (legato, no retrigger)
 - v2.6: **Perf HUD** — live active-voice readout (reported from the worklet ~43x/sec),
   color-coded green/amber/red by load so CPU pressure is visible at a glance
 - v2.5: **DSP performance pass** (fixes load/latency):
