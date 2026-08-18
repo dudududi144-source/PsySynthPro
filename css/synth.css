@@ -530,3 +530,8 @@ body {
 }
 .updel:hover { background:#5a1f1a; }
 .savebtn { color:#9fe8b0; border-color:#3b6e4f; }
+
+
+/* ══════════ GEN VARIATIONS (Phase 10) ══════════ */
+.genbtn { color:#c4b5fd; border-color:#5b4a8a; }
+.genbtn:hover { color:#e9d5ff; border-color:#7c5cff; }
