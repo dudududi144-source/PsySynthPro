@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.2.1 · fixes · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v3.3.0 · preset-store · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -534,10 +534,21 @@ body {
 .catbtn.active { background:linear-gradient(135deg,#0e7490,#0e7490aa); color:#7ff3ff; border-color:#0e7490; }
 .pbtns { display:flex; gap:8px; flex-wrap:wrap; }
 
+
+/* ══════════ USER PRESETS (Phase 9) ══════════ */
+.upwrap { display:inline-flex; align-items:stretch; }
+.preset.user { border-color:#3b6e4f; color:#9fe8b0; }
+.updel {
+  width:18px; border:none; border-radius:0 6px 6px 0;
+  background:#3a1512; color:#f87171; cursor:pointer; font-size:9px;
+}
+.updel:hover { background:#5a1f1a; }
+.savebtn { color:#9fe8b0; border-color:#3b6e4f; }
+
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.2.1 · fixes · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.3.0 · preset-store · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -567,11 +578,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.2.1 · fixes · 2026-08-18 &bull; PSY PRESETS &bull; SUPERSAW &bull; NOISE &bull; SEQ GLIDE &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.3.0 · preset-store · 2026-08-18 &bull; USER PRESETS &bull; SUPERSAW &bull; NOISE &bull; SEQ GLIDE &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v3.2.1 · fixes · 2026-08-18';
+window.__psyBuild = 'v3.3.0 · preset-store · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -2383,6 +2394,54 @@ Psy.exportArpGroove = function (arp, notes, bars) {
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
 
+/* ═══════════ Preset Store (user presets, localStorage) ═══════════
+   Clean persistence layer for user-created presets.
+   Schema: { "<name>": { ...patch params... } }
+   Names are sanitized; duplicates overwrite.                        */
+
+const STORE_KEY = 'psysynthpro.userPresets.v1';
+
+Psy.PresetStore = {
+  _read: function () {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
+    catch (e) { return {}; }
+  },
+  _write: function (obj) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); return true; }
+    catch (e) { return false; }
+  },
+  sanitizeName: function (name) {
+    return String(name || '').trim().slice(0, 32);
+  },
+  list: function () {
+    return Object.keys(this._read());
+  },
+  get: function (name) {
+    return this._read()[name] || null;
+  },
+  save: function (name, patch) {
+    name = this.sanitizeName(name);
+    if (!name) return false;
+    const all = this._read();
+    all[name] = patch;
+    return this._write(all);
+  },
+  remove: function (name) {
+    const all = this._read();
+    if (!(name in all)) return false;
+    delete all[name];
+    return this._write(all);
+  },
+  count: function () {
+    return this.list().length;
+  }
+};
+
+</script>
+<script>
+"use strict";
+var Psy = (window.PsySynth = window.PsySynth || {});
+
 (function () {
   const engine = new Psy.SynthEngine();
   /* Perf HUD: live active-voice count reported from the worklet */
@@ -3059,7 +3118,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     /* category filter row */
     const catRow = document.createElement('div');
     catRow.className = 'catrow';
-    const cats = ['ALL', 'BASS', 'LEAD', 'PAD', 'ARP', 'FX', 'WT'];
+    const cats = ['ALL', 'BASS', 'LEAD', 'PAD', 'ARP', 'FX', 'WT', 'USER'];
     cats.forEach(function (cat) {
       const b = document.createElement('button');
       b.className = 'catbtn' + (cat === 'ALL' ? ' active' : '');
@@ -3079,19 +3138,75 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     wrap.appendChild(btnWrap);
     /* point 'presets' button rendering into btnWrap */
     window.__pbtnWrap = btnWrap;
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'catbtn savebtn';
+    saveBtn.textContent = 'SAVE CURRENT';
+    saveBtn.addEventListener('click', saveCurrentPreset);
+    wrap.appendChild(saveBtn);
     renderPresetButtons2();
   }
+  function loadUserPreset(name) {
+    const patch = Psy.PresetStore.get(name);
+    if (!patch) return;
+    engine.setAll(patch);
+    syncUI();
+    $('oName').textContent = name;
+    pushRecent(name);
+  }
+
   function renderPresetButtons2() {
     const wrap = window.__pbtnWrap;
     while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+    /* factory presets */
     NAMES.forEach(function (name, i) {
-      if (activeCategory !== 'ALL' && presetCategory(name) !== activeCategory) return;
+      if (activeCategory !== 'ALL' && activeCategory !== 'USER' && presetCategory(name) !== activeCategory) return;
+      if (activeCategory === 'USER') return;
       const b = document.createElement('button');
       b.className = 'preset factory';
       b.textContent = name;
       b.addEventListener('click', function () { loadPreset(i); pushRecent(name); });
       wrap.appendChild(b);
     });
+    /* user presets */
+    if (activeCategory === 'ALL' || activeCategory === 'USER') {
+      Psy.PresetStore.list().forEach(function (name) {
+        const wrap2 = document.createElement('span');
+        wrap2.className = 'upwrap';
+        const b = document.createElement('button');
+        b.className = 'preset user';
+        b.textContent = name;
+        b.addEventListener('click', function () { loadUserPreset(name); });
+        wrap2.appendChild(b);
+        const del = document.createElement('button');
+        del.className = 'updel';
+        del.textContent = 'x';
+        del.addEventListener('click', function (e) {
+          e.stopPropagation();
+          Psy.PresetStore.remove(name);
+          renderPresetButtons2();
+        });
+        wrap2.appendChild(del);
+        wrap.appendChild(wrap2);
+      });
+    }
+  }
+
+  function saveCurrentPreset() {
+    const name = window.prompt ? window.prompt('Save current sound as:', 'MY SOUND') : 'MY SOUND';
+    if (!name) return;
+    const patch = {};
+    for (const k in engine.params) patch[k] = engine.params[k];
+    if (Psy.PresetStore.save(name, patch)) {
+      activeCategory = 'USER';
+      const catRow = document.querySelector('.catrow');
+      if (catRow) {
+        catRow.querySelectorAll('.catbtn').forEach(function (x) {
+          x.classList.toggle('active', x.textContent === 'USER');
+        });
+      }
+      renderPresetButtons2();
+      pushRecent(name);
+    }
   }
 
 const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
