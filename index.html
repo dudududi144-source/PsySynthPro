@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v2.7.1 · modfix · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v2.8.0 · arp-export · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -524,7 +524,7 @@ body {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.7.1 · modfix · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.8.0 · arp-export · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -554,11 +554,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v2.7.1 · modfix · 2026-08-18 &bull; PSYTRANCE INSTRUMENT &bull; GLIDE &bull; NxM MOD MATRIX &bull; PERF HUD &bull; SEQ &bull; ARP</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v2.8.0 · arp-export · 2026-08-18 &bull; PSYTRANCE INSTRUMENT &bull; GLIDE &bull; NxM MOD MATRIX &bull; ARP/SEQ EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v2.7.1 · modfix · 2026-08-18';
+window.__psyBuild = 'v2.8.0 · arp-export · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -2268,6 +2268,48 @@ Psy.exportSeqGroove = function (seq, notes, bars) {
 
 Psy.MidiRecorder = MidiRecorder;
 
+
+/* ── Arpeggiator groove export (Phase 8) ──
+   Simulates the arpeggiator note-selection for `bars` bars and renders MIDI. */
+Psy.exportArpGroove = function (arp, notes, bars) {
+  const pattern = arp.pattern;      /* 0 UP, 1 DWN, 2 UPDN, 3 RND */
+  const octaves = arp.octaves || 1;
+  const bpm = arp.bpm || 132;
+  const stepBeats = (Psy.ARP_STEPS[arp.stepIdxDiv] || { beats: 0.25 }).beats;
+  const stepDur = (60 / bpm) * stepBeats;
+  const gateSec = Math.max(0.03, stepDur * ((arp.gate || 60) / 100));
+
+  /* build sequence like Arpeggiator.buildSequence */
+  const sorted = notes.slice().sort(function (a, b) { return a - b; });
+  const seq = [];
+  for (let o = 0; o < octaves; o++) for (let i = 0; i < sorted.length; i++) seq.push(sorted[i] + o * 12);
+  if (seq.length === 0) return { events: [], bpm: bpm };
+
+  const stepsPerBar = Math.round(1 / stepBeats);
+  const totalSteps = stepsPerBar * (bars || 2);
+  const events = [];
+  let stepIdx = 0;
+  const n = seq.length;
+  for (let s = 0; s < totalSteps; s++) {
+    let note;
+    if (n === 1 || pattern === 0) note = seq[stepIdx % n];
+    else if (pattern === 1) note = seq[n - 1 - (stepIdx % n)];
+    else if (pattern === 2) {
+      const len = n * 2 - 2;
+      let ii = stepIdx % (len || 1);
+      if (ii >= n) ii = len - ii;
+      note = seq[ii];
+    } else {
+      note = seq[Math.floor(Math.random() * n)];
+    }
+    const t = s * stepDur;
+    events.push({ on: true, note: note, vel: 100, t: t });
+    events.push({ on: false, note: note, vel: 0, t: t + gateSec });
+    stepIdx++;
+  }
+  return { events: events, bpm: bpm };
+};
+
 </script>
 <script>
 "use strict";
@@ -2656,7 +2698,28 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       onChange: function (v) { arp.octaves = Math.round(v); }
     });
 
+    /* arp export — render current ARP pattern to a .mid clip for the DAW */
+    const aExpRow = document.createElement('div');
+    aExpRow.className = 'seq-tempos';
+    const aExpBtn = document.createElement('button');
+    aExpBtn.className = 'tempo-btn exp';
+    aExpBtn.style.width = 'auto';
+    aExpBtn.style.padding = '6px 14px';
+    aExpBtn.innerHTML = '&#11015; EXPORT ARP (.mid)';
+    aExpBtn.addEventListener('click', function () {
+      let notes = arp.held.map(function (h) { return h.note; });
+      if (notes.length === 0) notes = lastNotes.slice();
+      if (notes.length === 0) notes = [36];
+      const g = Psy.exportArpGroove(arp, notes, 2);
+      if (!g.events.length) return;
+      const blob = Psy.buildMidiFile(g.events, g.bpm, 480);
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      Psy.downloadBlob(blob, 'psysynthpro-arp-' + g.bpm + 'bpm-' + stamp + '.mid');
+    });
+    aExpRow.appendChild(aExpBtn);
+
     s.appendChild(row);
+    s.appendChild(aExpRow);
     $('sections').appendChild(s);
   }
 
