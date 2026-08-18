@@ -59,7 +59,18 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   const FTYPES = ['LP', 'HP', 'BP', 'NOTCH'];
   const LTYPES = ['FILTER', 'PITCH', 'AMP'];
 
-  const LAYOUT = [
+  function modSlotItems() {
+  const items = [];
+  const SRC = ['OFF','LFO1','LFO2','ENV1','ENV2','VEL'];
+  const DST = ['OFF','CUT','PIT','AMP','FM','RES'];
+  for (let i=0;i<8;i++){
+    items.push({ type:'cycle', key:'m'+i+'s', label:'S'+(i+1), options:[0,1,2,3,4,5], display:function(v){return SRC[v];} });
+    items.push({ type:'knob', key:'m'+i+'a', label:'A'+(i+1), min:-100, max:100, def:0, fmt:fmtPct });
+    items.push({ type:'cycle', key:'m'+i+'d', label:'D'+(i+1), options:[0,1,2,3,4,5], display:function(v){return DST[v];} });
+  }
+  return items;
+}
+const LAYOUT = [
     { title: 'POLYBLEP OSC', color: '#ffb454', items: [
       { type: 'cycle', key: 'wave', label: 'WAVE', options: [0, 1, 2, 3, 4], display: function (v) { return WAVES[v]; } },
       { type: 'knob', key: 'detune', label: 'DETUNE', min: -100, max: 100, def: 0, fmt: fmtCt },
@@ -93,6 +104,18 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       { type: 'knob', key: 'lfoRate', label: 'RATE', min: 0.1, max: 20, step: 0.1, def: 2.2, fmt: function (v) { return v.toFixed(1) + 'Hz'; } },
       { type: 'knob', key: 'lfoDepth', label: 'DEPTH', min: 0, max: 100, def: 35, fmt: fmtPct }
     ]},
+    { title: 'FILTER ENV', color: '#4ade80', items: [
+      { type: 'knob', key: 'fAttack', label: 'ATTACK', min: 1, max: 1000, def: 5, fmt: fmtMs },
+      { type: 'knob', key: 'fDecay', label: 'DECAY', min: 10, max: 2000, def: 300, fmt: fmtMs },
+      { type: 'knob', key: 'fSustain', label: 'SUSTAIN', min: 0, max: 100, def: 40, fmt: fmtPct },
+      { type: 'knob', key: 'fRelease', label: 'RELEASE', min: 30, max: 4000, def: 400, fmt: fmtMs },
+      { type: 'knob', key: 'fEnvAmt', label: 'AMOUNT', min: 0, max: 100, def: 60, fmt: fmtPct }
+    ]},
+    { title: 'LFO 2', color: '#b8e05a', items: [
+      { type: 'cycle', key: 'lfo2Wave', label: 'WAVE', options: [0,1], display: function (v) { return v===1?'SQR':'SIN'; } },
+      { type: 'knob', key: 'lfo2Rate', label: 'RATE', min: 0.1, max: 20, step: 0.1, def: 5, fmt: function (v) { return v.toFixed(1)+'Hz'; } }
+    ]},
+    { title: 'FREE MOD MATRIX', color: '#fbbf24', items: modSlotItems() },
     { title: 'SPACE FX', color: '#f07dc2', items: [
       { type: 'knob', key: 'reverb', label: 'REVERB', min: 0, max: 100, def: 35, fmt: fmtPct },
       { type: 'knob', key: 'delay', label: 'DELAY', min: 0, max: 100, def: 22, fmt: fmtPct },
