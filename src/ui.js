@@ -872,7 +872,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     renderPresetButtons2();
   }
 
-const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
+const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5', 74: 'D5', 76: 'E5', 77: 'F5', 79: 'G5', 81: 'A5', 83: 'B5', 84: 'C6' };
 
   /* ── Octave shift: OCT -/+ buttons + Z/X keys ── */
   let octShift = 0;
@@ -911,7 +911,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
 
   function buildKeyboard() {
     const kb = $('kb');
-    for (let n = 48; n <= 72; n++) {
+    for (let n = 48; n <= 84; n++) {
       const black = [1, 3, 6, 8, 10].indexOf(n % 12) >= 0;
       const k = document.createElement('div');
       k.className = 'key ' + (black ? 'b' : 'w');
