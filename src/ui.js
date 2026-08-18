@@ -56,7 +56,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   const fmtCt = function (v) { return (v > 0 ? '+' : '') + Math.round(v); };
 
   const WAVES = ['SAW', 'SQR', 'TRI', 'SINE', 'USER'];
-  const FTYPES = ['LP', 'HP', 'BP', 'NOTCH'];
+  const FTYPES = ['LP', 'HP', 'BP', 'NOTCH', 'LAD'];
   const LTYPES = ['FILTER', 'PITCH', 'AMP'];
 
   function modSlotItems() {
@@ -87,9 +87,10 @@ const LAYOUT = [
       { type: 'knob', key: 'fm2Depth', label: 'B DEPTH', min: 0, max: 100, def: 0, fmt: fmtPct }
     ]},
     { title: 'ZDF SVF', color: '#4dd6e8', items: [
-      { type: 'cycle', key: 'filterType', label: 'TYPE', options: [0, 1, 2, 3], display: function (v) { return FTYPES[v]; } },
+      { type: 'cycle', key: 'filterType', label: 'TYPE', options: [0, 1, 2, 3, 4], display: function (v) { return FTYPES[v]; } },
       { type: 'knob', key: 'cutoff', label: 'CUTOFF', min: 40, max: 16000, log: true, def: 2600, fmt: fmtHz },
       { type: 'knob', key: 'res', label: 'RES', min: 0.1, max: 20, step: 0.1, def: 2 },
+      { type: 'knob', key: 'wtPos', label: 'WT POS', min: 0, max: 100, def: 0, fmt: fmtPct },
       { type: 'knob', key: 'filterEnv', label: 'ENV AMT', min: 0, max: 100, def: 55, fmt: fmtPct }
     ]},
     { title: 'ANALOG ENV', color: '#e8ecf2', items: [
