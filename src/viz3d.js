@@ -18,6 +18,21 @@ class Viz3D {
     this.camDist = 320;
     this.fov = 430;
     this.time = 0;
+    this.setupHiDPI();
+  }
+
+  /* HiDPI / Retina: scale backing store by devicePixelRatio, draw in logical px */
+  setupHiDPI() {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = this.canvas.clientWidth || this.canvas.width;
+    const h = this.canvas.clientHeight || this.canvas.height;
+    this.width = w;
+    this.height = h;
+    this.canvas.width = Math.round(w * dpr);
+    this.canvas.height = Math.round(h * dpr);
+    this.canvas.style.width = w + 'px';
+    this.canvas.style.height = h + 'px';
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   start() {
@@ -46,7 +61,7 @@ class Viz3D {
   }
 
   draw() {
-    const ctx = this.ctx, W = this.canvas.width, H = this.canvas.height;
+    const ctx = this.ctx, W = this.width, H = this.height;
     this.time += 0.008;
 
     /* background fade */
