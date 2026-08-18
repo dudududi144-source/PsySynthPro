@@ -28,7 +28,8 @@ class SynthProcessor extends AudioWorkletProcessor {
       m6s: 0, m6a: 0, m6d: 0,
       m7s: 0, m7a: 0, m7d: 0,
       glideTime: 0,
-      master: 80, reverb: 35, delay: 22
+      master: 80, reverb: 35, delay: 22,
+      fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0.8,
     };
     this.voices = [];
     for (let i = 0; i < 16; i++) {
@@ -457,6 +458,36 @@ class SynthEngine {
       self.revSend.connect(self.conv);
       self.conv.connect(self.master);
 
+      /* FX RACK: distortion / chorus / bitcrush as parallel sends */
+      self.distSend = self.ctx.createGain();
+      self.distSend.gain.value = (self.params.fxDist / 100) * 0.6;
+      self.waveshaper = self.ctx.createWaveShaper();
+      self.waveshaper.curve = self.makeDistCurve(60);
+      self.waveshaper.oversample = '2x';
+      self.fxInput.connect(self.distSend);
+      self.distSend.connect(self.waveshaper);
+      self.waveshaper.connect(self.master);
+      self.chSend = self.ctx.createGain();
+      self.chSend.gain.value = (self.params.fxChorus / 100) * 0.5;
+      self.chDelay = self.ctx.createDelay(1);
+      self.chDelay.delayTime.value = 0.02;
+      self.chLfo = self.ctx.createOscillator();
+      self.chLfo.frequency.value = self.params.chRate;
+      self.chLfoDepth = self.ctx.createGain();
+      self.chLfoDepth.gain.value = 0.004;
+      self.chLfo.connect(self.chLfoDepth);
+      self.chLfoDepth.connect(self.chDelay.delayTime);
+      self.chLfo.start();
+      self.fxInput.connect(self.chSend);
+      self.chSend.connect(self.chDelay);
+      self.chDelay.connect(self.master);
+      self.crSend = self.ctx.createGain();
+      self.crSend.gain.value = (self.params.fxCrush / 100) * 0.5;
+      self.crusher = self.ctx.createWaveShaper();
+      self.crusher.curve = self.makeCrushCurve(6);
+      self.fxInput.connect(self.crSend);
+      self.crSend.connect(self.crusher);
+      self.crusher.connect(self.master);
       self.analyser = self.ctx.createAnalyser();
       self.analyser.fftSize = 2048;
       self.master.connect(self.analyser);
@@ -469,6 +500,17 @@ class SynthEngine {
     });
   }
 
+  makeDistCurve(amount) {
+    const n = 1024; const c = new Float32Array(n);
+    for (let i=0;i<n;i++){ const x = (i/(n-1))*2-1; c[i] = Math.tanh(x*(1+amount*0.05)); }
+    return c;
+  }
+  makeCrushCurve(bits) {
+    const n = 1024; const c = new Float32Array(n);
+    const steps = Math.pow(2, bits);
+    for (let i=0;i<n;i++){ const x=(i/(n-1))*2-1; c[i]=Math.round(x*steps)/steps; }
+    return c;
+  }
   makeIR(seconds, decay) {
     const rate = this.ctx.sampleRate;
     const len = Math.floor(rate * seconds);
@@ -487,6 +529,10 @@ class SynthEngine {
     this.params[key] = value;
     if (key === 'delay' && this.delSend) this.delSend.gain.value = (value / 100) * 0.55;
     else if (key === 'reverb' && this.revSend) this.revSend.gain.value = (value / 100) * 0.85;
+      if (this.distSend) this.distSend.gain.value = (this.params.fxDist / 100) * 0.6;
+      if (this.chSend) this.chSend.gain.value = (this.params.fxChorus / 100) * 0.5;
+      if (this.crSend) this.crSend.gain.value = (this.params.fxCrush / 100) * 0.5;
+      if (this.chLfo) this.chLfo.frequency.value = this.params.chRate;
     else if (key === 'master' && this.master) this.master.gain.value = value / 100;
     else this.sendParams();
   }
