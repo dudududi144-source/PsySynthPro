@@ -3,6 +3,16 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.8.0] — Arpeggiator MIDI Export
+### Added
+- **EXPORT ARP (.mid)** button in the ARPEGGIATOR panel: renders the current arp pattern
+  (UP/DWN/UPDN/RND, multi-octave, gate %, tempo) for 2 bars to a quantized Standard MIDI
+  File, mirroring the SEQ groove export. Uses held notes (falls back to last played, then C2).
+### Notes
+- RND pattern export is (by design) random per render.
+### Verified
+- exportArpGroove builds the sequence identically to Arpeggiator.buildSequence/pick.
+
 ## [2.7.1] — Mod-Matrix Bugfix (QA-found)
 ### Fixed
 - **Mod-matrix bleed:** the 15 NxM matrix params (modLC..modVR) were missing from
