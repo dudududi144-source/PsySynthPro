@@ -63,7 +63,7 @@ A browser-based psytrance instrument with a **premium hardware-grade panel** and
 - [ ] step-sequencer per-step slide/glide
 - [ ] full NxM mod matrix with bipolar amounts
 - [x] MIDI-out export of seq groove (groove -> DAW) — done v2.3 (EXPORT GROOVE button)
-- [ ] MIDI-out export of arpeggiator patterns
+- [x] MIDI-out export of arpeggiator patterns — done v2.8
 - [x] NxM bipolar mod matrix — done v2.4 (3x5 grid, audio-rate)
 
 ## Verification discipline (hard-won rules)
