@@ -3,6 +3,15 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [3.4.0] — Procedural Variation Generator
+### Added
+- **src/variation.js** — seeded (mulberry32) variation generator. Varies parameters within
+  MUSICAL ranges (cutoff log-drift, res/env/envelope/FX within bounds, keeps wave/filterType/
+  fmRatio to preserve character). Reproducible by seed.
+- **GEN VARIATIONS** button: saves N (1-32) variations of the current patch as user presets.
+### Why
+- The path to a large high-quality preset library without hand-crafting each one.
+
 ## [3.3.0] — User Preset Persistence
 ### Added
 - **PresetStore** — clean localStorage-backed persistence layer (src/preset-store.js).
