@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.8.0 · undo-ab · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v3.9.0 · wt-bandlimit · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -623,7 +623,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.8.0 · undo-ab · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.9.0 · wt-bandlimit · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -653,11 +653,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.8.0 · undo-ab · 2026-08-18 &bull; UNDO &bull; A/B &bull; SEARCH &bull; 46 PSY PRESETS &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.9.0 · wt-bandlimit · 2026-08-18 &bull; BAND-LIMITED WT &bull; UNDO &bull; A/B &bull; 46 PSY PRESETS &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v3.8.0 · undo-ab · 2026-08-18';
+window.__psyBuild = 'v3.9.0 · wt-bandlimit · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -1066,7 +1066,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       const v = this.findVoice(m.note);
       if (v) { v.bend = m.bend; v.bendMul = Math.pow(2, v.bend / 12); }
     }
-    else if (m.type === 'wavetable') { this.wtable = m.table; this.wtLen = m.table.length; }
+    else if (m.type === 'wavetable') { this.wtable = m.table; this.wtLen = m.table.length; this.wtMips = null; }
     else if (m.type === 'panic') {
       this.queue = [];
       for (const v of this.voices) { v.active = false; v.stage = 0; v.amp = 0; }
@@ -1130,17 +1130,40 @@ class SynthProcessor extends AudioWorkletProcessor {
     return 0;
   }
 
-  readWavetable(phase) {
+  /* band-limited wavetable: mipmap levels keep harmonics under Nyquist */
+  buildMips(table) {
+    const L = table.length;
+    const mips = [table];
+    let cur = table;
+    for (let m = 0; m < 5; m++) {
+      const next = new Float32Array(L);
+      for (let i = 0; i < L; i++) {
+        next[i] = (cur[(i - 1 + L) % L] + cur[i] * 2 + cur[(i + 1) % L]) * 0.25;
+      }
+      mips.push(next);
+      cur = next;
+    }
+    return mips;
+  }
+
+  readWavetable(phase, inc) {
+    if (!this.wtMips) this.wtMips = this.buildMips(this.wtable);
+    const mips = this.wtMips;
+    /* pick mip so highest kept harmonic stays under Nyquist */
+    const maxH = 0.5 / Math.max(inc, 0.00001);
+    let level = 0;
+    while (level < mips.length - 1 && maxH < Math.pow(2, level + 1)) level++;
+    const tbl = mips[level];
     const pos = phase * this.wtLen;
     const i0 = Math.floor(pos) % this.wtLen;
     const i1 = (i0 + 1) % this.wtLen;
     const frac = pos - Math.floor(pos);
-    return this.wtable[i0] + (this.wtable[i1] - this.wtable[i0]) * frac;
+    return tbl[i0] + (tbl[i1] - tbl[i0]) * frac;
   }
 
   oscSample(phase, inc, wave, v) {
     const TWO_PI = 6.28318530718;
-    if (wave === 4) return this.readWavetable(phase);
+    if (wave === 4) return this.readWavetable(phase, inc);
     if (wave === 3) return Math.sin(TWO_PI * phase);
     if (wave === 0) return (2 * phase - 1) - this.polyblep(phase, inc);
     if (wave === 1) {
