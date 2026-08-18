@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v5.2.0 · fxrack · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v5.3.0 · ui-overhaul · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -620,10 +620,42 @@ button:focus-visible, .key:focus-visible {
 }
 .psearch:focus { outline: 2px solid #7ff3ff; border-color: #7ff3ff; }
 
+
+/* ══════════ COMMERCIAL UI OVERHAUL (Round: mobile + organization) ══════════ */
+/* Tab bar for organizing sections */
+.tabbar { display:flex; gap:6px; flex-wrap:wrap; margin: 14px 0 12px; }
+.tabbtn {
+  padding: 9px 16px; border-radius: 8px; border: 1px solid #2a2f38;
+  background: linear-gradient(180deg,#1c2028,#12151b); color:#8b949e;
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1.5px; cursor:pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.tabbtn.active { background:linear-gradient(135deg,#0e7490,#0e7490aa); color:#7ff3ff; border-color:#0e7490; }
+.section[data-hidden="1"] { display:none; }
+
+/* Responsive overhaul */
+@media (max-width: 900px) {
+  .chassis { padding: 16px 14px 18px; }
+  .topbar { flex-wrap: wrap; gap: 8px; }
+  .oled { order: -1; width: 100%; }
+  .sections { gap: 10px; }
+  .section { width: calc(50% - 5px); min-width: 0; }
+  .kb { overflow-x: auto; justify-content: flex-start; }
+}
+@media (max-width: 560px) {
+  .chassis { padding: 12px 8px 14px; border-radius: 10px; }
+  .section { width: 100%; }
+  .tbtn { padding: 10px 12px; font-size: 10px; }
+  .tabbtn { padding: 10px 12px; }
+  .key.w { min-width: 26px; }
+  .kzone { width: 48px; height: 48px; }
+  .brand span { display:none; }
+}
+
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a2f38;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v5.2.0 · fxrack · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v5.3.0 · ui-overhaul · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -653,11 +685,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v5.2.0 · fxrack · 2026-08-18 &bull; FX RACK &bull; MOOG LADDER &bull; FILTER ENV &bull; LFO2 &bull; FREE MOD</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v5.3.0 · ui-overhaul · 2026-08-18 &bull; TABS &bull; RESPONSIVE &bull; FX RACK &bull; MOOG LADDER &bull; FREE MOD</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v5.2.0 · fxrack · 2026-08-18';
+window.__psyBuild = 'v5.3.0 · ui-overhaul · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -3894,7 +3926,44 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     }
   }
 
+  /* Tab organization */
+  const TABMAP = {"POLYBLEP OSC": "SYNTH", "FM OPERATOR": "SYNTH", "ZDF SVF": "SYNTH", "ANALOG ENV": "SYNTH", "FILTER ENV": "SYNTH", "LFO": "MOD", "LFO 2": "MOD", "FREE MOD MATRIX": "MOD", "PERFORMANCE MACROS": "MOD", "FX RACK": "FX", "SPACE FX": "FX", "ARPEGGIATOR": "PERF", "STEP SEQ": "PERF", "WAVETABLE LAB": "PERF", "PRESET MORPH": "PERF"};
+  function buildTabs() {
+    const wrap = $('sections');
+    const bar = document.createElement('div');
+    bar.className = 'tabbar';
+    const tabs = ['SYNTH','MOD','FX','PERF'];
+    let active = 'SYNTH';
+    function apply() {
+      wrap.querySelectorAll('.section').forEach(function (sec) {
+        const t = sec.getAttribute('data-tab');
+        sec.setAttribute('data-hidden', (t && t !== active) ? '1' : '0');
+      });
+    }
+    tabs.forEach(function (tb) {
+      const b = document.createElement('button');
+      b.className = 'tabbtn' + (tb === active ? ' active' : '');
+      b.textContent = tb;
+      b.addEventListener('click', function () {
+        active = tb;
+        bar.querySelectorAll('.tabbtn').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        apply();
+      });
+      bar.appendChild(b);
+    });
+    wrap.parentNode.insertBefore(bar, wrap);
+    // tag sections by their title
+    wrap.querySelectorAll('.section').forEach(function (sec) {
+      const h = sec.querySelector('.stitle');
+      const name = h ? h.textContent.trim() : '';
+      sec.setAttribute('data-tab', TABMAP[name] || 'SYNTH');
+    });
+    apply();
+  }
+
   safeBuild('macros', buildMacros);
+  safeBuild('tabs', buildTabs);
   safeBuild('sections', buildSections);
   safeBuild('matrix', buildModMatrix);
   safeBuild('arp', buildArpPanel);
