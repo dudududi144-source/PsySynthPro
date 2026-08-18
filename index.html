@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.4.0 · variations · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v3.5.0 · psy-subgenres · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -553,7 +553,7 @@ body {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.4.0 · variations · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.5.0 · psy-subgenres · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -583,11 +583,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.4.0 · variations · 2026-08-18 &bull; VARIATIONS &bull; USER PRESETS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.5.0 · psy-subgenres · 2026-08-18 &bull; 38 PSY PRESETS &bull; VARIATIONS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v3.4.0 · variations · 2026-08-18';
+window.__psyBuild = 'v3.5.0 · psy-subgenres · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -709,6 +709,18 @@ Psy.PRESETS = {
   'RISER FX': { wave: 0, detune: 5, unison: 3, spread: 16, sub: 20, noise: 40, fmRatio: 2, fmDepth: 20, filterType: 0, cutoff: 800, res: 3, filterEnv: 70, attack: 1500, decay: 800, sustain: 60, release: 1200, lfoWave: 0, lfoTarget: 0, lfoRate: 3, lfoDepth: 40, master: 80, reverb: 60, delay: 35, lfoCutoff: 45, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 15, envFM: 0 },
   'IMPACT FX': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 90, noise: 60, fmRatio: 1, fmDepth: 10, filterType: 0, cutoff: 600, res: 2, filterEnv: 60, attack: 2, decay: 400, sustain: 20, release: 800, lfoWave: 0, lfoTarget: 0, lfoRate: 2, lfoDepth: 20, master: 85, reverb: 50, delay: 20, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: -10, envFM: 0 }
 
+
+  /* ── PSY SUBGENRES (Phase 11) ───────────────────────────── */
+  'FULLON BASS 145': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 82, noise: 0, fmRatio: 1, fmDepth: 4, filterType: 0, cutoff: 520, res: 6, filterEnv: 52, attack: 2, decay: 170, sustain: 32, release: 130, lfoWave: 0, lfoTarget: 0, lfoRate: 2, lfoDepth: 0, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 88, reverb: 8, delay: 5 },
+  'DARKPSY BASS': { wave: 0, detune: -3, unison: 1, spread: 0, sub: 90, noise: 8, fmRatio: 0.5, fmDepth: 20, filterType: 0, cutoff: 380, res: 9, filterEnv: 60, attack: 3, decay: 200, sustain: 40, release: 150, lfoWave: 0, lfoTarget: 0, lfoRate: 3, lfoDepth: 15, lfoCutoff: 18, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: -5, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 86, reverb: 12, delay: 6 },
+  'HITECH BASS': { wave: 0, detune: 2, unison: 1, spread: 0, sub: 75, noise: 5, fmRatio: 2, fmDepth: 25, filterType: 0, cutoff: 650, res: 7, filterEnv: 65, attack: 1, decay: 140, sustain: 28, release: 110, lfoWave: 0, lfoTarget: 0, lfoRate: 6, lfoDepth: 20, lfoCutoff: 25, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 87, reverb: 8, delay: 4 },
+  'PROG BASS': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 70, noise: 0, fmRatio: 1, fmDepth: 8, filterType: 0, cutoff: 600, res: 5, filterEnv: 48, attack: 5, decay: 250, sustain: 45, release: 200, lfoWave: 0, lfoTarget: 0, lfoRate: 1.5, lfoDepth: 10, lfoCutoff: 12, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 40, master: 85, reverb: 15, delay: 10 },
+  'FOREST BASS': { wave: 2, detune: -2, unison: 1, spread: 0, sub: 85, noise: 12, fmRatio: 1.5, fmDepth: 15, filterType: 0, cutoff: 450, res: 8, filterEnv: 55, attack: 4, decay: 220, sustain: 38, release: 160, lfoWave: 0, lfoTarget: 0, lfoRate: 2.5, lfoDepth: 18, lfoCutoff: 20, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: -8, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 85, reverb: 18, delay: 8 },
+  'FULLON LEAD': { wave: 0, detune: 7, unison: 5, spread: 16, sub: 10, noise: 0, fmRatio: 2, fmDepth: 12, filterType: 0, cutoff: 3600, res: 3, filterEnv: 45, attack: 6, decay: 280, sustain: 68, release: 650, lfoWave: 0, lfoTarget: 0, lfoRate: 2.8, lfoDepth: 28, lfoCutoff: 20, lfoPitch: 6, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 80, reverb: 35, delay: 25 },
+  'DARKPSY LEAD': { wave: 4, detune: 5, unison: 3, spread: 14, sub: 8, noise: 5, fmRatio: 3, fmDepth: 30, filterType: 0, cutoff: 2600, res: 5, filterEnv: 50, attack: 5, decay: 240, sustain: 60, release: 500, lfoWave: 0, lfoTarget: 0, lfoRate: 3.5, lfoDepth: 30, lfoCutoff: 22, lfoPitch: 8, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 80, reverb: 40, delay: 28 },
+  'PSY ARPGATE': { wave: 0, detune: 3, unison: 3, spread: 10, sub: 12, noise: 0, fmRatio: 2, fmDepth: 20, filterType: 0, cutoff: 3200, res: 4, filterEnv: 70, attack: 2, decay: 180, sustain: 20, release: 260, lfoWave: 1, lfoTarget: 2, lfoRate: 6, lfoDepth: 55, lfoCutoff: 15, lfoPitch: 0, lfoAmp: 55, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 82, reverb: 28, delay: 22 },
+  'PSYCHADELIC PAD': { wave: 4, detune: 9, unison: 5, spread: 20, sub: 28, noise: 6, fmRatio: 2, fmDepth: 10, filterType: 0, cutoff: 1500, res: 1, filterEnv: 26, attack: 850, decay: 950, sustain: 84, release: 2700, lfoWave: 0, lfoTarget: 1, lfoRate: 0.55, lfoDepth: 14, lfoCutoff: 0, lfoPitch: 11, lfoAmp: 6, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 78, reverb: 72, delay: 40 },
+  'SQUELCH LEAD': { wave: 0, detune: 2, unison: 1, spread: 0, sub: 30, noise: 0, fmRatio: 2, fmDepth: 12, filterType: 0, cutoff: 850, res: 18, filterEnv: 90, attack: 2, decay: 150, sustain: 30, release: 180, lfoWave: 0, lfoTarget: 0, lfoRate: 5, lfoDepth: 38, lfoCutoff: 42, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, glideTime: 0, master: 83, reverb: 22, delay: 18 },
 };
 
 </script>
