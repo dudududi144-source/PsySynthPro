@@ -1122,7 +1122,44 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     }
   }
 
+  /* Tab organization */
+  const TABMAP = {"POLYBLEP OSC": "SYNTH", "FM OPERATOR": "SYNTH", "ZDF SVF": "SYNTH", "ANALOG ENV": "SYNTH", "FILTER ENV": "SYNTH", "LFO": "MOD", "LFO 2": "MOD", "FREE MOD MATRIX": "MOD", "PERFORMANCE MACROS": "MOD", "FX RACK": "FX", "SPACE FX": "FX", "ARPEGGIATOR": "PERF", "STEP SEQ": "PERF", "WAVETABLE LAB": "PERF", "PRESET MORPH": "PERF"};
+  function buildTabs() {
+    const wrap = $('sections');
+    const bar = document.createElement('div');
+    bar.className = 'tabbar';
+    const tabs = ['SYNTH','MOD','FX','PERF'];
+    let active = 'SYNTH';
+    function apply() {
+      wrap.querySelectorAll('.section').forEach(function (sec) {
+        const t = sec.getAttribute('data-tab');
+        sec.setAttribute('data-hidden', (t && t !== active) ? '1' : '0');
+      });
+    }
+    tabs.forEach(function (tb) {
+      const b = document.createElement('button');
+      b.className = 'tabbtn' + (tb === active ? ' active' : '');
+      b.textContent = tb;
+      b.addEventListener('click', function () {
+        active = tb;
+        bar.querySelectorAll('.tabbtn').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        apply();
+      });
+      bar.appendChild(b);
+    });
+    wrap.parentNode.insertBefore(bar, wrap);
+    // tag sections by their title
+    wrap.querySelectorAll('.section').forEach(function (sec) {
+      const h = sec.querySelector('.stitle');
+      const name = h ? h.textContent.trim() : '';
+      sec.setAttribute('data-tab', TABMAP[name] || 'SYNTH');
+    });
+    apply();
+  }
+
   safeBuild('macros', buildMacros);
+  safeBuild('tabs', buildTabs);
   safeBuild('sections', buildSections);
   safeBuild('matrix', buildModMatrix);
   safeBuild('arp', buildArpPanel);
