@@ -7,6 +7,7 @@ Psy.DEFAULT = {
   filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
   attack: 12, decay: 260, sustain: 70, release: 650,
   lfoWave: 0, lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35,
+  glideTime: 0,
   master: 80, reverb: 35, delay: 22, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0,
   modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0
 };
