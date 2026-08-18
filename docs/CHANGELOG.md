@@ -3,6 +3,16 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.9.0] — Per-Step Sequencer Glide
+### Added
+- **GLIDE toggle** in the STEP SEQ panel. When ON, the sequencer sustains each note
+  (skips the note-off) so the next step glides into it — the classic psy-bass portamento,
+  powered by the worklet legato-glide added in v2.7.
+- Sequencer tracks lastNote and releases it cleanly when GLIDE is turned off or the
+  sequencer is disabled.
+### Verified
+- Sequencer glide path reuses the verified legato-glide engine path (single active voice).
+
 ## [2.8.0] — Arpeggiator MIDI Export
 ### Added
 - **EXPORT ARP (.mid)** button in the ARPEGGIATOR panel: renders the current arp pattern
