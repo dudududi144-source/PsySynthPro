@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.6.1 · a11y · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v3.6.2 · a11y+watchdog · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -608,7 +608,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.6.1 · a11y · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.6.2 · a11y+watchdog · 2026-08-18</div>
 <div id="psyErrStrip" role="alert" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -638,8 +638,49 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb" role="group" aria-label="Keyboard"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.6.1 · a11y · 2026-08-18 &bull; 46 PSY PRESETS &bull; VARIATIONS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.6.2 · a11y+watchdog · 2026-08-18 &bull; 46 PSY PRESETS &bull; VARIATIONS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
 </div>
+<script>
+window.__psyErrors = [];
+window.__psyBuild = 'v3.6.2 · a11y+watchdog · 2026-08-18';
+window.addEventListener('error', function (e) {
+  window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
+  try {
+    var es = document.getElementById('psyErrStrip');
+    if (es) { es.style.display = 'block'; es.textContent = 'JS ERROR: ' + (e.message || 'unknown'); }
+  } catch (er) {}
+});
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    var s = document.getElementById('sections');
+    if (!s || s.children.length > 0 || window.__psyUiReady) return;
+    var tried = false;
+    try { tried = sessionStorage.getItem('psyAutoRepair') === '1'; } catch (e) {}
+    if (!tried) {
+      try { sessionStorage.setItem('psyAutoRepair', '1'); } catch (e) {}
+      try { if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }); } catch (e) {}
+      try { if (window.caches && caches.keys) caches.keys().then(function (ks) { ks.forEach(function (k) { caches.delete(k); }); }); } catch (e) {}
+      setTimeout(function () { location.reload(); }, 300);
+      return;
+    }
+    try { sessionStorage.removeItem('psyAutoRepair'); } catch (e) {}
+    var d = document.createElement('div');
+    d.setAttribute('role','alert');
+    d.style.cssText = 'margin:14px 0;padding:16px 18px;border:1px solid #f85149;border-radius:10px;background:#1a0b0b;color:#ffb3ab;font-family:monospace;font-size:12px;line-height:1.9';
+    var msg = '<b>PANEL FAILED TO BUILD</b> · build ' + window.__psyBuild + '<br>';
+    if (window.__psyErrors.length) msg += 'Captured: ' + window.__psyErrors.join(' | ').slice(0, 400) + '<br>';
+    msg += '<button id="bHeal" style="margin-top:8px;padding:10px 18px;background:#f85149;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-family:monospace">REPAIR · clear cache and reload</button>';
+    d.innerHTML = msg;
+    s.parentNode.insertBefore(d, s);
+    var b = document.getElementById('bHeal');
+    if (b) b.addEventListener('click', function () {
+      try { if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }); } catch (e) {}
+      try { if (window.caches && caches.keys) caches.keys().then(function (ks) { ks.forEach(function (k) { caches.delete(k); }); }); } catch (e) {}
+      setTimeout(function () { location.reload(); }, 200);
+    });
+  }, 1500);
+});
+</script>
 <script>
 (function () {
   try {
