@@ -66,6 +66,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       { type: 'knob', key: 'unison', label: 'UNISON', min: 1, max: 7, step: 2, def: 3 },
       { type: 'knob', key: 'spread', label: 'SPREAD', min: 0, max: 50, def: 12, fmt: fmtCt },
       { type: 'knob', key: 'sub', label: 'SUB', min: 0, max: 100, def: 25, fmt: fmtPct },
+      { type: 'knob', key: 'noise', label: 'NOISE', min: 0, max: 100, def: 0, fmt: fmtPct },
       { type: 'knob', key: 'glideTime', label: 'GLIDE', min: 0, max: 500, def: 0, fmt: fmtMs }
     ]},
     { title: 'FM OPERATOR', color: '#ffd166', items: [
