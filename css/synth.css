@@ -519,3 +519,14 @@ body {
 .catbtn:hover { color:#c9d1d9; border-color:#3a4150; }
 .catbtn.active { background:linear-gradient(135deg,#0e7490,#0e7490aa); color:#7ff3ff; border-color:#0e7490; }
 .pbtns { display:flex; gap:8px; flex-wrap:wrap; }
+
+
+/* ══════════ USER PRESETS (Phase 9) ══════════ */
+.upwrap { display:inline-flex; align-items:stretch; }
+.preset.user { border-color:#3b6e4f; color:#9fe8b0; }
+.updel {
+  width:18px; border:none; border-radius:0 6px 6px 0;
+  background:#3a1512; color:#f87171; cursor:pointer; font-size:9px;
+}
+.updel:hover { background:#5a1f1a; }
+.savebtn { color:#9fe8b0; border-color:#3b6e4f; }
