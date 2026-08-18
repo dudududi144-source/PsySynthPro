@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.7.0 · a11y+search · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v3.8.0 · deep-audit · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -623,7 +623,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.7.0 · a11y+search · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.8.0 · deep-audit · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -653,11 +653,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.7.0 · a11y+search · 2026-08-18 &bull; 46 PSY PRESETS &bull; SEARCH &bull; A11Y &bull; VARIATIONS &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.8.0 · deep-audit · 2026-08-18 &bull; DEEP AUDIT &bull; 46 PSY PRESETS &bull; SEARCH &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v3.7.0 · a11y+search · 2026-08-18';
+window.__psyBuild = 'v3.8.0 · deep-audit · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -1148,10 +1148,11 @@ class SynthProcessor extends AudioWorkletProcessor {
       return sq + this.polyblep(phase, inc) - this.polyblep((phase + 0.5) % 1, inc);
     }
     if (wave === 2) {
+      /* band-limited triangle: integrate PolyBLEP square, with slow DC servo to prevent drift */
       const sq = phase < 0.5 ? 1 : -1;
       const c = sq + this.polyblep(phase, inc) - this.polyblep((phase + 0.5) % 1, inc);
       v.triInt += c * inc * 4;
-      v.triInt = Math.max(-1.2, Math.min(1.2, v.triInt));
+      v.triInt -= v.triInt * 0.0008;   /* DC servo: gently pull toward 0, no hard clamp distortion */
       return Math.max(-1, Math.min(1, v.triInt));
     }
     return Math.sin(TWO_PI * phase);
