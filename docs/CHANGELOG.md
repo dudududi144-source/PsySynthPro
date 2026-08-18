@@ -3,6 +3,16 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.7.0] — Monophonic Legato Glide (psy-bass portamento)
+### Added
+- **GLIDE knob** in the oscillator section (0-500 ms, default 0 = off).
+- Engine: when GLIDE > 0 and exactly one voice is sounding, a new note glides the
+  active voice's pitch (legato, envelope not retriggered) instead of allocating a new voice.
+- Per-sample pitch glide in the worklet (baseFreq -> targetBaseFreq at glideRate/sec).
+### Notes
+- Additive (glideTime default 0), so existing presets/behavior are unchanged.
+- Applies to live/keyboard play; per-step sequencer glide is next.
+
 ## [2.6.0] — Perf HUD (live voice monitor)
 ### Added
 - **Perf HUD** in the status strip: live active-voice count (X/16), reported from the
