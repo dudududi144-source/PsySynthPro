@@ -15,6 +15,8 @@ class MidiEngine {
     this.chanNote = {};       /* channel -> active note (for per-note bend) */
     this.bendRange = 2;       /* semitones */
     this.lastEvent = '';
+    this.ccMap = {};
+    this.learnTarget = null;
   }
 
   init() {
@@ -87,6 +89,17 @@ class MidiEngine {
 
   handleCC(cc, val) {
     const v = val / 127;
+    if (this.learnTarget) {
+      this.ccMap[cc] = this.learnTarget;
+      this.setLast('LEARNED CC' + cc + ' -> ' + this.learnTarget);
+      this.emit('event', this.lastEvent);
+      this.learnTarget = null;
+      return;
+    }
+    if (this.ccMap[cc]) {
+      this.engine.set(this.ccMap[cc], v * 100);
+      return;
+    }
     switch (cc) {
       case 1:   /* mod wheel -> LFO depth */
         this.engine.set('lfoDepth', v * 100);
