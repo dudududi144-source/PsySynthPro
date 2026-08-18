@@ -642,6 +642,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   function loadPreset(i) {
     pIdx = (i + NAMES.length) % NAMES.length;
     const name = NAMES[pIdx];
+    pushHistory();
     engine.setAll(Psy.PRESETS[name]);
     syncUI();
     $('oName').textContent = name;
@@ -662,6 +663,8 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
   let activeCategory = 'ALL';
   let searchTerm = '';
+  let paramHistory = [];
+  let slotA = null, slotB = null;
   function getRecents() {
     try { return JSON.parse(localStorage.getItem('psy.recents') || '[]'); } catch (e) { return []; }
   }
@@ -727,6 +730,22 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       renderPresetButtons2();
     });
     wrap.appendChild(searchIn);
+    const utilRow = document.createElement('div');
+    utilRow.className = 'catrow';
+    function ubtn(label, fn) {
+      const b = document.createElement('button');
+      b.className = 'catbtn';
+      b.textContent = label;
+      b.addEventListener('click', fn);
+      utilRow.appendChild(b);
+      return b;
+    }
+    ubtn('UNDO', doUndo);
+    ubtn('A', function () { loadSlot('A'); });
+    ubtn('B', function () { loadSlot('B'); });
+    ubtn('COPY>B', function () { copyToSlot('B'); });
+    ubtn('COPY>A', function () { copyToSlot('A'); });
+    wrap.appendChild(utilRow);
     const btnWrap = document.createElement('div');
     btnWrap.className = 'pbtns';
     btnWrap.id = 'pbtns';
@@ -809,6 +828,22 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       renderPresetButtons2();
       pushRecent(name);
     }
+  }
+
+  function snapshotParams() { return Object.assign({}, engine.params); }
+  function pushHistory() { paramHistory.push(snapshotParams()); if (paramHistory.length > 32) paramHistory.shift(); }
+  function doUndo() {
+    const p = paramHistory.pop();
+    if (p) { engine.setAll(p); syncUI(); $('oName').textContent = 'UNDO'; }
+  }
+  function copyToSlot(slot) {
+    if (slot === 'A') slotA = snapshotParams(); else slotB = snapshotParams();
+    $('oName').textContent = 'COPIED TO ' + slot;
+  }
+  function loadSlot(slot) {
+    pushHistory();
+    const p = (slot === 'A') ? slotA : slotB;
+    if (p) { engine.setAll(Object.assign({}, p)); syncUI(); $('oName').textContent = 'SLOT ' + slot; }
   }
 
   /* Generate musical variations of the current patch, save them as user presets */
