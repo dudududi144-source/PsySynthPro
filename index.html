@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.1.0 · supersaw+noise · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v3.2.0 · psy-presets · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -521,10 +521,23 @@ body {
 .perf-hud.warm { color: #d29922; background: rgba(210,153,34,0.08); border-color: rgba(210,153,34,0.3); }
 .perf-hud.hot { color: #f85149; background: rgba(248,81,73,0.08); border-color: rgba(248,81,73,0.35); }
 
+
+/* ══════════ PRESET BANK v2 (Phase 8) ══════════ */
+.catrow { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.catbtn {
+  padding:5px 12px; border-radius:6px; border:1px solid #2a2f38;
+  background:linear-gradient(180deg,#1c2028,#12151b); color:#8b949e;
+  font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:1.5px; cursor:pointer;
+  box-shadow:0 2px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.catbtn:hover { color:#c9d1d9; border-color:#3a4150; }
+.catbtn.active { background:linear-gradient(135deg,#0e7490,#0e7490aa); color:#7ff3ff; border-color:#0e7490; }
+.pbtns { display:flex; gap:8px; flex-wrap:wrap; }
+
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.1.0 · supersaw+noise · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.2.0 · psy-presets · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -554,11 +567,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.1.0 · supersaw+noise · 2026-08-18 &bull; SUPERSAW &bull; NOISE &bull; NxM MOD MATRIX &bull; SEQ GLIDE &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.2.0 · psy-presets · 2026-08-18 &bull; PSY PRESETS &bull; SUPERSAW &bull; NOISE &bull; SEQ GLIDE &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v3.1.0 · supersaw+noise · 2026-08-18';
+window.__psyBuild = 'v3.2.0 · psy-presets · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -652,6 +665,33 @@ Psy.PRESETS = {
   /* ── MOD MATRIX SHOWCASE ─────────────────────────────────────── */
   'WARP BASS':     { wave: 0, detune: 0, unison: 1, spread: 0,  sub: 60, noise: 0, fmRatio: 1, fmDepth: 12, filterType: 0, cutoff: 700,  res: 9,  filterEnv: 65, attack: 2, decay: 220, sustain: 40, release: 200, lfoWave: 0, lfoTarget: 0, lfoRate: 6, lfoDepth: 0, master: 85, reverb: 14, delay: 10, lfoCutoff: 60, lfoPitch: 0,  lfoAmp: 0, lfoFM: 0,  envPitch: 35, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
   'ACID SIREN':    { wave: 1, detune: 3, unison: 3, spread: 12, sub: 0, noise: 0,  fmRatio: 3, fmDepth: 40, filterType: 2, cutoff: 1400, res: 12, filterEnv: 70, attack: 8, decay: 300, sustain: 55, release: 400, lfoWave: 0, lfoTarget: 0, lfoRate: 5, lfoDepth: 0, master: 80, reverb: 30, delay: 22, lfoCutoff: 45, lfoPitch: 55, lfoAmp: 0, lfoFM: 60, envPitch: 0,  envFM: 40, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 }
+
+  /* ── WAVETABLE (wave:4 uses the built-in Psy wavetable) ─────── */
+  'WT COSMIC LEAD': { wave: 4, detune: 4, unison: 3, spread: 12, sub: 15, noise: 0, fmRatio: 2, fmDepth: 20, filterType: 0, cutoff: 3000, res: 3, filterEnv: 55, attack: 10, decay: 280, sustain: 68, release: 600, lfoWave: 0, lfoTarget: 0, lfoRate: 2.6, lfoDepth: 30, master: 82, reverb: 35, delay: 24, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+  'WT NEURO BASS': { wave: 4, detune: 0, unison: 1, spread: 0, sub: 75, noise: 5, fmRatio: 1.5, fmDepth: 30, filterType: 0, cutoff: 600, res: 8, filterEnv: 62, attack: 4, decay: 200, sustain: 45, release: 180, lfoWave: 0, lfoTarget: 0, lfoRate: 3, lfoDepth: 25, master: 85, reverb: 12, delay: 8, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+
+  /* ── PSY BASS (more) ─────────────────────────────────────────── */
+  'FULLON BASS': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 80, noise: 0, fmRatio: 1, fmDepth: 5, filterType: 0, cutoff: 480, res: 6, filterEnv: 55, attack: 2, decay: 180, sustain: 35, release: 140, lfoWave: 0, lfoTarget: 0, lfoRate: 2, lfoDepth: 0, master: 88, reverb: 8, delay: 6, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+  'ACID BASS 303': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 40, noise: 0, fmRatio: 1, fmDepth: 0, filterType: 0, cutoff: 400, res: 19, filterEnv: 95, attack: 2, decay: 140, sustain: 20, release: 120, lfoWave: 0, lfoTarget: 0, lfoRate: 4, lfoDepth: 20, master: 85, reverb: 10, delay: 10, lfoCutoff: 30, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+  'ROLLING BASS': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 70, noise: 0, fmRatio: 1, fmDepth: 6, filterType: 0, cutoff: 550, res: 7, filterEnv: 50, attack: 2, decay: 160, sustain: 30, release: 130, lfoWave: 0, lfoTarget: 0, lfoRate: 2, lfoDepth: 0, master: 87, reverb: 10, delay: 8, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+
+  /* ── PSY LEADS ───────────────────────────────────────────────── */
+  'SUPERSAW LEAD': { wave: 0, detune: 8, unison: 5, spread: 18, sub: 10, noise: 0, fmRatio: 2, fmDepth: 10, filterType: 0, cutoff: 3500, res: 3, filterEnv: 45, attack: 8, decay: 300, sustain: 70, release: 700, lfoWave: 0, lfoTarget: 0, lfoRate: 2.5, lfoDepth: 28, master: 80, reverb: 35, delay: 25, lfoCutoff: 0, lfoPitch: 8, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+  'GOA LEAD': { wave: 4, detune: 6, unison: 3, spread: 14, sub: 10, noise: 0, fmRatio: 3, fmDepth: 35, filterType: 0, cutoff: 2800, res: 4, filterEnv: 50, attack: 6, decay: 250, sustain: 65, release: 550, lfoWave: 0, lfoTarget: 0, lfoRate: 3, lfoDepth: 32, master: 80, reverb: 40, delay: 28, lfoCutoff: 25, lfoPitch: 5, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+  'ACID LEAD': { wave: 0, detune: 3, unison: 1, spread: 0, sub: 0, noise: 0, fmRatio: 2, fmDepth: 15, filterType: 0, cutoff: 900, res: 17, filterEnv: 88, attack: 3, decay: 180, sustain: 40, release: 200, lfoWave: 0, lfoTarget: 0, lfoRate: 5, lfoDepth: 35, master: 82, reverb: 25, delay: 20, lfoCutoff: 40, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+
+  /* ── PSY PADS ────────────────────────────────────────────────── */
+  'DARK SPACE PAD': { wave: 0, detune: 10, unison: 5, spread: 22, sub: 30, noise: 8, fmRatio: 2, fmDepth: 8, filterType: 0, cutoff: 1200, res: 1, filterEnv: 25, attack: 900, decay: 1000, sustain: 85, release: 2800, lfoWave: 0, lfoTarget: 1, lfoRate: 0.5, lfoDepth: 15, master: 78, reverb: 75, delay: 40, lfoCutoff: 0, lfoPitch: 12, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+  'ETHEREAL CHOIR': { wave: 4, detune: 8, unison: 5, spread: 20, sub: 25, noise: 5, fmRatio: 2, fmDepth: 10, filterType: 0, cutoff: 1600, res: 1, filterEnv: 28, attack: 800, decay: 900, sustain: 82, release: 2600, lfoWave: 0, lfoTarget: 1, lfoRate: 0.6, lfoDepth: 14, master: 78, reverb: 70, delay: 38, lfoCutoff: 0, lfoPitch: 10, lfoAmp: 8, lfoFM: 0, envPitch: 0, envFM: 0 },
+
+  /* ── PSY PLUCKS / ARPS ───────────────────────────────────────── */
+  'PSY PLUCK': { wave: 0, detune: 2, unison: 1, spread: 0, sub: 20, noise: 0, fmRatio: 2, fmDepth: 30, filterType: 0, cutoff: 3800, res: 5, filterEnv: 85, attack: 2, decay: 220, sustain: 10, release: 300, lfoWave: 0, lfoTarget: 0, lfoRate: 4, lfoDepth: 25, master: 82, reverb: 30, delay: 22, lfoCutoff: 20, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+  'GOA ARP': { wave: 4, detune: 3, unison: 3, spread: 10, sub: 10, noise: 0, fmRatio: 3, fmDepth: 40, filterType: 0, cutoff: 3200, res: 4, filterEnv: 75, attack: 2, decay: 200, sustain: 15, release: 280, lfoWave: 0, lfoTarget: 0, lfoRate: 5, lfoDepth: 30, master: 82, reverb: 32, delay: 24, lfoCutoff: 22, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
+
+  /* ── PSY FX / TEXTURES ───────────────────────────────────────── */
+  'RISER FX': { wave: 0, detune: 5, unison: 3, spread: 16, sub: 20, noise: 40, fmRatio: 2, fmDepth: 20, filterType: 0, cutoff: 800, res: 3, filterEnv: 70, attack: 1500, decay: 800, sustain: 60, release: 1200, lfoWave: 0, lfoTarget: 0, lfoRate: 3, lfoDepth: 40, master: 80, reverb: 60, delay: 35, lfoCutoff: 45, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 15, envFM: 0 },
+  'IMPACT FX': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 90, noise: 60, fmRatio: 1, fmDepth: 10, filterType: 0, cutoff: 600, res: 2, filterEnv: 60, attack: 2, decay: 400, sustain: 20, release: 800, lfoWave: 0, lfoTarget: 0, lfoRate: 2, lfoDepth: 20, master: 85, reverb: 50, delay: 20, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: -10, envFM: 0 }
+
 };
 
 </script>
@@ -2990,18 +3030,69 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     if (btns[pIdx]) btns[pIdx].classList.add('on');
   }
 
+  function presetCategory(name) {
+    if (/BASS/.test(name)) return 'BASS';
+    if (/LEAD/.test(name)) return 'LEAD';
+    if (/PAD|DRONE|CHOIR/.test(name)) return 'PAD';
+    if (/ARP|PLUCK|STAB|BLEEP|ROLLING/.test(name)) return 'ARP';
+    if (/FX|RISER|IMPACT/.test(name)) return 'FX';
+    if (/^WT/.test(name)) return 'WT';
+    return 'OTHER';
+  }
+
+  let activeCategory = 'ALL';
+  function getRecents() {
+    try { return JSON.parse(localStorage.getItem('psy.recents') || '[]'); } catch (e) { return []; }
+  }
+  function pushRecent(name) {
+    let r = getRecents().filter(function (x) { return x !== name; });
+    r.unshift(name);
+    r = r.slice(0, 6);
+    try { localStorage.setItem('psy.recents', JSON.stringify(r)); } catch (e) {}
+  }
+
+
   function buildPresets() {
     const wrap = $('presets');
+    /* category filter row */
+    const catRow = document.createElement('div');
+    catRow.className = 'catrow';
+    const cats = ['ALL', 'BASS', 'LEAD', 'PAD', 'ARP', 'FX', 'WT'];
+    cats.forEach(function (cat) {
+      const b = document.createElement('button');
+      b.className = 'catbtn' + (cat === 'ALL' ? ' active' : '');
+      b.textContent = cat;
+      b.addEventListener('click', function () {
+        activeCategory = cat;
+        catRow.querySelectorAll('.catbtn').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        renderPresetButtons2();
+      });
+      catRow.appendChild(b);
+    });
+    wrap.appendChild(catRow);
+    const btnWrap = document.createElement('div');
+    btnWrap.className = 'pbtns';
+    btnWrap.id = 'pbtns';
+    wrap.appendChild(btnWrap);
+    /* point 'presets' button rendering into btnWrap */
+    window.__pbtnWrap = btnWrap;
+    renderPresetButtons2();
+  }
+  function renderPresetButtons2() {
+    const wrap = window.__pbtnWrap;
+    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
     NAMES.forEach(function (name, i) {
+      if (activeCategory !== 'ALL' && presetCategory(name) !== activeCategory) return;
       const b = document.createElement('button');
       b.className = 'preset factory';
       b.textContent = name;
-      b.addEventListener('click', function () { loadPreset(i); });
+      b.addEventListener('click', function () { loadPreset(i); pushRecent(name); });
       wrap.appendChild(b);
     });
   }
 
-  const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
+const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
 
   /* ── Octave shift: OCT -/+ buttons + Z/X keys ── */
   let octShift = 0;
