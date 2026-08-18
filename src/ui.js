@@ -1043,6 +1043,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
         });
         midi.input = noteRouter;
         midi.init();
+        window.__midi = midi;
       }
       updateMeta();
       syncUI();
