@@ -590,3 +590,10 @@ button:focus-visible, .key:focus-visible {
   .viz3d-bezel canvas { height: 120px; }
   .kb { overflow-x: auto; }
 }
+
+
+/* ══════════ BANK TOP + RECENTS (v3.7 UX) ══════════ */
+.bank-top { margin: 0 0 12px; max-height: 92px; overflow-y: auto; }
+.recents-row { display:flex; gap:8px; align-items:center; margin: 10px 0 12px; flex-wrap:wrap; }
+.recents-label { color:#5b6470; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:1.5px; }
+.preset.recent { border-color:#2a4a5f; color:#8fd7ff; }
