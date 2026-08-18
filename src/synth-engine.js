@@ -179,7 +179,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     const dC = 1 - Math.exp(-1 / (Math.max(10, p.decay) / 1000 * sr));
     const rC = 1 - Math.exp(-1 / (Math.max(30, p.release) / 1000 * sr));
     const sus = p.sustain / 100;
-    const un = Math.max(1, Math.round(p.unison));
+    const un = Math.min(7, Math.max(1, Math.round(p.unison)));
     const lfoInc = p.lfoRate / sr;
     const TWO_PI = 6.28318530718;
     const uniMuls = [];
