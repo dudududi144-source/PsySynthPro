@@ -10,7 +10,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     this.p = {
       wave: 0, detune: 0, unison: 3, spread: 12, sub: 25, noise: 0,
       fmRatio: 2, fmDepth: 12, fm2Ratio: 3, fm2Depth: 0,
-      filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
+      filterType: 0, cutoff: 2600, res: 2, filterEnv: 55, wtPos: 0,
       attack: 12, decay: 260, sustain: 70, release: 650,
       fAttack: 5, fDecay: 300, fSustain: 40, fRelease: 400, fEnvAmt: 60,
       lfo2Rate: 5, lfo2Wave: 0,
@@ -36,7 +36,7 @@ class SynthProcessor extends AudioWorkletProcessor {
         active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
         phase: 0, modPhase: 0, mod2Phase: 0, subPhase: 0, triInt: 0,
         uniPhase: [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
-        amp: 0, stage: 0, fAmp: 0, fStage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0,
+        amp: 0, stage: 0, fAmp: 0, fStage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0, z1: 0, z2: 0, z3: 0, z4: 0,
         coefTick: 0, a1: 0, a2: 0, a3: 0, resEffCached: -1,
         targetBaseFreq: 0, glideRate: 0
       });
@@ -180,7 +180,10 @@ class SynthProcessor extends AudioWorkletProcessor {
     const i0 = Math.floor(pos) % this.wtLen;
     const i1 = (i0 + 1) % this.wtLen;
     const frac = pos - Math.floor(pos);
-    return tbl[i0] + (tbl[i1] - tbl[i0]) * frac;
+    const wt = tbl[i0] + (tbl[i1] - tbl[i0]) * frac;
+    /* WT POS: morph wavetable -> sine for scanning feel */
+    const pos = Math.max(0, Math.min(1, p.wtPos / 100));
+    return wt * (1 - pos) + Math.sin(6.28318530718 * phase) * pos;
   }
 
   oscSample(phase, inc, wave, v) {
@@ -354,7 +357,19 @@ class SynthProcessor extends AudioWorkletProcessor {
         v.ic1eq = 2 * v1 - v.ic1eq;
         v.ic2eq = 2 * v2 - v.ic2eq;
         let fsig;
-        if (p.filterType === 0) fsig = v2;
+        if (p.filterType === 4) {
+          /* Moog-style 4-pole ladder with tanh saturation */
+          const g = Math.min(1, Math.max(0.001, v.smoothFc / 18000));
+          const kk = Math.min(3.8, Math.max(0, (p.res / 20) * 3.8));
+          const fb = kk * v.z4;
+          const inp = sig - fb;
+          v.z1 += g * (Math.tanh(inp * 0.6) - Math.tanh(v.z1));
+          v.z2 += g * (Math.tanh(v.z1) - Math.tanh(v.z2));
+          v.z3 += g * (Math.tanh(v.z2) - Math.tanh(v.z3));
+          v.z4 += g * (Math.tanh(v.z3) - Math.tanh(v.z4));
+          fsig = v.z4;
+        }
+        else if (p.filterType === 0) fsig = v2;
         else if (p.filterType === 1) fsig = sig - k * v1 - v2;
         else if (p.filterType === 2) fsig = v1;
         else fsig = sig - v1;
