@@ -406,6 +406,7 @@ class SynthEngine {
     else this.sendParams();
   }
   setAll(obj) {
+    Object.assign(this.params, PsySynth.DEFAULT);
     Object.assign(this.params, obj);
     if (this.delSend) this.delSend.gain.value = (this.params.delay / 100) * 0.55;
     if (this.revSend) this.revSend.gain.value = (this.params.reverb / 100) * 0.85;
