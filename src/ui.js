@@ -71,7 +71,9 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     ]},
     { title: 'FM OPERATOR', color: '#ffd166', items: [
       { type: 'knob', key: 'fmRatio', label: 'RATIO', min: 0.5, max: 8, step: 0.5, def: 2, fmt: function (v) { return 'x' + v; } },
-      { type: 'knob', key: 'fmDepth', label: 'DEPTH', min: 0, max: 100, def: 12, fmt: fmtPct }
+      { type: 'knob', key: 'fmDepth', label: 'DEPTH', min: 0, max: 100, def: 12, fmt: fmtPct },
+      { type: 'knob', key: 'fm2Ratio', label: 'B RATIO', min: 0.5, max: 8, step: 0.5, def: 3, fmt: function (v) { return 'x' + v; } },
+      { type: 'knob', key: 'fm2Depth', label: 'B DEPTH', min: 0, max: 100, def: 0, fmt: fmtPct }
     ]},
     { title: 'ZDF SVF', color: '#4dd6e8', items: [
       { type: 'cycle', key: 'filterType', label: 'TYPE', options: [0, 1, 2, 3], display: function (v) { return FTYPES[v]; } },
