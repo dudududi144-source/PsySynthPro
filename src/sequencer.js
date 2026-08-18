@@ -16,6 +16,8 @@ class Sequencer {
     this.bpm = 141;
     this.stepIdxDiv = 2;   /* Psy.ARP_STEPS index - 1/16 default */
     this.gate = 70;        /* % of step */
+    this.glide = false;    /* per-step glide: sustain note so next step glides */
+    this.lastNote = -1;
     this.steps = [];
     for (let i = 0; i < SEQ_LEN; i++) {
       /* rolling psy default: all gates on, accents on the quarter steps */
@@ -39,6 +41,7 @@ class Sequencer {
     } else {
       this.stopTimer();
       if (!this.hold) this.held = [];
+      if (this.lastNote >= 0) { this.engine.noteOff(this.lastNote); this.lastNote = -1; }
     }
   }
 
@@ -100,7 +103,10 @@ class Sequencer {
         const vel = st.accent ? 1.0 : 0.72;
         const gateSec = Math.max(0.03, stepDur * (this.gate / 100));
         this.engine.noteOnAt(note, vel, this.nextTime);
-        this.engine.noteOffAt(note, this.nextTime + gateSec);
+        if (!this.glide) {
+          this.engine.noteOffAt(note, this.nextTime + gateSec);
+        }
+        this.lastNote = note;
         if (this.onStep) this.onStep(this.stepPos, note);
       } else if (this.onStep) {
         this.onStep(this.stepPos, -1);
