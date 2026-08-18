@@ -3,6 +3,17 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [3.1.0] — Psy Advantages: True Supersaw + Noise
+### Fixed
+- **Supersaw correlation bug**: all unison voices shared one phase accumulator, so unison
+  was correlated (not a true supersaw). Now each unison voice has its own independent
+  random initial phase — the classic psy/EDM supersaw spread.
+### Added
+- **Noise oscillator** — NOISE knob mixes white noise into the signal (psy FX/percussion).
+  Noise param added to DEFAULT + all 14 presets (default 0).
+### Verified
+- Per-unison phases independent; noise mixed post-osc pre-filter.
+
 ## [3.0.0] — Retina 3D Spectrum (roadmap complete)
 ### Added
 - **Retina/HiDPI 3D spectrum** — the SPECTRUM 3D canvas now renders at
