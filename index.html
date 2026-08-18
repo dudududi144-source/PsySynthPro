@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v4.0.0 · perf · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v4.2.0 · mipmap-fix · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -623,7 +623,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a2f38;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v4.0.0 · perf · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a2f38;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v4.2.0 · mipmap-fix · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -653,11 +653,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v4.0.0 · perf · 2026-08-18 &bull; PERF &bull; BAND-LIMITED WT &bull; UNDO/A-B &bull; 46 PSY PRESETS &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v4.2.0 · mipmap-fix · 2026-08-18 &bull; ROAST-FIXED &bull; 3-OCT KB &bull; 46 PSY PRESETS &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v4.0.0 · perf · 2026-08-18';
+window.__psyBuild = 'v4.2.0 · mipmap-fix · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -1151,8 +1151,10 @@ class SynthProcessor extends AudioWorkletProcessor {
     const mips = this.wtMips;
     /* pick mip so highest kept harmonic stays under Nyquist */
     const maxH = 0.5 / Math.max(inc, 0.00001);
-    let level = 0;
-    while (level < mips.length - 1 && maxH < Math.pow(2, level + 1)) level++;
+    /* each mip level ~halves usable harmonics; pick level so kept harmonics <= maxH */
+    const halfLen = this.wtLen / 2;
+    let level = Math.floor(Math.log2(Math.max(1, halfLen / Math.max(1, maxH))));
+    level = Math.max(0, Math.min(mips.length - 1, level));
     const tbl = mips[level];
     const pos = phase * this.wtLen;
     const i0 = Math.floor(pos) % this.wtLen;
@@ -3537,7 +3539,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     renderPresetButtons2();
   }
 
-const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
+const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5', 74: 'D5', 76: 'E5', 77: 'F5', 79: 'G5', 81: 'A5', 83: 'B5', 84: 'C6' };
 
   /* ── Octave shift: OCT -/+ buttons + Z/X keys ── */
   let octShift = 0;
@@ -3576,7 +3578,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
 
   function buildKeyboard() {
     const kb = $('kb');
-    for (let n = 48; n <= 72; n++) {
+    for (let n = 48; n <= 84; n++) {
       const black = [1, 3, 6, 8, 10].indexOf(n % 12) >= 0;
       const k = document.createElement('div');
       k.className = 'key ' + (black ? 'b' : 'w');
