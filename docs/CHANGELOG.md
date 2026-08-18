@@ -3,6 +3,16 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.6.0] — Perf HUD (live voice monitor)
+### Added
+- **Perf HUD** in the status strip: live active-voice count (X/16), reported from the
+  worklet every ~2048 samples (~43 Hz) via port messages.
+- Color-coded by load: green (<8), amber (8-11), red (12+).
+### Why
+- Makes CPU pressure visible so the v2.5 perf improvements can be verified live.
+### Verified
+- Worklet + engine + UI wiring; additive changes only.
+
 ## [2.5.0] — DSP Performance Pass (load/latency fix)
 ### Changed (worklet hot path)
 - **baseFreq & bendMul cached per voice** — removes 2 Math.pow per voice per sample.
