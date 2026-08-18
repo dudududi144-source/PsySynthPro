@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.0.0 · retina · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v3.1.0 · supersaw+noise · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -524,7 +524,7 @@ body {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.0.0 · retina · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.1.0 · supersaw+noise · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -554,11 +554,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.0.0 · retina · 2026-08-18 &bull; PSYTRANCE INSTRUMENT &bull; RETINA &bull; NxM MOD MATRIX &bull; SEQ GLIDE &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.1.0 · supersaw+noise · 2026-08-18 &bull; SUPERSAW &bull; NOISE &bull; NxM MOD MATRIX &bull; SEQ GLIDE &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v3.0.0 · retina · 2026-08-18';
+window.__psyBuild = 'v3.1.0 · supersaw+noise · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -619,7 +619,7 @@ window.addEventListener('load', function () {
 var Psy = (window.PsySynth = window.PsySynth || {});
 
 Psy.DEFAULT = {
-  wave: 0, detune: 0, unison: 3, spread: 12, sub: 25,
+  wave: 0, detune: 0, unison: 3, spread: 12, sub: 25, noise: 0,
   fmRatio: 2, fmDepth: 12,
   filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
   attack: 12, decay: 260, sustain: 70, release: 650,
@@ -634,24 +634,24 @@ Psy.DEFAULT = {
 
 Psy.PRESETS = {
   /* ── PSYTRANCE CORE ─────────────────────────────────────────── */
-  'PSY BASS 141':    { wave: 0, detune: 0,  unison: 1, spread: 0,  sub: 70, fmRatio: 1,   fmDepth: 8,  filterType: 0, cutoff: 520,  res: 7,  filterEnv: 58, attack: 3,    decay: 190,  sustain: 38, release: 160,  lfoWave: 0, lfoTarget: 0, lfoRate: 2,   lfoDepth: 0,  master: 85, reverb: 10, delay: 8, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'TRANCE GATE':     { wave: 0, detune: 6,  unison: 5, spread: 22, sub: 15, fmRatio: 2,   fmDepth: 14, filterType: 0, cutoff: 2900, res: 3,  filterEnv: 45, attack: 18,   decay: 320,  sustain: 75, release: 900,  lfoWave: 1, lfoTarget: 2, lfoRate: 4.7, lfoDepth: 78, master: 80, reverb: 48, delay: 30, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'ACID 303':        { wave: 0, detune: 0,  unison: 1, spread: 0,  sub: 0,  fmRatio: 2,   fmDepth: 0,  filterType: 0, cutoff: 620,  res: 18, filterEnv: 92, attack: 2,    decay: 170,  sustain: 22, release: 190,  lfoWave: 0, lfoTarget: 0, lfoRate: 4.5, lfoDepth: 35, master: 80, reverb: 12, delay: 14, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'GOA BLEEP':       { wave: 3, detune: 0,  unison: 3, spread: 9,  sub: 0,  fmRatio: 3.5, fmDepth: 62, filterType: 0, cutoff: 4200, res: 2,  filterEnv: 40, attack: 2,    decay: 380,  sustain: 0,  release: 520,  lfoWave: 0, lfoTarget: 1, lfoRate: 5.5, lfoDepth: 24, master: 80, reverb: 42, delay: 34, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'PSY STAB':        { wave: 1, detune: 4,  unison: 3, spread: 14, sub: 20, fmRatio: 2,   fmDepth: 10, filterType: 2, cutoff: 1500, res: 6,  filterEnv: 65, attack: 2,    decay: 240,  sustain: 0,  release: 280,  lfoWave: 0, lfoTarget: 0, lfoRate: 3,   lfoDepth: 20, master: 80, reverb: 30, delay: 26, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'DARK PAD':        { wave: 0, detune: 10, unison: 7, spread: 40, sub: 40, fmRatio: 2,   fmDepth: 6,  filterType: 0, cutoff: 1100, res: 1,  filterEnv: 20, attack: 900,  decay: 1100, sustain: 88, release: 2800, lfoWave: 0, lfoTarget: 1, lfoRate: 0.5, lfoDepth: 16, master: 80, reverb: 70, delay: 40, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'ROLLING ARP':     { wave: 0, detune: 5,  unison: 3, spread: 12, sub: 10, fmRatio: 2,   fmDepth: 16, filterType: 0, cutoff: 3400, res: 4,  filterEnv: 70, attack: 3,    decay: 210,  sustain: 15, release: 240,  lfoWave: 0, lfoTarget: 0, lfoRate: 6,   lfoDepth: 18, master: 80, reverb: 26, delay: 28, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'PSY BASS 141':    { wave: 0, detune: 0,  unison: 1, spread: 0,  sub: 70, noise: 0, fmRatio: 1,   fmDepth: 8,  filterType: 0, cutoff: 520,  res: 7,  filterEnv: 58, attack: 3,    decay: 190,  sustain: 38, release: 160,  lfoWave: 0, lfoTarget: 0, lfoRate: 2,   lfoDepth: 0,  master: 85, reverb: 10, delay: 8, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'TRANCE GATE':     { wave: 0, detune: 6,  unison: 5, spread: 22, sub: 15, noise: 0, fmRatio: 2,   fmDepth: 14, filterType: 0, cutoff: 2900, res: 3,  filterEnv: 45, attack: 18,   decay: 320,  sustain: 75, release: 900,  lfoWave: 1, lfoTarget: 2, lfoRate: 4.7, lfoDepth: 78, master: 80, reverb: 48, delay: 30, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'ACID 303':        { wave: 0, detune: 0,  unison: 1, spread: 0,  sub: 0, noise: 0,  fmRatio: 2,   fmDepth: 0,  filterType: 0, cutoff: 620,  res: 18, filterEnv: 92, attack: 2,    decay: 170,  sustain: 22, release: 190,  lfoWave: 0, lfoTarget: 0, lfoRate: 4.5, lfoDepth: 35, master: 80, reverb: 12, delay: 14, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'GOA BLEEP':       { wave: 3, detune: 0,  unison: 3, spread: 9,  sub: 0, noise: 0,  fmRatio: 3.5, fmDepth: 62, filterType: 0, cutoff: 4200, res: 2,  filterEnv: 40, attack: 2,    decay: 380,  sustain: 0,  release: 520,  lfoWave: 0, lfoTarget: 1, lfoRate: 5.5, lfoDepth: 24, master: 80, reverb: 42, delay: 34, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'PSY STAB':        { wave: 1, detune: 4,  unison: 3, spread: 14, sub: 20, noise: 0, fmRatio: 2,   fmDepth: 10, filterType: 2, cutoff: 1500, res: 6,  filterEnv: 65, attack: 2,    decay: 240,  sustain: 0,  release: 280,  lfoWave: 0, lfoTarget: 0, lfoRate: 3,   lfoDepth: 20, master: 80, reverb: 30, delay: 26, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'DARK PAD':        { wave: 0, detune: 10, unison: 7, spread: 40, sub: 40, noise: 0, fmRatio: 2,   fmDepth: 6,  filterType: 0, cutoff: 1100, res: 1,  filterEnv: 20, attack: 900,  decay: 1100, sustain: 88, release: 2800, lfoWave: 0, lfoTarget: 1, lfoRate: 0.5, lfoDepth: 16, master: 80, reverb: 70, delay: 40, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'ROLLING ARP':     { wave: 0, detune: 5,  unison: 3, spread: 12, sub: 10, noise: 0, fmRatio: 2,   fmDepth: 16, filterType: 0, cutoff: 3400, res: 4,  filterEnv: 70, attack: 3,    decay: 210,  sustain: 15, release: 240,  lfoWave: 0, lfoTarget: 0, lfoRate: 6,   lfoDepth: 18, master: 80, reverb: 26, delay: 28, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
 
   /* ── CLASSICS ──────────────────────────────────────────────── */
-  'COSMIC LEAD':     { wave: 0, detune: 6,  unison: 3, spread: 14, sub: 20, fmRatio: 2,   fmDepth: 18, filterType: 0, cutoff: 3200, res: 3,  filterEnv: 60, attack: 15,   decay: 240,  sustain: 72, release: 700,  lfoWave: 0, lfoTarget: 0, lfoRate: 2.4, lfoDepth: 38, master: 80, reverb: 38, delay: 25, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'ETHEREAL PAD':    { wave: 3, detune: 10, unison: 5, spread: 24, sub: 35, fmRatio: 2,   fmDepth: 8,  filterType: 0, cutoff: 1800, res: 1,  filterEnv: 30, attack: 700,  decay: 900,  sustain: 85, release: 2400, lfoWave: 0, lfoTarget: 1, lfoRate: 0.8, lfoDepth: 22, master: 80, reverb: 72, delay: 38, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'NEURO PLUCK':     { wave: 1, detune: 0,  unison: 1, spread: 0,  sub: 15, fmRatio: 3,   fmDepth: 45, filterType: 0, cutoff: 5200, res: 5,  filterEnv: 90, attack: 2,    decay: 300,  sustain: 0,  release: 420,  lfoWave: 0, lfoTarget: 0, lfoRate: 5,   lfoDepth: 42, master: 80, reverb: 30, delay: 20, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'AMBIENT DRONE':   { wave: 2, detune: 8,  unison: 5, spread: 30, sub: 40, fmRatio: 2,   fmDepth: 6,  filterType: 0, cutoff: 1400, res: 1,  filterEnv: 25, attack: 1200, decay: 1200, sustain: 90, release: 3200, lfoWave: 0, lfoTarget: 1, lfoRate: 0.4, lfoDepth: 18, master: 80, reverb: 82, delay: 45, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'VOID SCREAM':     { wave: 0, detune: 0,  unison: 7, spread: 45, sub: 30, fmRatio: 6,   fmDepth: 70, filterType: 2, cutoff: 1200, res: 10, filterEnv: 75, attack: 30,   decay: 500,  sustain: 40, release: 900,  lfoWave: 1, lfoTarget: 1, lfoRate: 8,   lfoDepth: 70, master: 80, reverb: 46, delay: 34, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'COSMIC LEAD':     { wave: 0, detune: 6,  unison: 3, spread: 14, sub: 20, noise: 0, fmRatio: 2,   fmDepth: 18, filterType: 0, cutoff: 3200, res: 3,  filterEnv: 60, attack: 15,   decay: 240,  sustain: 72, release: 700,  lfoWave: 0, lfoTarget: 0, lfoRate: 2.4, lfoDepth: 38, master: 80, reverb: 38, delay: 25, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'ETHEREAL PAD':    { wave: 3, detune: 10, unison: 5, spread: 24, sub: 35, noise: 0, fmRatio: 2,   fmDepth: 8,  filterType: 0, cutoff: 1800, res: 1,  filterEnv: 30, attack: 700,  decay: 900,  sustain: 85, release: 2400, lfoWave: 0, lfoTarget: 1, lfoRate: 0.8, lfoDepth: 22, master: 80, reverb: 72, delay: 38, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'NEURO PLUCK':     { wave: 1, detune: 0,  unison: 1, spread: 0,  sub: 15, noise: 0, fmRatio: 3,   fmDepth: 45, filterType: 0, cutoff: 5200, res: 5,  filterEnv: 90, attack: 2,    decay: 300,  sustain: 0,  release: 420,  lfoWave: 0, lfoTarget: 0, lfoRate: 5,   lfoDepth: 42, master: 80, reverb: 30, delay: 20, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'AMBIENT DRONE':   { wave: 2, detune: 8,  unison: 5, spread: 30, sub: 40, noise: 0, fmRatio: 2,   fmDepth: 6,  filterType: 0, cutoff: 1400, res: 1,  filterEnv: 25, attack: 1200, decay: 1200, sustain: 90, release: 3200, lfoWave: 0, lfoTarget: 1, lfoRate: 0.4, lfoDepth: 18, master: 80, reverb: 82, delay: 45, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'VOID SCREAM':     { wave: 0, detune: 0,  unison: 7, spread: 45, sub: 30, noise: 0, fmRatio: 6,   fmDepth: 70, filterType: 2, cutoff: 1200, res: 10, filterEnv: 75, attack: 30,   decay: 500,  sustain: 40, release: 900,  lfoWave: 1, lfoTarget: 1, lfoRate: 8,   lfoDepth: 70, master: 80, reverb: 46, delay: 34, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
 
   /* ── MOD MATRIX SHOWCASE ─────────────────────────────────────── */
-  'WARP BASS':     { wave: 0, detune: 0, unison: 1, spread: 0,  sub: 60, fmRatio: 1, fmDepth: 12, filterType: 0, cutoff: 700,  res: 9,  filterEnv: 65, attack: 2, decay: 220, sustain: 40, release: 200, lfoWave: 0, lfoTarget: 0, lfoRate: 6, lfoDepth: 0, master: 85, reverb: 14, delay: 10, lfoCutoff: 60, lfoPitch: 0,  lfoAmp: 0, lfoFM: 0,  envPitch: 35, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'ACID SIREN':    { wave: 1, detune: 3, unison: 3, spread: 12, sub: 0,  fmRatio: 3, fmDepth: 40, filterType: 2, cutoff: 1400, res: 12, filterEnv: 70, attack: 8, decay: 300, sustain: 55, release: 400, lfoWave: 0, lfoTarget: 0, lfoRate: 5, lfoDepth: 0, master: 80, reverb: 30, delay: 22, lfoCutoff: 45, lfoPitch: 55, lfoAmp: 0, lfoFM: 60, envPitch: 0,  envFM: 40, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 }
+  'WARP BASS':     { wave: 0, detune: 0, unison: 1, spread: 0,  sub: 60, noise: 0, fmRatio: 1, fmDepth: 12, filterType: 0, cutoff: 700,  res: 9,  filterEnv: 65, attack: 2, decay: 220, sustain: 40, release: 200, lfoWave: 0, lfoTarget: 0, lfoRate: 6, lfoDepth: 0, master: 85, reverb: 14, delay: 10, lfoCutoff: 60, lfoPitch: 0,  lfoAmp: 0, lfoFM: 0,  envPitch: 35, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
+  'ACID SIREN':    { wave: 1, detune: 3, unison: 3, spread: 12, sub: 0, noise: 0,  fmRatio: 3, fmDepth: 40, filterType: 2, cutoff: 1400, res: 12, filterEnv: 70, attack: 8, decay: 300, sustain: 55, release: 400, lfoWave: 0, lfoTarget: 0, lfoRate: 5, lfoDepth: 0, master: 80, reverb: 30, delay: 22, lfoCutoff: 45, lfoPitch: 55, lfoAmp: 0, lfoFM: 60, envPitch: 0,  envFM: 40, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 }
 };
 
 </script>
@@ -851,7 +851,7 @@ class SynthProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
     this.p = {
-      wave: 0, detune: 0, unison: 3, spread: 12, sub: 25,
+      wave: 0, detune: 0, unison: 3, spread: 12, sub: 25, noise: 0,
       fmRatio: 2, fmDepth: 12,
       filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
       attack: 12, decay: 260, sustain: 70, release: 650,
@@ -868,6 +868,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       this.voices.push({
         active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
         phase: 0, modPhase: 0, subPhase: 0, triInt: 0,
+        uniPhase: [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
         amp: 0, stage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0,
         coefTick: 0, a1: 0, a2: 0, a3: 0, resEffCached: -1,
         targetBaseFreq: 0, glideRate: 0
@@ -1087,9 +1088,9 @@ class SynthProcessor extends AudioWorkletProcessor {
           const fmDepthEff = (p.fmDepth / 100) * f * 2 + lfoVal * (p.lfoFM / 100) * f * 2 + envNorm * (p.envFM / 100) * f * 2 + modFmCoef * f * 2;
           const fmHz = Math.sin(TWO_PI * v.modPhase) * fmDepthEff;
           const inc = Math.max(0.00001, (f + fmHz) / sr);
-          v.phase += inc;
-          if (v.phase >= 1) v.phase -= 1;
-          sig += this.oscSample(v.phase, Math.min(inc, 0.49), p.wave, v);
+          v.uniPhase[u] += inc;
+          if (v.uniPhase[u] >= 1) v.uniPhase[u] -= 1;
+          sig += this.oscSample(v.uniPhase[u], Math.min(inc, 0.49), p.wave, v);
         }
         sig /= un;
 
@@ -1097,6 +1098,10 @@ class SynthProcessor extends AudioWorkletProcessor {
           v.subPhase += (baseFreq * bendMul / 2) / sr;
           if (v.subPhase >= 1) v.subPhase -= 1;
           sig += (p.sub / 100) * Math.sin(TWO_PI * v.subPhase);
+        }
+        /* noise oscillator (white noise mix) */
+        if (p.noise > 0) {
+          sig += (Math.random() * 2 - 1) * (p.noise / 100);
         }
 
         let fc = p.cutoff + (p.filterEnv / 100) * 9000 * (v.vel > 0 ? v.amp / v.vel : 0);
@@ -2401,6 +2406,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       { type: 'knob', key: 'unison', label: 'UNISON', min: 1, max: 7, step: 2, def: 3 },
       { type: 'knob', key: 'spread', label: 'SPREAD', min: 0, max: 50, def: 12, fmt: fmtCt },
       { type: 'knob', key: 'sub', label: 'SUB', min: 0, max: 100, def: 25, fmt: fmtPct },
+      { type: 'knob', key: 'noise', label: 'NOISE', min: 0, max: 100, def: 0, fmt: fmtPct },
       { type: 'knob', key: 'glideTime', label: 'GLIDE', min: 0, max: 500, def: 0, fmt: fmtMs }
     ]},
     { title: 'FM OPERATOR', color: '#ffd166', items: [
