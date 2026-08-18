@@ -384,7 +384,28 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       onChange: function (v) { arp.octaves = Math.round(v); }
     });
 
+    /* arp export — render current ARP pattern to a .mid clip for the DAW */
+    const aExpRow = document.createElement('div');
+    aExpRow.className = 'seq-tempos';
+    const aExpBtn = document.createElement('button');
+    aExpBtn.className = 'tempo-btn exp';
+    aExpBtn.style.width = 'auto';
+    aExpBtn.style.padding = '6px 14px';
+    aExpBtn.innerHTML = '&#11015; EXPORT ARP (.mid)';
+    aExpBtn.addEventListener('click', function () {
+      let notes = arp.held.map(function (h) { return h.note; });
+      if (notes.length === 0) notes = lastNotes.slice();
+      if (notes.length === 0) notes = [36];
+      const g = Psy.exportArpGroove(arp, notes, 2);
+      if (!g.events.length) return;
+      const blob = Psy.buildMidiFile(g.events, g.bpm, 480);
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      Psy.downloadBlob(blob, 'psysynthpro-arp-' + g.bpm + 'bpm-' + stamp + '.mid');
+    });
+    aExpRow.appendChild(aExpBtn);
+
     s.appendChild(row);
+    s.appendChild(aExpRow);
     $('sections').appendChild(s);
   }
 
