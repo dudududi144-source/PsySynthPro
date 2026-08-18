@@ -8,9 +8,8 @@
 <meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#12141a">
 <title>PsySynthPro - Psytrance Synthesizer</title>
-<link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.5.0 · psy-subgenres · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v3.6.0 · no-sw · 2026-08-18 (no service worker) -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -553,7 +552,7 @@ body {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.5.0 · psy-subgenres · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.6.0 · no-sw · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -583,11 +582,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.5.0 · psy-subgenres · 2026-08-18 &bull; 38 PSY PRESETS &bull; VARIATIONS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.6.0 · no-sw · 2026-08-18 &bull; 38 PSY PRESETS &bull; VARIATIONS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v3.5.0 · psy-subgenres · 2026-08-18';
+window.__psyBuild = 'v3.6.0 · no-sw · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -626,21 +625,16 @@ window.addEventListener('load', function () {
 });
 </script>
 <script>
+/* No service worker (removed to prevent stale-cache breakage). Unregister leftovers. */
 (function () {
   try {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
       navigator.serviceWorker.getRegistrations().then(function (regs) {
         for (var i = 0; i < regs.length; i++) regs[i].unregister();
-      }).catch(function () {});
+      });
     }
   } catch (e) {}
-  try {
-    if (window.caches && caches.keys) {
-      caches.keys().then(function (ks) {
-        for (var i = 0; i < ks.length; i++) caches.delete(ks[i]);
-      }).catch(function () {});
-    }
-  } catch (e) {}
+  try { if (window.caches && caches.keys) caches.keys().then(function (ks) { for (var i=0;i<ks.length;i++) caches.delete(ks[i]); }); } catch (e) {}
 })();
 </script>
 <script>
