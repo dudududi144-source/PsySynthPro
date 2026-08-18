@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.6.1 · audit-fixes · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v3.7.0 · ux-bank-top · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -608,7 +608,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.6.1 · audit-fixes · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.7.0 · ux-bank-top · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -626,6 +626,7 @@ button:focus-visible, .key:focus-visible {
     <button id="bMidi" class="tbtn midi">&#9836; MIDI</button>
     <button id="bPanic" class="tbtn panic">PANIC</button>
   </div>
+  <div class="prow bank-top" id="presets"></div>
   <div class="viz3d-bezel">
     <div class="viz3d-label">SPECTRUM 3D</div>
     <canvas id="viz3d" width="1100" height="180"></canvas>
@@ -636,13 +637,13 @@ button:focus-visible, .key:focus-visible {
     <div class="perf-hud" id="perfHud">VOICES 0/16</div>
   </div>
   <div class="sections" id="sections"></div>
-  <div class="prow" id="presets"></div>
+  <div class="prow recents-row" id="recents"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.6.1 · audit-fixes · 2026-08-18 &bull; 46 PSY PRESETS &bull; VARIATIONS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.7.0 · ux-bank-top · 2026-08-18 &bull; 46 PSY PRESETS &bull; VARIATIONS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v3.6.1 · audit-fixes · 2026-08-18';
+window.__psyBuild = 'v3.7.0 · ux-bank-top · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
