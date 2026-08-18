@@ -677,7 +677,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     /* category filter row */
     const catRow = document.createElement('div');
     catRow.className = 'catrow';
-    const cats = ['ALL', 'BASS', 'LEAD', 'PAD', 'ARP', 'FX', 'WT'];
+    const cats = ['ALL', 'BASS', 'LEAD', 'PAD', 'ARP', 'FX', 'WT', 'USER'];
     cats.forEach(function (cat) {
       const b = document.createElement('button');
       b.className = 'catbtn' + (cat === 'ALL' ? ' active' : '');
@@ -697,19 +697,75 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     wrap.appendChild(btnWrap);
     /* point 'presets' button rendering into btnWrap */
     window.__pbtnWrap = btnWrap;
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'catbtn savebtn';
+    saveBtn.textContent = 'SAVE CURRENT';
+    saveBtn.addEventListener('click', saveCurrentPreset);
+    wrap.appendChild(saveBtn);
     renderPresetButtons2();
   }
+  function loadUserPreset(name) {
+    const patch = Psy.PresetStore.get(name);
+    if (!patch) return;
+    engine.setAll(patch);
+    syncUI();
+    $('oName').textContent = name;
+    pushRecent(name);
+  }
+
   function renderPresetButtons2() {
     const wrap = window.__pbtnWrap;
     while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+    /* factory presets */
     NAMES.forEach(function (name, i) {
-      if (activeCategory !== 'ALL' && presetCategory(name) !== activeCategory) return;
+      if (activeCategory !== 'ALL' && activeCategory !== 'USER' && presetCategory(name) !== activeCategory) return;
+      if (activeCategory === 'USER') return;
       const b = document.createElement('button');
       b.className = 'preset factory';
       b.textContent = name;
       b.addEventListener('click', function () { loadPreset(i); pushRecent(name); });
       wrap.appendChild(b);
     });
+    /* user presets */
+    if (activeCategory === 'ALL' || activeCategory === 'USER') {
+      Psy.PresetStore.list().forEach(function (name) {
+        const wrap2 = document.createElement('span');
+        wrap2.className = 'upwrap';
+        const b = document.createElement('button');
+        b.className = 'preset user';
+        b.textContent = name;
+        b.addEventListener('click', function () { loadUserPreset(name); });
+        wrap2.appendChild(b);
+        const del = document.createElement('button');
+        del.className = 'updel';
+        del.textContent = 'x';
+        del.addEventListener('click', function (e) {
+          e.stopPropagation();
+          Psy.PresetStore.remove(name);
+          renderPresetButtons2();
+        });
+        wrap2.appendChild(del);
+        wrap.appendChild(wrap2);
+      });
+    }
+  }
+
+  function saveCurrentPreset() {
+    const name = window.prompt ? window.prompt('Save current sound as:', 'MY SOUND') : 'MY SOUND';
+    if (!name) return;
+    const patch = {};
+    for (const k in engine.params) patch[k] = engine.params[k];
+    if (Psy.PresetStore.save(name, patch)) {
+      activeCategory = 'USER';
+      const catRow = document.querySelector('.catrow');
+      if (catRow) {
+        catRow.querySelectorAll('.catbtn').forEach(function (x) {
+          x.classList.toggle('active', x.textContent === 'USER');
+        });
+      }
+      renderPresetButtons2();
+      pushRecent(name);
+    }
   }
 
 const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
