@@ -61,6 +61,7 @@ class Viz3D {
   }
 
   draw() {
+    if (typeof document !== 'undefined' && document.hidden) return;
     const ctx = this.ctx, W = this.width, H = this.height;
     this.time += 0.008;
 
