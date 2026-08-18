@@ -120,6 +120,10 @@ class Knob {
   }
   render() {
     const p = this.norm();
+    if (this.zone && this.zone.setAttribute) {
+      this.zone.setAttribute('aria-valuenow', String(Math.round(this.value)));
+      this.zone.setAttribute('aria-valuetext', this.cfg.fmt ? this.cfg.fmt(this.value) : String(Math.round(this.value)));
+    }
     const a1 = -135 + 270 * p;
     if (a1 <= -133) this.valueArc.setAttribute('d', '');
     else this.valueArc.setAttribute('d', arcPath(50, 50, 34, -135, a1));
@@ -129,6 +133,18 @@ class Knob {
   bind() {
     const self = this;
     let drag = false, sy = 0, sp = 0;
+    /* accessibility: focusable + keyboard control */
+    this.zone.setAttribute('role', 'slider');
+    this.zone.setAttribute('tabindex', '0');
+    this.zone.setAttribute('aria-label', this.cfg.label || 'knob');
+    this.zone.addEventListener('keydown', function (e) {
+      const stepF = (e.shiftKey ? 0.1 : 0.03);
+      if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); self.set(self.fromNorm(self.norm() + stepF)); }
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { e.preventDefault(); self.set(self.fromNorm(self.norm() - stepF)); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); self.set(self.cfg.def); }
+    });
+    this.zone.addEventListener('focus', function () { self.zone.classList.add('kfocus'); });
+    this.zone.addEventListener('blur', function () { self.zone.classList.remove('kfocus'); });
     this.zone.addEventListener('pointerdown', function (e) {
       drag = true; sy = e.clientY; sp = self.norm();
       self.zone.setPointerCapture(e.pointerId);
