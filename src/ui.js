@@ -196,6 +196,7 @@ const LAYOUT = [
   }
 
   function syncUI() {
+    if (typeof refreshModRings === 'function') { setTimeout(refreshModRings, 0); }
     Object.keys(REG).forEach(function (k) {
       const c = REG[k];
       if (c instanceof Psy.Knob) c.set(engine.params[k], true);
@@ -1121,6 +1122,19 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     }
   }
 
+  /* Mod rings: highlight knobs that are active modulation destinations */
+  const DEST_PARAM = { 1: 'cutoff', 2: null, 3: null, 4: 'fmDepth', 5: 'res' };
+  function refreshModRings() {
+    const active = {};
+    for (let i=0;i<8;i++) {
+      const s = engine.params['m'+i+'s'], a = engine.params['m'+i+'a'], d = engine.params['m'+i+'d'];
+      if (s && a && d) { const pk = DEST_PARAM[d]; if (pk) active[pk] = true; }
+    }
+    for (const k in REG) {
+      const c = REG[k];
+      if (c && c.zone) c.zone.classList.toggle('modulated', !!active[k]);
+    }
+  }
   /* Tab organization */
   const TABMAP = {"POLYBLEP OSC": "SYNTH", "FM OPERATOR": "SYNTH", "ZDF SVF": "SYNTH", "ANALOG ENV": "SYNTH", "FILTER ENV": "SYNTH", "LFO": "MOD", "LFO 2": "MOD", "FREE MOD MATRIX": "MOD", "PERFORMANCE MACROS": "MOD", "FX RACK": "FX", "SPACE FX": "FX", "ARPEGGIATOR": "PERF", "STEP SEQ": "PERF", "WAVETABLE LAB": "PERF", "PRESET MORPH": "PERF"};
   function buildTabs() {
