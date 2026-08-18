@@ -702,6 +702,11 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     saveBtn.textContent = 'SAVE CURRENT';
     saveBtn.addEventListener('click', saveCurrentPreset);
     wrap.appendChild(saveBtn);
+    const genBtn = document.createElement('button');
+    genBtn.className = 'catbtn genbtn';
+    genBtn.textContent = 'GEN VARIATIONS';
+    genBtn.addEventListener('click', generateVariations);
+    wrap.appendChild(genBtn);
     renderPresetButtons2();
   }
   function loadUserPreset(name) {
@@ -766,6 +771,28 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       renderPresetButtons2();
       pushRecent(name);
     }
+  }
+
+  /* Generate musical variations of the current patch, save them as user presets */
+  function generateVariations() {
+    const base = {};
+    for (const k in engine.params) base[k] = engine.params[k];
+    const count = window.prompt ? parseInt(window.prompt('How many variations? (1-32)', '8'), 10) : 8;
+    const n = Math.max(1, Math.min(32, isNaN(count) ? 8 : count));
+    const baseName = ($('oName').textContent || 'SOUND').slice(0, 16).trim();
+    const vars = Psy.Variation.generateMany(base, baseName, n, 0.5);
+    let saved = 0;
+    for (const vr of vars) {
+      if (Psy.PresetStore.save(vr.name, vr.patch)) saved++;
+    }
+    activeCategory = 'USER';
+    const catRow = document.querySelector('.catrow');
+    if (catRow) {
+      catRow.querySelectorAll('.catbtn').forEach(function (x) {
+        x.classList.toggle('active', x.textContent === 'USER');
+      });
+    }
+    renderPresetButtons2();
   }
 
 const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
