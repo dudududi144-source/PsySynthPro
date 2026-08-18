@@ -30,6 +30,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
     this.lfoPhase = 0;
     this.queue = [];
+    this._voiceTick = 0;
     this.wtable = this.renderDefaultTable();
     this.wtLen = this.wtable.length;
     this.port.onmessage = (e) => this.onMessage(e.data);
@@ -265,6 +266,13 @@ class SynthProcessor extends AudioWorkletProcessor {
       const s = Math.tanh(acc * master * 0.28);
       for (let c = 0; c < nCh; c++) out[c][i] = s;
     }
+    this._voiceTick += N;
+    if (this._voiceTick >= 2048) {
+      this._voiceTick = 0;
+      let count = 0;
+      for (const v of this.voices) if (v.active) count++;
+      this.port.postMessage({ type: 'voices', count: count });
+    }
     return true;
   }
 }
@@ -279,6 +287,7 @@ class SynthEngine {
     this.node = null;
     this.analyser = null;
     this.ready = false;
+    this.onVoices = null;
     this.params = Object.assign({}, PsySynth.DEFAULT);
   }
 
@@ -293,6 +302,9 @@ class SynthEngine {
       self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
         numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
       });
+      self.node.port.onmessage = function (e) {
+        if (e.data && e.data.type === 'voices' && self.onVoices) self.onVoices(e.data.count);
+      };
 
       self.fxInput = self.ctx.createGain();
       self.node.connect(self.fxInput);
