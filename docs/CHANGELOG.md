@@ -3,6 +3,17 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [3.2.0] — Psy Preset Expansion + Preset Bank
+### Added
+- **+14 psy presets** (28 total): wavetable (WT COSMIC LEAD, WT NEURO BASS), bass
+  (FULLON/ACID/ROLLING BASS), leads (SUPERSAW/GOA/ACID LEAD), pads (DARK SPACE/ETHEREAL CHOIR),
+  plucks/arp (PSY PLUCK, GOA ARP), FX (RISER/IMPACT FX).
+- Fixed: wavetable presets now actually use wave:4 (worklet wavetable).
+- **Preset bank UI**: category filter (ALL/BASS/LEAD/PAD/ARP/FX/WT) + recently-used
+  tracking (localStorage, last 6).
+### Notes
+- Presets hand-voiced per category; each is a full patch (osc+filter+env+LFO+FX).
+
 ## [3.1.0] — Psy Advantages: True Supersaw + Noise
 ### Fixed
 - **Supersaw correlation bug**: all unison voices shared one phase accumulator, so unison
