@@ -3,6 +3,14 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [3.5.0] — Psy Subgenre Preset Expansion
+### Added
+- **+10 hand-voiced psy subgenre presets** (38 total): FULLON/DARKPSY/HITECH/PROG/FOREST
+  bass & leads, PSY ARPGATE, PSYCHADELIC PAD, SQUELCH LEAD. Each is a full patch with all
+  params (no bleed), organized by subgenre for the category filter.
+### Notes
+- Combined with the variation generator, each subgenre preset can spawn many variations.
+
 ## [3.4.0] — Procedural Variation Generator
 ### Added
 - **src/variation.js** — seeded (mulberry32) variation generator. Varies parameters within
