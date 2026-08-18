@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v5.1.0 · phase2 · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v5.2.0 · fxrack · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -623,7 +623,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a2f38;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v5.1.0 · phase2 · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a2f38;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v5.2.0 · fxrack · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -653,11 +653,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v5.1.0 · phase2 · 2026-08-18 &bull; MOOG LADDER &bull; WT POS &bull; FILTER ENV &bull; LFO2 &bull; FREE MOD</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v5.2.0 · fxrack · 2026-08-18 &bull; FX RACK &bull; MOOG LADDER &bull; FILTER ENV &bull; LFO2 &bull; FREE MOD</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v5.1.0 · phase2 · 2026-08-18';
+window.__psyBuild = 'v5.2.0 · fxrack · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -1020,7 +1020,8 @@ class SynthProcessor extends AudioWorkletProcessor {
       m6s: 0, m6a: 0, m6d: 0,
       m7s: 0, m7a: 0, m7d: 0,
       glideTime: 0,
-      master: 80, reverb: 35, delay: 22
+      master: 80, reverb: 35, delay: 22,
+      fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0.8,
     };
     this.voices = [];
     for (let i = 0; i < 16; i++) {
@@ -1449,6 +1450,36 @@ class SynthEngine {
       self.revSend.connect(self.conv);
       self.conv.connect(self.master);
 
+      /* FX RACK: distortion / chorus / bitcrush as parallel sends */
+      self.distSend = self.ctx.createGain();
+      self.distSend.gain.value = (self.params.fxDist / 100) * 0.6;
+      self.waveshaper = self.ctx.createWaveShaper();
+      self.waveshaper.curve = self.makeDistCurve(60);
+      self.waveshaper.oversample = '2x';
+      self.fxInput.connect(self.distSend);
+      self.distSend.connect(self.waveshaper);
+      self.waveshaper.connect(self.master);
+      self.chSend = self.ctx.createGain();
+      self.chSend.gain.value = (self.params.fxChorus / 100) * 0.5;
+      self.chDelay = self.ctx.createDelay(1);
+      self.chDelay.delayTime.value = 0.02;
+      self.chLfo = self.ctx.createOscillator();
+      self.chLfo.frequency.value = self.params.chRate;
+      self.chLfoDepth = self.ctx.createGain();
+      self.chLfoDepth.gain.value = 0.004;
+      self.chLfo.connect(self.chLfoDepth);
+      self.chLfoDepth.connect(self.chDelay.delayTime);
+      self.chLfo.start();
+      self.fxInput.connect(self.chSend);
+      self.chSend.connect(self.chDelay);
+      self.chDelay.connect(self.master);
+      self.crSend = self.ctx.createGain();
+      self.crSend.gain.value = (self.params.fxCrush / 100) * 0.5;
+      self.crusher = self.ctx.createWaveShaper();
+      self.crusher.curve = self.makeCrushCurve(6);
+      self.fxInput.connect(self.crSend);
+      self.crSend.connect(self.crusher);
+      self.crusher.connect(self.master);
       self.analyser = self.ctx.createAnalyser();
       self.analyser.fftSize = 2048;
       self.master.connect(self.analyser);
@@ -1461,6 +1492,17 @@ class SynthEngine {
     });
   }
 
+  makeDistCurve(amount) {
+    const n = 1024; const c = new Float32Array(n);
+    for (let i=0;i<n;i++){ const x = (i/(n-1))*2-1; c[i] = Math.tanh(x*(1+amount*0.05)); }
+    return c;
+  }
+  makeCrushCurve(bits) {
+    const n = 1024; const c = new Float32Array(n);
+    const steps = Math.pow(2, bits);
+    for (let i=0;i<n;i++){ const x=(i/(n-1))*2-1; c[i]=Math.round(x*steps)/steps; }
+    return c;
+  }
   makeIR(seconds, decay) {
     const rate = this.ctx.sampleRate;
     const len = Math.floor(rate * seconds);
@@ -1479,6 +1521,10 @@ class SynthEngine {
     this.params[key] = value;
     if (key === 'delay' && this.delSend) this.delSend.gain.value = (value / 100) * 0.55;
     else if (key === 'reverb' && this.revSend) this.revSend.gain.value = (value / 100) * 0.85;
+      if (this.distSend) this.distSend.gain.value = (this.params.fxDist / 100) * 0.6;
+      if (this.chSend) this.chSend.gain.value = (this.params.fxChorus / 100) * 0.5;
+      if (this.crSend) this.crSend.gain.value = (this.params.fxCrush / 100) * 0.5;
+      if (this.chLfo) this.chLfo.frequency.value = this.params.chRate;
     else if (key === 'master' && this.master) this.master.gain.value = value / 100;
     else this.sendParams();
   }
@@ -2843,6 +2889,12 @@ const LAYOUT = [
       { type: 'knob', key: 'lfo2Rate', label: 'RATE', min: 0.1, max: 20, step: 0.1, def: 5, fmt: function (v) { return v.toFixed(1)+'Hz'; } }
     ]},
     { title: 'FREE MOD MATRIX', color: '#fbbf24', items: modSlotItems() },
+    { title: 'FX RACK', color: '#ff6b6b', items: [
+      { type: 'knob', key: 'fxDist', label: 'DIST', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fxChorus', label: 'CHORUS', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fxCrush', label: 'CRUSH', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'chRate', label: 'CH RATE', min: 0.1, max: 8, step: 0.1, def: 0.8, fmt: function (v) { return v.toFixed(1)+'Hz'; } }
+    ]},
     { title: 'SPACE FX', color: '#f07dc2', items: [
       { type: 'knob', key: 'reverb', label: 'REVERB', min: 0, max: 100, def: 35, fmt: fmtPct },
       { type: 'knob', key: 'delay', label: 'DELAY', min: 0, max: 100, def: 22, fmt: fmtPct },
