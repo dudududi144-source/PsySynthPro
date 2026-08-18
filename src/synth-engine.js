@@ -159,8 +159,10 @@ class SynthProcessor extends AudioWorkletProcessor {
     const mips = this.wtMips;
     /* pick mip so highest kept harmonic stays under Nyquist */
     const maxH = 0.5 / Math.max(inc, 0.00001);
-    let level = 0;
-    while (level < mips.length - 1 && maxH < Math.pow(2, level + 1)) level++;
+    /* each mip level ~halves usable harmonics; pick level so kept harmonics <= maxH */
+    const halfLen = this.wtLen / 2;
+    let level = Math.floor(Math.log2(Math.max(1, halfLen / Math.max(1, maxH))));
+    level = Math.max(0, Math.min(mips.length - 1, level));
     const tbl = mips[level];
     const pos = phase * this.wtLen;
     const i0 = Math.floor(pos) % this.wtLen;
