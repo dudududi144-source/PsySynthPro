@@ -74,7 +74,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       const v = this.findVoice(m.note);
       if (v) { v.bend = m.bend; v.bendMul = Math.pow(2, v.bend / 12); }
     }
-    else if (m.type === 'wavetable') { this.wtable = m.table; this.wtLen = m.table.length; }
+    else if (m.type === 'wavetable') { this.wtable = m.table; this.wtLen = m.table.length; this.wtMips = null; }
     else if (m.type === 'panic') {
       this.queue = [];
       for (const v of this.voices) { v.active = false; v.stage = 0; v.amp = 0; }
@@ -138,17 +138,40 @@ class SynthProcessor extends AudioWorkletProcessor {
     return 0;
   }
 
-  readWavetable(phase) {
+  /* band-limited wavetable: mipmap levels keep harmonics under Nyquist */
+  buildMips(table) {
+    const L = table.length;
+    const mips = [table];
+    let cur = table;
+    for (let m = 0; m < 5; m++) {
+      const next = new Float32Array(L);
+      for (let i = 0; i < L; i++) {
+        next[i] = (cur[(i - 1 + L) % L] + cur[i] * 2 + cur[(i + 1) % L]) * 0.25;
+      }
+      mips.push(next);
+      cur = next;
+    }
+    return mips;
+  }
+
+  readWavetable(phase, inc) {
+    if (!this.wtMips) this.wtMips = this.buildMips(this.wtable);
+    const mips = this.wtMips;
+    /* pick mip so highest kept harmonic stays under Nyquist */
+    const maxH = 0.5 / Math.max(inc, 0.00001);
+    let level = 0;
+    while (level < mips.length - 1 && maxH < Math.pow(2, level + 1)) level++;
+    const tbl = mips[level];
     const pos = phase * this.wtLen;
     const i0 = Math.floor(pos) % this.wtLen;
     const i1 = (i0 + 1) % this.wtLen;
     const frac = pos - Math.floor(pos);
-    return this.wtable[i0] + (this.wtable[i1] - this.wtable[i0]) * frac;
+    return tbl[i0] + (tbl[i1] - tbl[i0]) * frac;
   }
 
   oscSample(phase, inc, wave, v) {
     const TWO_PI = 6.28318530718;
-    if (wave === 4) return this.readWavetable(phase);
+    if (wave === 4) return this.readWavetable(phase, inc);
     if (wave === 3) return Math.sin(TWO_PI * phase);
     if (wave === 0) return (2 * phase - 1) - this.polyblep(phase, inc);
     if (wave === 1) {
