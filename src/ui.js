@@ -650,18 +650,69 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     if (btns[pIdx]) btns[pIdx].classList.add('on');
   }
 
+  function presetCategory(name) {
+    if (/BASS/.test(name)) return 'BASS';
+    if (/LEAD/.test(name)) return 'LEAD';
+    if (/PAD|DRONE|CHOIR/.test(name)) return 'PAD';
+    if (/ARP|PLUCK|STAB|BLEEP|ROLLING/.test(name)) return 'ARP';
+    if (/FX|RISER|IMPACT/.test(name)) return 'FX';
+    if (/^WT/.test(name)) return 'WT';
+    return 'OTHER';
+  }
+
+  let activeCategory = 'ALL';
+  function getRecents() {
+    try { return JSON.parse(localStorage.getItem('psy.recents') || '[]'); } catch (e) { return []; }
+  }
+  function pushRecent(name) {
+    let r = getRecents().filter(function (x) { return x !== name; });
+    r.unshift(name);
+    r = r.slice(0, 6);
+    try { localStorage.setItem('psy.recents', JSON.stringify(r)); } catch (e) {}
+  }
+
+
   function buildPresets() {
     const wrap = $('presets');
+    /* category filter row */
+    const catRow = document.createElement('div');
+    catRow.className = 'catrow';
+    const cats = ['ALL', 'BASS', 'LEAD', 'PAD', 'ARP', 'FX', 'WT'];
+    cats.forEach(function (cat) {
+      const b = document.createElement('button');
+      b.className = 'catbtn' + (cat === 'ALL' ? ' active' : '');
+      b.textContent = cat;
+      b.addEventListener('click', function () {
+        activeCategory = cat;
+        catRow.querySelectorAll('.catbtn').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        renderPresetButtons2();
+      });
+      catRow.appendChild(b);
+    });
+    wrap.appendChild(catRow);
+    const btnWrap = document.createElement('div');
+    btnWrap.className = 'pbtns';
+    btnWrap.id = 'pbtns';
+    wrap.appendChild(btnWrap);
+    /* point 'presets' button rendering into btnWrap */
+    window.__pbtnWrap = btnWrap;
+    renderPresetButtons2();
+  }
+  function renderPresetButtons2() {
+    const wrap = window.__pbtnWrap;
+    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
     NAMES.forEach(function (name, i) {
+      if (activeCategory !== 'ALL' && presetCategory(name) !== activeCategory) return;
       const b = document.createElement('button');
       b.className = 'preset factory';
       b.textContent = name;
-      b.addEventListener('click', function () { loadPreset(i); });
+      b.addEventListener('click', function () { loadPreset(i); pushRecent(name); });
       wrap.appendChild(b);
     });
   }
 
-  const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
+const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
 
   /* ── Octave shift: OCT -/+ buttons + Z/X keys ── */
   let octShift = 0;
