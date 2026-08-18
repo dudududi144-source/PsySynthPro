@@ -597,3 +597,11 @@ button:focus-visible, .key:focus-visible {
 .recents-row { display:flex; gap:8px; align-items:center; margin: 10px 0 12px; flex-wrap:wrap; }
 .recents-label { color:#5b6470; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:1.5px; }
 .preset.recent { border-color:#2a4a5f; color:#8fd7ff; }
+
+.psearch {
+  width: 100%; margin-bottom: 10px;
+  padding: 8px 12px; border-radius: 7px; border: 1px solid #2a2f38;
+  background: #12151b; color: #c9d1d9;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+}
+.psearch:focus { outline: 2px solid #7ff3ff; border-color: #7ff3ff; }
