@@ -3,6 +3,14 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [3.3.0] — User Preset Persistence
+### Added
+- **PresetStore** — clean localStorage-backed persistence layer (src/preset-store.js).
+- **SAVE CURRENT** button saves the current patch as a user preset.
+- **USER category** in the preset bank; user presets save/load/delete (x button).
+### Architecture
+- Persistence isolated in PresetStore (read/write/sanitize/remove) — clean separation.
+
 ## [3.2.0] — Psy Preset Expansion + Preset Bank
 ### Added
 - **+14 psy presets** (28 total): wavetable (WT COSMIC LEAD, WT NEURO BASS), bass
