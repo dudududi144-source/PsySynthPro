@@ -535,3 +535,37 @@ body {
 /* ══════════ GEN VARIATIONS (Phase 10) ══════════ */
 .genbtn { color:#c4b5fd; border-color:#5b4a8a; }
 .genbtn:hover { color:#e9d5ff; border-color:#7c5cff; }
+
+
+/* ══════════ ACCESSIBILITY + RESPONSIVE (Round 1) ══════════ */
+.kzone.kfocus { outline: 2px solid #7ff3ff; outline-offset: 2px; border-radius: 50%; }
+button:focus-visible, .kzone:focus-visible { outline: 2px solid #7ff3ff; outline-offset: 2px; }
+
+/* onboarding hint */
+.onboard {
+  margin: 0 0 14px; padding: 10px 14px; border-radius: 8px;
+  background: linear-gradient(90deg, rgba(127,243,255,0.08), rgba(127,243,255,0.02));
+  border: 1px solid rgba(127,243,255,0.25);
+  color: #9adbe8; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px;
+}
+.onboard b { color: #7ff3ff; }
+
+/* responsive */
+@media (max-width: 1280px) {
+  .chassis { width: 100%; }
+  .cheek { display: none; }
+}
+@media (max-width: 900px) {
+  .chassis { padding: 16px 14px; }
+  .topbar { flex-wrap: wrap; }
+  .oled { min-width: 100%; order: -1; }
+  .section { padding: 4px 10px; }
+  .seq-grid .seq-btn { width: 26px; height: 26px; }
+}
+@media (max-width: 560px) {
+  .krow { gap: 8px; }
+  .kzone { width: 48px !important; height: 48px !important; }
+  .key.w { width: 26px; height: 92px; }
+  .key.b { width: 17px; height: 56px; margin: 0 -9px; }
+  .viz3d-bezel canvas { height: 120px; }
+}
