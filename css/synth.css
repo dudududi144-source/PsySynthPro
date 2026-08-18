@@ -637,3 +637,5 @@ button:focus-visible, .key:focus-visible {
   .kzone { width: 48px; height: 48px; }
   .brand span { display:none; }
 }
+
+.kzone.modulated { box-shadow: 0 0 0 2px rgba(127,243,255,0.55), 0 0 12px rgba(127,243,255,0.35); border-radius: 50%; }
