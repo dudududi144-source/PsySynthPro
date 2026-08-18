@@ -117,6 +117,12 @@ const LAYOUT = [
       { type: 'knob', key: 'lfo2Rate', label: 'RATE', min: 0.1, max: 20, step: 0.1, def: 5, fmt: function (v) { return v.toFixed(1)+'Hz'; } }
     ]},
     { title: 'FREE MOD MATRIX', color: '#fbbf24', items: modSlotItems() },
+    { title: 'FX RACK', color: '#ff6b6b', items: [
+      { type: 'knob', key: 'fxDist', label: 'DIST', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fxChorus', label: 'CHORUS', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fxCrush', label: 'CRUSH', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'chRate', label: 'CH RATE', min: 0.1, max: 8, step: 0.1, def: 0.8, fmt: function (v) { return v.toFixed(1)+'Hz'; } }
+    ]},
     { title: 'SPACE FX', color: '#f07dc2', items: [
       { type: 'knob', key: 'reverb', label: 'REVERB', min: 0, max: 100, def: 35, fmt: fmtPct },
       { type: 'knob', key: 'delay', label: 'DELAY', min: 0, max: 100, def: 22, fmt: fmtPct },
