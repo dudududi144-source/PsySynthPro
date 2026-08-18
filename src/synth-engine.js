@@ -156,10 +156,11 @@ class SynthProcessor extends AudioWorkletProcessor {
       return sq + this.polyblep(phase, inc) - this.polyblep((phase + 0.5) % 1, inc);
     }
     if (wave === 2) {
+      /* band-limited triangle: integrate PolyBLEP square, with slow DC servo to prevent drift */
       const sq = phase < 0.5 ? 1 : -1;
       const c = sq + this.polyblep(phase, inc) - this.polyblep((phase + 0.5) % 1, inc);
       v.triInt += c * inc * 4;
-      v.triInt = Math.max(-1.2, Math.min(1.2, v.triInt));
+      v.triInt -= v.triInt * 0.0008;   /* DC servo: gently pull toward 0, no hard clamp distortion */
       return Math.max(-1, Math.min(1, v.triInt));
     }
     return Math.sin(TWO_PI * phase);
