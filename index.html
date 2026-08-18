@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v3.3.0 · preset-store · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v3.4.0 · variations · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -545,10 +545,15 @@ body {
 .updel:hover { background:#5a1f1a; }
 .savebtn { color:#9fe8b0; border-color:#3b6e4f; }
 
+
+/* ══════════ GEN VARIATIONS (Phase 10) ══════════ */
+.genbtn { color:#c4b5fd; border-color:#5b4a8a; }
+.genbtn:hover { color:#e9d5ff; border-color:#7c5cff; }
+
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.3.0 · preset-store · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v3.4.0 · variations · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -578,11 +583,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v3.3.0 · preset-store · 2026-08-18 &bull; USER PRESETS &bull; SUPERSAW &bull; NOISE &bull; SEQ GLIDE &bull; EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v3.4.0 · variations · 2026-08-18 &bull; VARIATIONS &bull; USER PRESETS &bull; SUPERSAW &bull; SEQ GLIDE &bull; EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v3.3.0 · preset-store · 2026-08-18';
+window.__psyBuild = 'v3.4.0 · variations · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -2442,6 +2447,92 @@ Psy.PresetStore = {
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
 
+/* ═══════════ Procedural Variation Generator ═══════════
+   Generates musical-quality variations of a base preset by varying
+   parameters within musical ranges (not random garbage). Seeded (mulberry32)
+   so every variation is reproducible.                                */
+
+/* mulberry32 seeded PRNG */
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+Psy.Variation = {
+  /* vary a value by up to +/-amt, optionally clamped to [lo,hi] */
+  _vary: function (rng, base, amt, lo, hi) {
+    let v = base + (rng() * 2 - 1) * amt;
+    if (lo !== undefined) v = Math.max(lo, v);
+    if (hi !== undefined) v = Math.min(hi, v);
+    return v;
+  },
+
+  /* Generate a variation of a base preset. seed makes it reproducible.
+     intensity 0..1 controls how far parameters drift. */
+  generate: function (base, seed, intensity) {
+    const rng = mulberry32(seed);
+    const it = (intensity === undefined) ? 0.5 : intensity;
+    const p = Object.assign({}, base);
+
+    /* timbre: keep wave & filterType (preserve character), vary color */
+    p.detune = this._vary(rng, base.detune, 8 * it, -50, 50);
+    p.unison = base.unison; /* keep voicing structure */
+    p.spread = this._vary(rng, base.spread, 6 * it, 0, 50);
+    p.sub = this._vary(rng, base.sub, 15 * it, 0, 100);
+    p.noise = this._vary(rng, base.noise, 10 * it, 0, 60);
+
+    /* FM: keep ratio (musical interval), vary depth */
+    p.fmRatio = base.fmRatio;
+    p.fmDepth = this._vary(rng, base.fmDepth, 12 * it, 0, 100);
+
+    /* filter: vary cutoff logarithmically around base, vary res/env */
+    const cutMul = Math.pow(2, (rng() * 2 - 1) * 1.2 * it); /* up to ~2.3x either way */
+    p.cutoff = Math.max(40, Math.min(16000, base.cutoff * cutMul));
+    p.res = this._vary(rng, base.res, 3 * it, 0.1, 20);
+    p.filterEnv = this._vary(rng, base.filterEnv, 15 * it, 0, 100);
+
+    /* envelope: vary within musical bounds, keep shape family */
+    p.attack = this._vary(rng, base.attack, base.attack * 0.5 * it, 1, 3000);
+    p.decay = this._vary(rng, base.decay, base.decay * 0.4 * it, 10, 3000);
+    p.sustain = this._vary(rng, base.sustain, 12 * it, 0, 100);
+    p.release = this._vary(rng, base.release, base.release * 0.4 * it, 30, 5000);
+
+    /* LFO: vary rate within musical range, vary depth */
+    p.lfoRate = this._vary(rng, base.lfoRate, base.lfoRate * 0.5 * it, 0.1, 20);
+    p.lfoDepth = this._vary(rng, base.lfoDepth, 15 * it, 0, 100);
+
+    /* FX: vary within musical range */
+    p.reverb = this._vary(rng, base.reverb, 15 * it, 0, 100);
+    p.delay = this._vary(rng, base.delay, 12 * it, 0, 100);
+    p.master = this._vary(rng, base.master, 8 * it, 60, 95);
+
+    return p;
+  },
+
+  /* Generate N named variations of a base preset */
+  generateMany: function (base, baseName, count, intensity) {
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      const seed = (baseName.length * 7919) + i * 104729 + 13;
+      out.push({
+        name: baseName + ' V' + (i + 1),
+        patch: this.generate(base, seed, intensity)
+      });
+    }
+    return out;
+  }
+};
+
+</script>
+<script>
+"use strict";
+var Psy = (window.PsySynth = window.PsySynth || {});
+
 (function () {
   const engine = new Psy.SynthEngine();
   /* Perf HUD: live active-voice count reported from the worklet */
@@ -3143,6 +3234,11 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     saveBtn.textContent = 'SAVE CURRENT';
     saveBtn.addEventListener('click', saveCurrentPreset);
     wrap.appendChild(saveBtn);
+    const genBtn = document.createElement('button');
+    genBtn.className = 'catbtn genbtn';
+    genBtn.textContent = 'GEN VARIATIONS';
+    genBtn.addEventListener('click', generateVariations);
+    wrap.appendChild(genBtn);
     renderPresetButtons2();
   }
   function loadUserPreset(name) {
@@ -3207,6 +3303,28 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       renderPresetButtons2();
       pushRecent(name);
     }
+  }
+
+  /* Generate musical variations of the current patch, save them as user presets */
+  function generateVariations() {
+    const base = {};
+    for (const k in engine.params) base[k] = engine.params[k];
+    const count = window.prompt ? parseInt(window.prompt('How many variations? (1-32)', '8'), 10) : 8;
+    const n = Math.max(1, Math.min(32, isNaN(count) ? 8 : count));
+    const baseName = ($('oName').textContent || 'SOUND').slice(0, 16).trim();
+    const vars = Psy.Variation.generateMany(base, baseName, n, 0.5);
+    let saved = 0;
+    for (const vr of vars) {
+      if (Psy.PresetStore.save(vr.name, vr.patch)) saved++;
+    }
+    activeCategory = 'USER';
+    const catRow = document.querySelector('.catrow');
+    if (catRow) {
+      catRow.querySelectorAll('.catbtn').forEach(function (x) {
+        x.classList.toggle('active', x.textContent === 'USER');
+      });
+    }
+    renderPresetButtons2();
   }
 
 const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5' };
