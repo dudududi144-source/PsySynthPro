@@ -3,6 +3,18 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [2.7.1] — Mod-Matrix Bugfix (QA-found)
+### Fixed
+- **Mod-matrix bleed:** the 15 NxM matrix params (modLC..modVR) were missing from
+  `Psy.DEFAULT` and from every preset, so modulation bled between presets and `syncUI`
+  could pass `undefined` to the matrix knobs. Added all 15 params (=0) to DEFAULT and
+  all 14 presets so presets are self-contained and knobs always sync to a real number.
+### Added (carried from v2.7)
+- Monophonic legato GLIDE (GLIDE knob, 0-500ms).
+### Verified
+- Worklet `this.p` initializes all matrix params to 0 (matrixActive=false, no NaN).
+- Live bundle: DEFAULT carries matrix params; secret scan CLEAN.
+
 ## [2.7.0] — Monophonic Legato Glide (psy-bass portamento)
 ### Added
 - **GLIDE knob** in the oscillator section (0-500 ms, default 0 = off).
