@@ -145,6 +145,13 @@ class Knob {
     });
     this.zone.addEventListener('focus', function () { self.zone.classList.add('kfocus'); });
     this.zone.addEventListener('blur', function () { self.zone.classList.remove('kfocus'); });
+    this.zone.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+      if (window.__midi && self.cfg.key) {
+        window.__midi.learnTarget = self.cfg.key;
+        if (window.__midi.setLast) { window.__midi.setLast('LEARN: move a knob/CC'); window.__midi.emit && window.__midi.emit('event', window.__midi.lastEvent); }
+      }
+    });
     this.zone.addEventListener('pointerdown', function (e) {
       drag = true; sy = e.clientY; sp = self.norm();
       self.zone.setPointerCapture(e.pointerId);
