@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v2.5.0 · perf · 2026-08-17 -->
+<!-- SELF-CONTAINED BUNDLE v2.6.0 · perfhud · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -507,10 +507,24 @@ body {
 .mod-matrix .kwrap { width: 64px; }
 .mod-matrix .klabel { display: none; }
 
+
+/* ══════════ PERF HUD (v2.6) ══════════ */
+.perf-hud {
+  margin-left: auto;
+  color: #3fb950;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 1px;
+  padding: 6px 12px; border-radius: 7px;
+  background: rgba(63,185,80,0.08);
+  border: 1px solid rgba(63,185,80,0.25);
+}
+.perf-hud.warm { color: #d29922; background: rgba(210,153,34,0.08); border-color: rgba(210,153,34,0.3); }
+.perf-hud.hot { color: #f85149; background: rgba(248,81,73,0.08); border-color: rgba(248,81,73,0.35); }
+
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.5.0 · perf · 2026-08-17</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.6.0 · perfhud · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -535,15 +549,16 @@ body {
   <div class="midi-row">
     <div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER to enable</div>
     <div class="midi-event" id="midiEvent"></div>
+    <div class="perf-hud" id="perfHud">VOICES 0/16</div>
   </div>
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v2.5.0 · perf · 2026-08-17 &bull; PSYTRANCE INSTRUMENT &bull; NxM MOD MATRIX &bull; OPTIMIZED DSP &bull; SEQ &bull; ARP</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v2.6.0 · perfhud · 2026-08-18 &bull; PSYTRANCE INSTRUMENT &bull; NxM MOD MATRIX &bull; PERF HUD &bull; SEQ &bull; ARP</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v2.5.0 · perf · 2026-08-17';
+window.__psyBuild = 'v2.6.0 · perfhud · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -857,6 +872,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
     this.lfoPhase = 0;
     this.queue = [];
+    this._voiceTick = 0;
     this.wtable = this.renderDefaultTable();
     this.wtLen = this.wtable.length;
     this.port.onmessage = (e) => this.onMessage(e.data);
@@ -1092,6 +1108,13 @@ class SynthProcessor extends AudioWorkletProcessor {
       const s = Math.tanh(acc * master * 0.28);
       for (let c = 0; c < nCh; c++) out[c][i] = s;
     }
+    this._voiceTick += N;
+    if (this._voiceTick >= 2048) {
+      this._voiceTick = 0;
+      let count = 0;
+      for (const v of this.voices) if (v.active) count++;
+      this.port.postMessage({ type: 'voices', count: count });
+    }
     return true;
   }
 }
@@ -1106,6 +1129,7 @@ class SynthEngine {
     this.node = null;
     this.analyser = null;
     this.ready = false;
+    this.onVoices = null;
     this.params = Object.assign({}, PsySynth.DEFAULT);
   }
 
@@ -1120,6 +1144,9 @@ class SynthEngine {
       self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
         numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
       });
+      self.node.port.onmessage = function (e) {
+        if (e.data && e.data.type === 'voices' && self.onVoices) self.onVoices(e.data.count);
+      };
 
       self.fxInput = self.ctx.createGain();
       self.node.connect(self.fxInput);
@@ -2217,6 +2244,13 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
 (function () {
   const engine = new Psy.SynthEngine();
+  /* Perf HUD: live active-voice count reported from the worklet */
+  engine.onVoices = function (count) {
+    const hud = document.getElementById('perfHud');
+    if (!hud) return;
+    hud.textContent = 'VOICES ' + count + '/16';
+    hud.className = 'perf-hud' + (count >= 12 ? ' hot' : (count >= 8 ? ' warm' : ''));
+  };
   const arp = new Psy.Arpeggiator(engine);
   arp.onStep = function (note) {
     const k = document.querySelector('[data-n="' + note + '"]');
