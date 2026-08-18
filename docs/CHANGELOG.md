@@ -3,6 +3,14 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [3.6.0] — Removed Service Worker (reliability fix)
+### Removed
+- Service worker (was serving stale/cached content that broke the panel for returning visitors).
+- The page now auto-unregisters any leftover SW and clears caches on load.
+### Why
+- The SW (even network-first) caused stale-content breakage for returning visitors.
+  Reliability first; offline mode sacrificed.
+
 ## [3.5.0] — Psy Subgenre Preset Expansion
 ### Added
 - **+10 hand-voiced psy subgenre presets** (38 total): FULLON/DARKPSY/HITECH/PROG/FOREST
