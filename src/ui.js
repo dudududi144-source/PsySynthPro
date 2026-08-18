@@ -661,6 +661,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
   }
 
   let activeCategory = 'ALL';
+  let searchTerm = '';
   function getRecents() {
     try { return JSON.parse(localStorage.getItem('psy.recents') || '[]'); } catch (e) { return []; }
   }
@@ -716,6 +717,16 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       catRow.appendChild(b);
     });
     wrap.appendChild(catRow);
+    const searchIn = document.createElement('input');
+    searchIn.type = 'text';
+    searchIn.className = 'psearch';
+    searchIn.placeholder = 'SEARCH PRESETS...';
+    searchIn.setAttribute('aria-label', 'Search presets');
+    searchIn.addEventListener('input', function () {
+      searchTerm = searchIn.value.toUpperCase();
+      renderPresetButtons2();
+    });
+    wrap.appendChild(searchIn);
     const btnWrap = document.createElement('div');
     btnWrap.className = 'pbtns';
     btnWrap.id = 'pbtns';
@@ -750,6 +761,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     NAMES.forEach(function (name, i) {
       if (activeCategory !== 'ALL' && activeCategory !== 'USER' && presetCategory(name) !== activeCategory) return;
       if (activeCategory === 'USER') return;
+      if (searchTerm && name.toUpperCase().indexOf(searchTerm) < 0) return;
       const b = document.createElement('button');
       b.className = 'preset factory';
       b.textContent = name;
@@ -759,6 +771,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     /* user presets */
     if (activeCategory === 'ALL' || activeCategory === 'USER') {
       Psy.PresetStore.list().forEach(function (name) {
+        if (searchTerm && name.toUpperCase().indexOf(searchTerm) < 0) return;
         const wrap2 = document.createElement('span');
         wrap2.className = 'upwrap';
         const b = document.createElement('button');
