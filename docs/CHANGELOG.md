@@ -3,6 +3,16 @@
 All notable changes to PsySynthPro. Format follows [Keep a Changelog](https://keepachangelog.com/),
 versioning follows [SemVer](https://semver.org/).
 
+## [3.0.0] — Retina 3D Spectrum (roadmap complete)
+### Added
+- **Retina/HiDPI 3D spectrum** — the SPECTRUM 3D canvas now renders at
+  devicePixelRatio resolution (capped at 2x) and draws in logical pixels, so it is
+  crisp on Retina/HiDPI displays.
+### Notes
+- Completes the original roadmap (Phases 1-6 all done).
+### Verified
+- setupHiDPI scales the backing store and ctx transform; draw uses logical W/H.
+
 ## [2.9.0] — Per-Step Sequencer Glide
 ### Added
 - **GLIDE toggle** in the STEP SEQ panel. When ON, the sequencer sustains each note
