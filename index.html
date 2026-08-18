@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v2.8.0 · arp-export · 2026-08-18 -->
+<!-- SELF-CONTAINED BUNDLE v2.9.0 · seq-glide · 2026-08-18 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -524,7 +524,7 @@ body {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.8.0 · arp-export · 2026-08-18</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v2.9.0 · seq-glide · 2026-08-18</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -554,11 +554,11 @@ body {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v2.8.0 · arp-export · 2026-08-18 &bull; PSYTRANCE INSTRUMENT &bull; GLIDE &bull; NxM MOD MATRIX &bull; ARP/SEQ EXPORT</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v2.9.0 · seq-glide · 2026-08-18 &bull; PSYTRANCE INSTRUMENT &bull; SEQ GLIDE &bull; NxM MOD MATRIX &bull; ARP/SEQ EXPORT</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v2.8.0 · arp-export · 2026-08-18';
+window.__psyBuild = 'v2.9.0 · seq-glide · 2026-08-18';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -1584,6 +1584,8 @@ class Sequencer {
     this.bpm = 141;
     this.stepIdxDiv = 2;   /* Psy.ARP_STEPS index - 1/16 default */
     this.gate = 70;        /* % of step */
+    this.glide = false;    /* per-step glide: sustain note so next step glides */
+    this.lastNote = -1;
     this.steps = [];
     for (let i = 0; i < SEQ_LEN; i++) {
       /* rolling psy default: all gates on, accents on the quarter steps */
@@ -1607,6 +1609,7 @@ class Sequencer {
     } else {
       this.stopTimer();
       if (!this.hold) this.held = [];
+      if (this.lastNote >= 0) { this.engine.noteOff(this.lastNote); this.lastNote = -1; }
     }
   }
 
@@ -1668,7 +1671,10 @@ class Sequencer {
         const vel = st.accent ? 1.0 : 0.72;
         const gateSec = Math.max(0.03, stepDur * (this.gate / 100));
         this.engine.noteOnAt(note, vel, this.nextTime);
-        this.engine.noteOffAt(note, this.nextTime + gateSec);
+        if (!this.glide) {
+          this.engine.noteOffAt(note, this.nextTime + gateSec);
+        }
+        this.lastNote = note;
         if (this.onStep) this.onStep(this.stepPos, note);
       } else if (this.onStep) {
         this.onStep(this.stepPos, -1);
@@ -2838,6 +2844,15 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       color: '#60a5fa', label: 'HOLD', options: ['OFF', 'ON'], value: 'OFF',
       display: function (v) { return v; },
       onChange: function (v) { seq.hold = (v === 'ON'); if (v === 'OFF') seq.held = []; }
+    });
+
+    new Psy.CycleBtn(row, {
+      color: '#60a5fa', label: 'GLIDE', options: ['OFF', 'ON'], value: 'OFF',
+      display: function (v) { return v; },
+      onChange: function (v) {
+        seq.glide = (v === 'ON');
+        if (v === 'OFF' && seq.lastNote >= 0) { seq.engine.noteOff(seq.lastNote); seq.lastNote = -1; }
+      }
     });
 
     const bpmKnob = new Psy.Knob(row, {
