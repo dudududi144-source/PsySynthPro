@@ -569,3 +569,24 @@ button:focus-visible, .kzone:focus-visible { outline: 2px solid #7ff3ff; outline
   .key.b { width: 17px; height: 56px; margin: 0 -9px; }
   .viz3d-bezel canvas { height: 120px; }
 }
+
+
+/* ══════════ A11Y + RESPONSIVE (Roast round 1) ══════════ */
+/* focus-visible rings for keyboard users */
+button:focus-visible, .key:focus-visible {
+  outline: 2px solid #7ff3ff; outline-offset: 2px;
+}
+/* respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+/* high contrast text baseline */
+.klabel, .stitle { color:#9aa5b1; }
+/* responsive: stack sections on narrow screens */
+@media (max-width: 760px) {
+  .sections { flex-direction: column; }
+  .section { border-left: none; border-top: 1px solid #232932; padding: 12px 8px; }
+  .topbar { flex-wrap: wrap; }
+  .viz3d-bezel canvas { height: 120px; }
+  .kb { overflow-x: auto; }
+}
