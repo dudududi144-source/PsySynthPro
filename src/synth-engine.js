@@ -25,6 +25,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       this.voices.push({
         active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
         phase: 0, modPhase: 0, subPhase: 0, triInt: 0,
+        uniPhase: [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
         amp: 0, stage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0,
         coefTick: 0, a1: 0, a2: 0, a3: 0, resEffCached: -1,
         targetBaseFreq: 0, glideRate: 0
@@ -244,9 +245,9 @@ class SynthProcessor extends AudioWorkletProcessor {
           const fmDepthEff = (p.fmDepth / 100) * f * 2 + lfoVal * (p.lfoFM / 100) * f * 2 + envNorm * (p.envFM / 100) * f * 2 + modFmCoef * f * 2;
           const fmHz = Math.sin(TWO_PI * v.modPhase) * fmDepthEff;
           const inc = Math.max(0.00001, (f + fmHz) / sr);
-          v.phase += inc;
-          if (v.phase >= 1) v.phase -= 1;
-          sig += this.oscSample(v.phase, Math.min(inc, 0.49), p.wave, v);
+          v.uniPhase[u] += inc;
+          if (v.uniPhase[u] >= 1) v.uniPhase[u] -= 1;
+          sig += this.oscSample(v.uniPhase[u], Math.min(inc, 0.49), p.wave, v);
         }
         sig /= un;
 
