@@ -17,6 +17,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0,
       modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0,
       modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0,
+      glideTime: 0,
       master: 80, reverb: 35, delay: 22
     };
     this.voices = [];
@@ -25,7 +26,8 @@ class SynthProcessor extends AudioWorkletProcessor {
         active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
         phase: 0, modPhase: 0, subPhase: 0, triInt: 0,
         amp: 0, stage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0,
-        coefTick: 0, a1: 0, a2: 0, a3: 0, resEffCached: -1
+        coefTick: 0, a1: 0, a2: 0, a3: 0, resEffCached: -1,
+        targetBaseFreq: 0, glideRate: 0
       });
     }
     this.lfoPhase = 0;
@@ -89,6 +91,24 @@ class SynthProcessor extends AudioWorkletProcessor {
   }
 
   noteOn(note, vel) {
+    /* Glide (legato): glideTime>0 & exactly one sounding voice -> glide it, no retrigger */
+    if (this.p.glideTime > 0) {
+      let activeCount = 0, lastActive = null;
+      for (const x of this.voices) if (x.active) { activeCount++; lastActive = x; }
+      if (activeCount === 1 && lastActive) {
+        const gv = lastActive;
+        gv.note = note;
+        const newBase = 440 * Math.pow(2, (note - 69) / 12);
+        const glideSec = Math.max(0.001, this.p.glideTime / 1000);
+        gv.glideRate = (newBase - gv.baseFreq) / glideSec;
+        gv.targetBaseFreq = newBase;
+        gv.vel = vel;
+        if (gv.stage === 4) gv.stage = 3;
+        gv.age = 0;
+        for (const x of this.voices) if (x !== gv) x.age++;
+        return;
+      }
+    }
     let v = this.voices.find(x => x.note === note && x.active && x.stage !== 4);
     if (!v) v = this.voices.find(x => !x.active);
     if (!v) {
@@ -184,6 +204,16 @@ class SynthProcessor extends AudioWorkletProcessor {
         else if (v.stage === 4) { target = 0; coef = rC; if (v.amp < 0.0004) { v.active = false; v.stage = 0; } }
         v.amp += (target - v.amp) * coef;
         if (!v.active) continue;
+
+        /* Glide: move baseFreq toward targetBaseFreq */
+        if (v.targetBaseFreq !== 0) {
+          v.baseFreq += v.glideRate / sr;
+          if ((v.glideRate >= 0 && v.baseFreq >= v.targetBaseFreq) || (v.glideRate < 0 && v.baseFreq <= v.targetBaseFreq)) {
+            v.baseFreq = v.targetBaseFreq;
+            v.targetBaseFreq = 0;
+            v.glideRate = 0;
+          }
+        }
 
         const baseFreq = v.baseFreq;
         const bendMul = v.bendMul;
