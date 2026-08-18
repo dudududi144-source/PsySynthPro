@@ -3,6 +3,13 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
 (function () {
   const engine = new Psy.SynthEngine();
+  /* Perf HUD: live active-voice count reported from the worklet */
+  engine.onVoices = function (count) {
+    const hud = document.getElementById('perfHud');
+    if (!hud) return;
+    hud.textContent = 'VOICES ' + count + '/16';
+    hud.className = 'perf-hud' + (count >= 12 ? ' hot' : (count >= 8 ? ' warm' : ''));
+  };
   const arp = new Psy.Arpeggiator(engine);
   arp.onStep = function (note) {
     const k = document.querySelector('[data-n="' + note + '"]');
