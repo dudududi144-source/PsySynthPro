@@ -671,6 +671,31 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     try { localStorage.setItem('psy.recents', JSON.stringify(r)); } catch (e) {}
   }
 
+  /* render recently-used presets into the bottom recents row */
+  function renderRecents() {
+    const wrap = document.getElementById('recents');
+    if (!wrap) return;
+    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+    const lab = document.createElement('span');
+    lab.className = 'recents-label';
+    lab.textContent = 'RECENT:';
+    wrap.appendChild(lab);
+    getRecents().forEach(function (name) {
+      const b = document.createElement('button');
+      b.className = 'preset recent';
+      b.textContent = name;
+      b.addEventListener('click', function () {
+        // user preset or factory?
+        if (Psy.PresetStore.get(name)) { loadUserPreset(name); renderRecents(); }
+        else {
+          const idx = NAMES.indexOf(name);
+          if (idx >= 0) loadPreset(idx);
+        }
+      });
+      wrap.appendChild(b);
+    });
+  }
+
 
   function buildPresets() {
     const wrap = $('presets');
@@ -728,7 +753,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       const b = document.createElement('button');
       b.className = 'preset factory';
       b.textContent = name;
-      b.addEventListener('click', function () { loadPreset(i); pushRecent(name); });
+      b.addEventListener('click', function () { loadPreset(i); pushRecent(name); renderRecents(); });
       wrap.appendChild(b);
     });
     /* user presets */
@@ -739,7 +764,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
         const b = document.createElement('button');
         b.className = 'preset user';
         b.textContent = name;
-        b.addEventListener('click', function () { loadUserPreset(name); });
+        b.addEventListener('click', function () { loadUserPreset(name); renderRecents(); });
         wrap2.appendChild(b);
         const del = document.createElement('button');
         del.className = 'updel';
@@ -1019,6 +1044,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
   safeBuild('wavetable', buildWavetableLab);
   safeBuild('morph', buildMorph);
   safeBuild('presets', buildPresets);
+  safeBuild('recents', renderRecents);
   safeBuild('userbank', renderUserBank);
   safeBuild('savebtn', buildSaveBtn);
   safeBuild('canvases', setupCanvases);
