@@ -526,6 +526,15 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       onChange: function (v) { seq.hold = (v === 'ON'); if (v === 'OFF') seq.held = []; }
     });
 
+    new Psy.CycleBtn(row, {
+      color: '#60a5fa', label: 'GLIDE', options: ['OFF', 'ON'], value: 'OFF',
+      display: function (v) { return v; },
+      onChange: function (v) {
+        seq.glide = (v === 'ON');
+        if (v === 'OFF' && seq.lastNote >= 0) { seq.engine.noteOff(seq.lastNote); seq.lastNote = -1; }
+      }
+    });
+
     const bpmKnob = new Psy.Knob(row, {
       color: '#60a5fa', label: 'BPM', min: 60, max: 200, def: 138,
       fmt: function (v) { return String(Math.round(v)); },
