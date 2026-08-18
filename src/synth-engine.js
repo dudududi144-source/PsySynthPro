@@ -8,7 +8,7 @@ class SynthProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
     this.p = {
-      wave: 0, detune: 0, unison: 3, spread: 12, sub: 25,
+      wave: 0, detune: 0, unison: 3, spread: 12, sub: 25, noise: 0,
       fmRatio: 2, fmDepth: 12,
       filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
       attack: 12, decay: 260, sustain: 70, release: 650,
@@ -255,6 +255,10 @@ class SynthProcessor extends AudioWorkletProcessor {
           v.subPhase += (baseFreq * bendMul / 2) / sr;
           if (v.subPhase >= 1) v.subPhase -= 1;
           sig += (p.sub / 100) * Math.sin(TWO_PI * v.subPhase);
+        }
+        /* noise oscillator (white noise mix) */
+        if (p.noise > 0) {
+          sig += (Math.random() * 2 - 1) * (p.noise / 100);
         }
 
         let fc = p.cutoff + (p.filterEnv / 100) * 9000 * (v.vel > 0 ? v.amp / v.vel : 0);
