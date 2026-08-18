@@ -35,7 +35,7 @@ Psy.PRESETS = {
 
   /* ── MOD MATRIX SHOWCASE ─────────────────────────────────────── */
   'WARP BASS':     { wave: 0, detune: 0, unison: 1, spread: 0,  sub: 60, noise: 0, fmRatio: 1, fmDepth: 12, filterType: 0, cutoff: 700,  res: 9,  filterEnv: 65, attack: 2, decay: 220, sustain: 40, release: 200, lfoWave: 0, lfoTarget: 0, lfoRate: 6, lfoDepth: 0, master: 85, reverb: 14, delay: 10, lfoCutoff: 60, lfoPitch: 0,  lfoAmp: 0, lfoFM: 0,  envPitch: 35, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
-  'ACID SIREN':    { wave: 1, detune: 3, unison: 3, spread: 12, sub: 0, noise: 0,  fmRatio: 3, fmDepth: 40, filterType: 2, cutoff: 1400, res: 12, filterEnv: 70, attack: 8, decay: 300, sustain: 55, release: 400, lfoWave: 0, lfoTarget: 0, lfoRate: 5, lfoDepth: 0, master: 80, reverb: 30, delay: 22, lfoCutoff: 45, lfoPitch: 55, lfoAmp: 0, lfoFM: 60, envPitch: 0,  envFM: 40, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 }
+  'ACID SIREN':    { wave: 1, detune: 3, unison: 3, spread: 12, sub: 0, noise: 0,  fmRatio: 3, fmDepth: 40, filterType: 2, cutoff: 1400, res: 12, filterEnv: 70, attack: 8, decay: 300, sustain: 55, release: 400, lfoWave: 0, lfoTarget: 0, lfoRate: 5, lfoDepth: 0, master: 80, reverb: 30, delay: 22, lfoCutoff: 45, lfoPitch: 55, lfoAmp: 0, lfoFM: 60, envPitch: 0,  envFM: 40, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0 },
 
   /* ── WAVETABLE (wave:4 uses the built-in Psy wavetable) ─────── */
   'WT COSMIC LEAD': { wave: 4, detune: 4, unison: 3, spread: 12, sub: 15, noise: 0, fmRatio: 2, fmDepth: 20, filterType: 0, cutoff: 3000, res: 3, filterEnv: 55, attack: 10, decay: 280, sustain: 68, release: 600, lfoWave: 0, lfoTarget: 0, lfoRate: 2.6, lfoDepth: 30, master: 82, reverb: 35, delay: 24, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0 },
@@ -61,7 +61,7 @@ Psy.PRESETS = {
 
   /* ── PSY FX / TEXTURES ───────────────────────────────────────── */
   'RISER FX': { wave: 0, detune: 5, unison: 3, spread: 16, sub: 20, noise: 40, fmRatio: 2, fmDepth: 20, filterType: 0, cutoff: 800, res: 3, filterEnv: 70, attack: 1500, decay: 800, sustain: 60, release: 1200, lfoWave: 0, lfoTarget: 0, lfoRate: 3, lfoDepth: 40, master: 80, reverb: 60, delay: 35, lfoCutoff: 45, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 15, envFM: 0 },
-  'IMPACT FX': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 90, noise: 60, fmRatio: 1, fmDepth: 10, filterType: 0, cutoff: 600, res: 2, filterEnv: 60, attack: 2, decay: 400, sustain: 20, release: 800, lfoWave: 0, lfoTarget: 0, lfoRate: 2, lfoDepth: 20, master: 85, reverb: 50, delay: 20, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: -10, envFM: 0 }
+  'IMPACT FX': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 90, noise: 60, fmRatio: 1, fmDepth: 10, filterType: 0, cutoff: 600, res: 2, filterEnv: 60, attack: 2, decay: 400, sustain: 20, release: 800, lfoWave: 0, lfoTarget: 0, lfoRate: 2, lfoDepth: 20, master: 85, reverb: 50, delay: 20, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: -10, envFM: 0 },
 
 
   /* ── PSY SUBGENRES (Phase 11) ───────────────────────────── */
