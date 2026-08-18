@@ -143,3 +143,45 @@ Psy.exportSeqGroove = function (seq, notes, bars) {
 };
 
 Psy.MidiRecorder = MidiRecorder;
+
+
+/* ── Arpeggiator groove export (Phase 8) ──
+   Simulates the arpeggiator note-selection for `bars` bars and renders MIDI. */
+Psy.exportArpGroove = function (arp, notes, bars) {
+  const pattern = arp.pattern;      /* 0 UP, 1 DWN, 2 UPDN, 3 RND */
+  const octaves = arp.octaves || 1;
+  const bpm = arp.bpm || 132;
+  const stepBeats = (Psy.ARP_STEPS[arp.stepIdxDiv] || { beats: 0.25 }).beats;
+  const stepDur = (60 / bpm) * stepBeats;
+  const gateSec = Math.max(0.03, stepDur * ((arp.gate || 60) / 100));
+
+  /* build sequence like Arpeggiator.buildSequence */
+  const sorted = notes.slice().sort(function (a, b) { return a - b; });
+  const seq = [];
+  for (let o = 0; o < octaves; o++) for (let i = 0; i < sorted.length; i++) seq.push(sorted[i] + o * 12);
+  if (seq.length === 0) return { events: [], bpm: bpm };
+
+  const stepsPerBar = Math.round(1 / stepBeats);
+  const totalSteps = stepsPerBar * (bars || 2);
+  const events = [];
+  let stepIdx = 0;
+  const n = seq.length;
+  for (let s = 0; s < totalSteps; s++) {
+    let note;
+    if (n === 1 || pattern === 0) note = seq[stepIdx % n];
+    else if (pattern === 1) note = seq[n - 1 - (stepIdx % n)];
+    else if (pattern === 2) {
+      const len = n * 2 - 2;
+      let ii = stepIdx % (len || 1);
+      if (ii >= n) ii = len - ii;
+      note = seq[ii];
+    } else {
+      note = seq[Math.floor(Math.random() * n)];
+    }
+    const t = s * stepDur;
+    events.push({ on: true, note: note, vel: 100, t: t });
+    events.push({ on: false, note: note, vel: 0, t: t + gateSec });
+    stepIdx++;
+  }
+  return { events: events, bpm: bpm };
+};
