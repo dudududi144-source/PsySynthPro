@@ -183,8 +183,8 @@ class SynthProcessor extends AudioWorkletProcessor {
     const frac = pos - Math.floor(pos);
     const wt = tbl[i0] + (tbl[i1] - tbl[i0]) * frac;
     /* WT POS: morph wavetable -> sine for scanning feel */
-    const pos = Math.max(0, Math.min(1, p.wtPos / 100));
-    return wt * (1 - pos) + Math.sin(6.28318530718 * phase) * pos;
+    const wtpos = Math.max(0, Math.min(1, p.wtPos / 100));
+    return wt * (1 - wtpos) + Math.sin(6.28318530718 * phase) * wtpos;
   }
 
   oscSample(phase, inc, wave, v) {
