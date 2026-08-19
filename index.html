@@ -819,10 +819,10 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v8.9.1 · search-rnd · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v8.9.2 · ab · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px"></div>
-<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap anywhere to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v8.9.1 · search-rnd · 2026-08-19 &bull; SEARCH &bull; RND &bull; LIMITER &bull; STEREO</span></div></div>
-<script>window.__psyBuild="v8.9.1 · search-rnd · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
+<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap anywhere to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v8.9.2 · ab · 2026-08-19 &bull; A/B &bull; SEARCH &bull; RND &bull; LIMITER &bull; STEREO</span></div></div>
+<script>window.__psyBuild="v8.9.2 · ab · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
 <script>
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
@@ -4150,7 +4150,18 @@ $('bPower').addEventListener('click', function () {
       engine.set('wtPos', Math.round(r(0,100)));
       syncUI();
     });
+    /* A/B compare */
+    let abSlot = 'A'; const abMem = { A: null, B: null };
+    const bA = document.createElement('button'); bA.className='stb on'; bA.textContent='A';
+    const bB = document.createElement('button'); bB.className='stb'; bB.textContent='B';
+    const bCp = document.createElement('button'); bCp.className='stb'; bCp.textContent='A→B';
+    function snap(){ const o={}; for(const k in engine.params) o[k]=engine.params[k]; return o; }
+    function applySnap(o){ if(!o) return; engine.setAll(o); syncUI(); }
+    bA.addEventListener('click', function(){ if(abSlot!=='A'){ abMem[abSlot]=snap(); abSlot='A'; applySnap(abMem.A); } bA.classList.add('on'); bB.classList.remove('on'); bCp.textContent='A→B'; });
+    bB.addEventListener('click', function(){ if(abSlot!=='B'){ abMem[abSlot]=snap(); abSlot='B'; applySnap(abMem.B); } bB.classList.add('on'); bA.classList.remove('on'); bCp.textContent='B→A'; });
+    bCp.addEventListener('click', function(){ if(abSlot==='A'){ abMem.B=snap(); } else { abMem.A=snap(); } });
     wrap.appendChild(cat); wrap.appendChild(sel); wrap.appendChild(save); wrap.appendChild(srch); wrap.appendChild(rnd);
+    wrap.appendChild(bA); wrap.appendChild(bB); wrap.appendChild(bCp);
     fill();
   }
 
