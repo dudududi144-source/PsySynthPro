@@ -639,3 +639,14 @@ button:focus-visible, .key:focus-visible {
 }
 
 .kzone.modulated { box-shadow: 0 0 0 2px rgba(127,243,255,0.55), 0 0 12px rgba(127,243,255,0.35); border-radius: 50%; }
+
+/* ══════════ FINISHING POLISH (mobile touch + readouts) ══════════ */
+.preset { min-height: 40px; display:inline-flex; align-items:center; justify-content:center; }
+.kval { font-size: 9px; opacity: 0.85; }
+@media (max-width: 560px) {
+  .preset { min-height: 44px; font-size: 9px; padding: 6px 8px; }
+  .pbtns { gap: 6px; }
+  .catrow { gap: 5px; }
+  .topbar { padding: 8px 6px; }
+  .oled .pname { font-size: 12px; }
+}
