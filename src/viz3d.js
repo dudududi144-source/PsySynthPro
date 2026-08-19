@@ -41,8 +41,7 @@ class Viz3D {
     const self = this;
     function loop() {
       if (!self.running) return;
-      self.loop._fc=(loop._fc||0)+1;
-if(!document.hidden&&(loop._fc%2===0)) draw();
+      self.draw();
       requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
