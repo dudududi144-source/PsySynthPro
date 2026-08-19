@@ -17,7 +17,7 @@ class Sequencer {
     this.selected = -1;
     this.steps = [];
     for (let i = 0; i < SEQ_LEN; i++)
-      this.steps.push({ on: true, vel: (i % 4 === 0 ? 1 : 0.72), tr: 0, len: 70, tie: false });
+      this.steps.push({ on: true, vel: (i % 4 === 0 ? 1 : 0.72), tr: 0, len: 70, tie: false, rat: 1 });
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
     this.root = 45; /* A1 default rolling-bass root when nothing held */
     this.swing = 0; /* 0..60 % swing on offbeats */
@@ -57,7 +57,7 @@ class Sequencer {
     for (let i = 0; i < SEQ_LEN; i++) {
       this.steps[i].on = p.g[i] === 1;
       this.steps[i].vel = p.a[i] === 1 ? 1 : 0.72;
-      this.steps[i].tie = false; this.steps[i].tr = 0; this.steps[i].len = 70;
+      this.steps[i].tie = false; this.steps[i].tr = 0; this.steps[i].len = 70; this.steps[i].rat = 1;
     }
     return true;
   }
@@ -79,9 +79,18 @@ class Sequencer {
         const vel = Math.max(0.05, Math.min(1, st.vel));
         const gateSec = Math.max(0.03, stepDur * ((st.len == null ? 70 : st.len) / 100));
         const t = this.nextTime + ((i % 2 === 1) ? (this.swing / 100) * stepDur * 0.5 : 0);
-        const cont = prev.on && prev.tie && this.lastNote === note;
-        if (!cont) this.engine.noteOnAt(note, vel, t);
-        if (!st.tie) this.engine.noteOffAt(note, t + gateSec);
+        const rat = Math.max(1, Math.min(4, st.rat || 1));
+        if (rat === 1) {
+          const cont = prev.on && prev.tie && this.lastNote === note;
+          if (!cont) this.engine.noteOnAt(note, vel, t);
+          if (!st.tie) this.engine.noteOffAt(note, t + gateSec);
+        } else {
+          const sub = stepDur / rat;
+          for (let r = 0; r < rat; r++) {
+            this.engine.noteOnAt(note, vel, t + r * sub);
+            this.engine.noteOffAt(note, t + r * sub + Math.min(gateSec, sub * 0.9));
+          }
+        }
         this.lastNote = st.tie ? note : -1;
         if (this.onStep) this.onStep(i, note);
       } else {
