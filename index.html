@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v8.0.1 · seq-visible · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v8.1.0 · no-3d · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -665,32 +665,33 @@ button:focus-visible, .key:focus-visible {
   .oled .pname { font-size: 12px; }
 }
 
-/* ══════════ MINIMAL SEQ v2 + PRESET MENU ══════════ */
-#seqtop { margin: 8px 0 4px; }
-.seq2 { width:100%; padding:8px; box-sizing:border-box; }
-.seq2-tr { display:flex; gap:6px; align-items:center; margin-bottom:6px; flex-wrap:wrap; }
-.seq2-grid { display:grid; grid-template-columns:repeat(16,1fr); gap:3px; }
-.sq2 { height:34px; border-radius:5px; border:1px solid #2a3444; background:#141a24; cursor:pointer; position:relative; }
+
+/* ══════════ SEQ v2 — BIG & ALWAYS-VISIBLE EDITOR ══════════ */
+#seqtop { margin: 10px 0 6px; display:block; }
+.seq2 { width:100%; padding:10px; box-sizing:border-box; background:linear-gradient(180deg,#161c28,#10151d); border:1px solid #2a3444; border-radius:10px; }
+.seq2-tr { display:flex; gap:6px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+.seq2-grid { display:grid; grid-template-columns:repeat(16,1fr); gap:4px; }
+.sq2 { height:46px; border-radius:6px; border:1px solid #2a3444; background:#141a24; cursor:pointer; position:relative; }
 .sq2.on { background:#1f6feb; border-color:#3b82f6; }
 .sq2.sel { outline:2px solid #7ff3ff; }
-.sq2.tie::after { content:''; position:absolute; right:-3px; top:40%; width:5px; height:20%; background:#7ff3ff; }
-.sq2.play { box-shadow:0 0 10px #7ff3ff; }
-.seq2-ed { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; align-items:center; }
-.stp { display:flex; gap:3px; align-items:center; }
-.stl { font-size:9px; color:#8b949e; letter-spacing:1px; }
-.stv { font-size:10px; color:#7ff3ff; min-width:26px; text-align:center; }
-.stb { padding:6px 9px; border-radius:6px; border:1px solid #2a3444; background:#1a2130; color:#c9d1d9; font-size:10px; cursor:pointer; }
+.sq2.tie::after { content:''; position:absolute; right:-4px; top:35%; width:6px; height:30%; background:#7ff3ff; }
+.sq2.play { box-shadow:0 0 12px #7ff3ff; }
+.seq2-ed { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; align-items:center; background:#0d1219; border:1px solid #22304a; border-radius:8px; padding:8px; }
+.stp { display:flex; gap:4px; align-items:center; }
+.stl { font-size:10px; color:#8b949e; letter-spacing:1px; }
+.stv { font-size:13px; color:#7ff3ff; min-width:34px; text-align:center; font-weight:bold; }
+.stb { padding:9px 12px; border-radius:6px; border:1px solid #2a3444; background:#1a2130; color:#c9d1d9; font-size:11px; cursor:pointer; }
 .stb.on { background:#1f6feb; color:#fff; }
 .stb.tie.on { background:#7ff3ff; color:#0b0f14; }
-.msel { padding:7px 8px; border-radius:6px; border:1px solid #2a3444; background:#141a24; color:#c9d1d9; font-size:10px; }
-.msel.big { flex:1; min-width:120px; }
+.msel { padding:8px 9px; border-radius:6px; border:1px solid #2a3444; background:#141a24; color:#c9d1d9; font-size:11px; }
+.msel.big { flex:1; min-width:140px; }
 .pmenu { display:flex; gap:6px; padding:6px 8px; align-items:center; }
-@media (max-width:560px){ .seq2-grid{grid-template-columns:repeat(8,1fr);} .sq2{height:30px;} }
+@media (max-width:560px){ .seq2-grid{grid-template-columns:repeat(8,1fr);} .sq2{height:38px;} }
 
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v8.0.1 · seq-visible · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v8.1.0 · no-3d · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -710,10 +711,6 @@ button:focus-visible, .key:focus-visible {
   </div>
   <div id="seqtop"></div>
   <div class="prow" id="presets"></div>
-  <div class="viz3d-bezel">
-    <div class="viz3d-label">SPECTRUM 3D</div>
-    <canvas id="viz3d" width="1100" height="180"></canvas>
-  </div>
   <div class="midi-row">
     <div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER to enable</div>
     <div class="midi-event" id="midiEvent"></div>
@@ -721,11 +718,11 @@ button:focus-visible, .key:focus-visible {
   </div>
   <div class="sections" id="sections"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v8.0.1 · seq-visible · 2026-08-19 &bull; SEQ ALWAYS-VISIBLE &bull; PRESET MENU &bull; MINIMAL</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v8.1.0 · no-3d · 2026-08-19 &bull; LITE (no 3D) &bull; PRO SEQ &bull; PRESET MENU</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v8.0.1 · seq-visible · 2026-08-19';
+window.__psyBuild = 'v8.1.0 · no-3d · 2026-08-19';
 window.__psyShow = function (t) { var es = document.getElementById('psyErrStrip'); if (es) { es.style.display='block'; es.textContent = t; } };
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
@@ -2294,200 +2291,6 @@ class MidiEngine {
 }
 
 Psy.MidiEngine = MidiEngine;
-
-</script>
-<script>
-"use strict";
-var Psy = (window.PsySynth = window.PsySynth || {});
-
-/* ═══════════ 3D Spectrum Visualizer (Phase 5) ═══════════
-   Real perspective projection of frequency bars as 3D boxes,
-   depth-sorted (painter's algorithm) with shaded faces.       */
-
-class Viz3D {
-  constructor(canvas, analyser) {
-    this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
-    this.analyser = analyser;
-    this.bins = 42;
-    this.freqData = new Uint8Array(analyser.frequencyBinCount);
-    this.smooth = new Float32Array(this.bins);
-    this.peaks = new Float32Array(this.bins);
-    this.running = false;
-    this.camDist = 320;
-    this.fov = 430;
-    this.time = 0;
-    this.setupHiDPI();
-  }
-
-  /* HiDPI / Retina: scale backing store by devicePixelRatio, draw in logical px */
-  setupHiDPI() {
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const w = this.canvas.clientWidth || this.canvas.width;
-    const h = this.canvas.clientHeight || this.canvas.height;
-    this.width = w;
-    this.height = h;
-    this.canvas.width = Math.round(w * dpr);
-    this.canvas.height = Math.round(h * dpr);
-    this.canvas.style.width = w + 'px';
-    this.canvas.style.height = h + 'px';
-    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  start() {
-    if (this.running) return;
-    this.running = true;
-    const self = this;
-    function loop() {
-      if (!self.running) return;
-      self.draw();
-      requestAnimationFrame(loop);
-    }
-    requestAnimationFrame(loop);
-  }
-
-  /* rotate a point around Y then X, then perspective-project */
-  project(x, y, z, yaw, pitch, cx, cy) {
-    const cyaw = Math.cos(yaw), syaw = Math.sin(yaw);
-    const cp = Math.cos(pitch), sp = Math.sin(pitch);
-    let rx = x * cyaw + z * syaw;
-    let rz = -x * syaw + z * cyaw;
-    let ry = y * cp - rz * sp;
-    rz = y * sp + rz * cp;
-    const pz = rz + this.camDist;
-    const f = this.fov / (pz > 20 ? pz : 20);
-    return { x: cx + rx * f, y: cy - ry * f, z: pz };
-  }
-
-  draw() {
-    if (typeof document !== 'undefined' && document.hidden) return;
-    const ctx = this.ctx, W = this.width, H = this.height;
-    this.time += 0.008;
-
-    /* background fade */
-    ctx.fillStyle = 'rgba(3, 8, 14, 0.5)';
-    ctx.fillRect(0, 0, W, H);
-
-    this.analyser.getByteFrequencyData(this.freqData);
-    const sr = (this.analyser.context ? this.analyser.context.sampleRate : 48000);
-    const nyq = sr / 2;
-    const fmin = 40, fmax = Math.min(16000, nyq);
-    const n = this.freqData.length;
-
-    /* log-spaced binning */
-    for (let i = 0; i < this.bins; i++) {
-      const f0 = fmin * Math.pow(fmax / fmin, i / this.bins);
-      const f1 = fmin * Math.pow(fmax / fmin, (i + 1) / this.bins);
-      let i0 = Math.floor(f0 / nyq * n);
-      let i1 = Math.max(i0 + 1, Math.floor(f1 / nyq * n));
-      i0 = Math.max(0, Math.min(n - 1, i0));
-      i1 = Math.max(i0 + 1, Math.min(n, i1));
-      let sum = 0;
-      for (let j = i0; j < i1; j++) sum += this.freqData[j];
-      let v = sum / (i1 - i0) / 255;
-      v = Math.pow(v, 1.6);
-      this.smooth[i] += (v - this.smooth[i]) * 0.28;
-      if (this.smooth[i] > this.peaks[i]) this.peaks[i] = this.smooth[i];
-      else this.peaks[i] *= 0.985;
-    }
-
-    /* camera with gentle sway */
-    const yaw = -0.5 + Math.sin(this.time) * 0.06;
-    const pitch = 0.42;
-    const cx = W / 2, cy = H * 0.78;
-
-    /* floor grid */
-    this.drawFloor(yaw, pitch, cx, cy);
-
-    /* build bars */
-    const spacing = 150 / this.bins * 2.2;
-    const barW = spacing * 0.62;
-    const depth = spacing * 0.6;
-    const bars = [];
-    for (let i = 0; i < this.bins; i++) {
-      const amp = this.smooth[i];
-      const h = 2 + amp * 95;
-      const x = (i - this.bins / 2 + 0.5) * spacing;
-      const hue = 190 + (i / this.bins) * 110;
-      bars.push({ i: i, x: x, h: h, amp: amp, hue: hue, depth: depth });
-    }
-
-    /* painter's sort: draw far bars first (larger projected z) */
-    const self = this;
-    bars.forEach(function (b) {
-      const c = self.project(b.x, b.h / 2, 0, yaw, pitch, cx, cy);
-      b.z = c.z;
-    });
-    bars.sort(function (a, b) { return b.z - a.z; });
-
-    for (let bi = 0; bi < bars.length; bi++) {
-      this.drawBar(bars[bi], barW, yaw, pitch, cx, cy);
-    }
-  }
-
-  drawFloor(yaw, pitch, cx, cy) {
-    const ctx = this.ctx;
-    ctx.strokeStyle = 'rgba(60, 120, 140, 0.14)';
-    ctx.lineWidth = 1;
-    const span = 110;
-    for (let g = -4; g <= 4; g++) {
-      const z = g * 14;
-      const a = this.project(-span, 0, z, yaw, pitch, cx, cy);
-      const b = this.project(span, 0, z, yaw, pitch, cx, cy);
-      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    }
-  }
-
-  drawBar(bar, barW, yaw, pitch, cx, cy) {
-    const ctx = this.ctx;
-    const x0 = bar.x - barW / 2, x1 = bar.x + barW / 2;
-    const z0 = -bar.depth / 2, z1 = bar.depth / 2;
-    const h = bar.h;
-
-    /* 8 corners */
-    const C = {
-      b00: this.project(x0, 0, z0, yaw, pitch, cx, cy),
-      b10: this.project(x1, 0, z0, yaw, pitch, cx, cy),
-      b11: this.project(x1, 0, z1, yaw, pitch, cx, cy),
-      b01: this.project(x0, 0, z1, yaw, pitch, cx, cy),
-      t00: this.project(x0, h, z0, yaw, pitch, cx, cy),
-      t10: this.project(x1, h, z0, yaw, pitch, cx, cy),
-      t11: this.project(x1, h, z1, yaw, pitch, cx, cy),
-      t01: this.project(x0, h, z1, yaw, pitch, cx, cy)
-    };
-
-    const hue = bar.hue;
-    const amp = bar.amp;
-    const lit = 30 + amp * 40;
-
-    function face(ctx, p1, p2, p3, p4, fill) {
-      ctx.beginPath();
-      ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
-      ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
-      ctx.closePath();
-      ctx.fillStyle = fill;
-      ctx.fill();
-    }
-
-    /* back/side face (right side, facing camera at negative yaw) */
-    face(ctx, C.b10, C.b11, C.t11, C.t10, 'hsla(' + hue + ', 90%, ' + (lit * 0.55) + '%, 0.85)');
-    /* front face */
-    face(ctx, C.b00, C.b10, C.t10, C.t00, 'hsla(' + hue + ', 95%, ' + lit + '%, 0.9)');
-    /* top face (brightest) */
-    face(ctx, C.t00, C.t10, C.t11, C.t01, 'hsla(' + hue + ', 100%, ' + Math.min(85, lit + 25) + '%, 0.95)');
-
-    /* glow cap on loud bars */
-    if (amp > 0.5) {
-      ctx.save();
-      ctx.shadowColor = 'hsl(' + hue + ', 100%, 60%)';
-      ctx.shadowBlur = 12;
-      face(ctx, C.t00, C.t10, C.t11, C.t01, 'hsla(' + hue + ', 100%, 75%, 0.9)');
-      ctx.restore();
-    }
-  }
-}
-
-Psy.Viz3D = Viz3D;
 
 </script>
 <script>
