@@ -9,7 +9,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     super();
     this.p = {
       wave: 0, detune: 0, unison: 3, spread: 12, sub: 25, noise: 0,
-      fmRatio: 2, fmDepth: 12, fm2Ratio: 3, fm2Depth: 0,
+      fmRatio: 2, fmDepth: 12, fm2Ratio: 3, fm2Depth: 0, fm3Ratio: 4, fm3Depth: 0,
       filterType: 0, cutoff: 2600, res: 2, filterEnv: 55, wtPos: 0,
       attack: 12, decay: 260, sustain: 70, release: 650,
       fAttack: 5, fDecay: 300, fSustain: 40, fRelease: 400, fEnvAmt: 60,
@@ -35,7 +35,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     for (let i = 0; i < 16; i++) {
       this.voices.push({
         active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
-        phase: 0, modPhase: 0, mod2Phase: 0, subPhase: 0, triInt: 0,
+        phase: 0, modPhase: 0, mod2Phase: 0, mod3Phase: 0, subPhase: 0, triInt: 0,
         uniPhase: [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
         amp: 0, stage: 0, fAmp: 0, fStage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0, z1: 0, z2: 0, z3: 0, z4: 0,
         coefTick: 0, a1: 0, a2: 0, a3: 0, resEffCached: -1,
@@ -301,10 +301,13 @@ class SynthProcessor extends AudioWorkletProcessor {
           if (v.modPhase >= 1) v.modPhase -= 1;
           v.mod2Phase += (f * p.fm2Ratio) / sr;
           if (v.mod2Phase >= 1) v.mod2Phase -= 1;
+          v.mod3Phase += (f * p.fm3Ratio) / sr;
+          if (v.mod3Phase >= 1) v.mod3Phase -= 1;
           const fmDepthEff = (p.fmDepth / 100) * f * 2 + lfoVal * (p.lfoFM / 100) * f * 2 + envNorm * (p.envFM / 100) * f * 2 + mFm * f * 2;
           const fm2Hz = Math.sin(TWO_PI * v.mod2Phase) * (p.fm2Depth / 100) * f * 2;
+          const fm3Hz = Math.sin(TWO_PI * v.mod3Phase) * (p.fm3Depth / 100) * f * 2;
           const fmHz = Math.sin(TWO_PI * v.modPhase) * fmDepthEff;
-          const inc = Math.max(0.00001, (f + fmHz + fm2Hz) / sr);
+          const inc = Math.max(0.00001, (f + fmHz + fm2Hz + fm3Hz) / sr);
           v.uniPhase[u] += inc;
           if (v.uniPhase[u] >= 1) v.uniPhase[u] -= 1;
           sig += this.oscSample(v.uniPhase[u], Math.min(inc, 0.49), p.wave, v);
