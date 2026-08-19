@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v8.0.0 · minimal · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v8.0.1 · seq-visible · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -665,10 +665,32 @@ button:focus-visible, .key:focus-visible {
   .oled .pname { font-size: 12px; }
 }
 
+/* ══════════ MINIMAL SEQ v2 + PRESET MENU ══════════ */
+#seqtop { margin: 8px 0 4px; }
+.seq2 { width:100%; padding:8px; box-sizing:border-box; }
+.seq2-tr { display:flex; gap:6px; align-items:center; margin-bottom:6px; flex-wrap:wrap; }
+.seq2-grid { display:grid; grid-template-columns:repeat(16,1fr); gap:3px; }
+.sq2 { height:34px; border-radius:5px; border:1px solid #2a3444; background:#141a24; cursor:pointer; position:relative; }
+.sq2.on { background:#1f6feb; border-color:#3b82f6; }
+.sq2.sel { outline:2px solid #7ff3ff; }
+.sq2.tie::after { content:''; position:absolute; right:-3px; top:40%; width:5px; height:20%; background:#7ff3ff; }
+.sq2.play { box-shadow:0 0 10px #7ff3ff; }
+.seq2-ed { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; align-items:center; }
+.stp { display:flex; gap:3px; align-items:center; }
+.stl { font-size:9px; color:#8b949e; letter-spacing:1px; }
+.stv { font-size:10px; color:#7ff3ff; min-width:26px; text-align:center; }
+.stb { padding:6px 9px; border-radius:6px; border:1px solid #2a3444; background:#1a2130; color:#c9d1d9; font-size:10px; cursor:pointer; }
+.stb.on { background:#1f6feb; color:#fff; }
+.stb.tie.on { background:#7ff3ff; color:#0b0f14; }
+.msel { padding:7px 8px; border-radius:6px; border:1px solid #2a3444; background:#141a24; color:#c9d1d9; font-size:10px; }
+.msel.big { flex:1; min-width:120px; }
+.pmenu { display:flex; gap:6px; padding:6px 8px; align-items:center; }
+@media (max-width:560px){ .seq2-grid{grid-template-columns:repeat(8,1fr);} .sq2{height:30px;} }
+
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v8.0.0 · minimal · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v8.0.1 · seq-visible · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -699,11 +721,11 @@ button:focus-visible, .key:focus-visible {
   </div>
   <div class="sections" id="sections"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v8.0.0 · minimal · 2026-08-19 &bull; MINIMAL &bull; PRO SEQ &bull; PRESET MENU &bull; 111 PRESETS</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v8.0.1 · seq-visible · 2026-08-19 &bull; SEQ ALWAYS-VISIBLE &bull; PRESET MENU &bull; MINIMAL</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v8.0.0 · minimal · 2026-08-19';
+window.__psyBuild = 'v8.0.1 · seq-visible · 2026-08-19';
 window.__psyShow = function (t) { var es = document.getElementById('psyErrStrip'); if (es) { es.style.display='block'; es.textContent = t; } };
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
