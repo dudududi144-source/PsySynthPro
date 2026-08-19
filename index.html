@@ -4,13 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#12141a">
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v8.4.0 · seq-fixed · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -691,94 +688,10 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v8.4.0 · seq-fixed · 2026-08-19</div>
-<div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
-<div class="chassis">
-  <div class="cheek l"></div><div class="cheek r"></div>
-  <div class="screw tl"></div><div class="screw tr"></div><div class="screw bl"></div><div class="screw br"></div>
-  <div class="topbar">
-    <button id="bPower" class="tbtn power">&#9211; POWER</button>
-    <div class="oled">
-      <div class="pname" id="oName">PSYSYNTH PRO</div>
-      <canvas id="scope" width="520" height="54"></canvas>
-      <div class="meta" id="oMeta">AUDIO-WORKLET<br>STANDBY</div>
-    </div>
-    <button id="bPrev" class="tbtn">&#9664;</button>
-    <button id="bNext" class="tbtn">&#9654;</button>
-    <button id="bRec" class="tbtn rec">&#9679; REC</button>
-    <button id="bMidi" class="tbtn midi">&#9836; MIDI</button>
-    <button id="bPanic" class="tbtn panic">PANIC</button>
-  </div>
-  <div id="seqtop"></div>
-  <div class="prow" id="presets"></div>
-  <div class="midi-row">
-    <div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER to enable</div>
-    <div class="midi-event" id="midiEvent"></div>
-    <div class="perf-hud" id="perfHud">VOICES 0/12</div>
-  </div>
-  <div class="sections" id="sections"></div>
-  <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v8.4.0 · seq-fixed · 2026-08-19 &bull; SEQ FIXED &bull; HUMANIZE &bull; RATCHET &bull; SWING</span></div>
-</div>
-<script>
-window.__psyErrors = [];
-window.__psyBuild = 'v8.4.0 · seq-fixed · 2026-08-19';
-window.__psyShow = function (t) { var es = document.getElementById('psyErrStrip'); if (es) { es.style.display='block'; es.textContent = t; } };
-window.addEventListener('error', function (e) {
-  window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
-  window.__psyShow('JS ERROR: ' + (e.message || 'unknown'));
-});
-window.addEventListener('unhandledrejection', function (e) {
-  window.__psyShow('ASYNC ERROR: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
-});
-window.addEventListener('load', function () {
-  setTimeout(function () {
-    var s = document.getElementById('sections');
-    if (!s || s.children.length > 0 || window.__psyUiReady) return;
-    var tried = false;
-    try { tried = sessionStorage.getItem('psyAutoRepair') === '1'; } catch (e) {}
-    if (!tried) {
-      try { sessionStorage.setItem('psyAutoRepair', '1'); } catch (e) {}
-      try { if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }); } catch (e) {}
-      try { if (window.caches && caches.keys) caches.keys().then(function (ks) { ks.forEach(function (k) { caches.delete(k); }); }); } catch (e) {}
-      setTimeout(function () { location.reload(); }, 300);
-      return;
-    }
-    try { sessionStorage.removeItem('psyAutoRepair'); } catch (e) {}
-    var d = document.createElement('div');
-    d.style.cssText = 'margin:14px 0;padding:16px 18px;border:1px solid #f85149;border-radius:10px;background:#1a0b0b;color:#ffb3ab;font-family:monospace;font-size:12px;line-height:1.9';
-    var msg = '<b>PANEL FAILED TO BUILD</b> · build ' + window.__psyBuild + '<br>';
-    if (window.__psyErrors.length) msg += 'Captured: ' + window.__psyErrors.join(' | ').slice(0, 400) + '<br>';
-    msg += '<button id="bHeal" style="margin-top:8px;padding:10px 18px;background:#f85149;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-family:monospace">REPAIR · clear cache and reload</button>';
-    d.innerHTML = msg;
-    s.parentNode.insertBefore(d, s);
-    var b = document.getElementById('bHeal');
-    if (b) b.addEventListener('click', function () {
-      try { if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); }); } catch (e) {}
-      try { if (window.caches && caches.keys) caches.keys().then(function (ks) { ks.forEach(function (k) { caches.delete(k); }); }); } catch (e) {}
-      setTimeout(function () { location.reload(); }, 200);
-    });
-  }, 1500);
-});
-</script>
-<script>
-(function () {
-  try {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
-      navigator.serviceWorker.getRegistrations().then(function (regs) {
-        for (var i = 0; i < regs.length; i++) regs[i].unregister();
-      }).catch(function () {});
-    }
-  } catch (e) {}
-  try {
-    if (window.caches && caches.keys) {
-      caches.keys().then(function (ks) {
-        for (var i = 0; i < ks.length; i++) caches.delete(ks[i]);
-      }).catch(function () {});
-    }
-  } catch (e) {}
-})();
-</script>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v8.5.0 · tap-gen · 2026-08-19</div>
+<div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px"></div>
+<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><button id="bPower" class="tbtn power">&#9211; POWER</button><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>STANDBY</div></div><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v8.5.0 · tap-gen · 2026-08-19 &bull; TAP &bull; GEN &bull; HUMANIZE &bull; RATCHET &bull; SWING</span></div></div>
+<script>window.__psyBuild="v8.5.0 · tap-gen · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
 <script>
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
@@ -4005,7 +3918,38 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     pat.addEventListener('change', function () { seq.loadPattern(pat.value); refresh(); });
     const clr = document.createElement('button'); clr.className='stb'; clr.textContent='CLR';
     clr.addEventListener('click', function(){ for(let i=0;i<Psy.SEQ_LEN;i++) seq.setStep(i,{on:false,tie:false,tr:0,len:70,vel:0.72,rat:1}); refresh(); });
-    tr.appendChild(snd); tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr);
+    /* TAP tempo */
+    let taps = [];
+    const tap = document.createElement('button'); tap.className='stb'; tap.textContent='TAP';
+    tap.addEventListener('click', function () {
+      const now = performance.now();
+      taps = taps.filter(function (t) { return now - t < 2500; });
+      taps.push(now);
+      if (taps.length >= 2) {
+        let sum = 0; for (let i = 1; i < taps.length; i++) sum += taps[i] - taps[i-1];
+        const avg = sum / (taps.length - 1);
+        seq.bpm = Math.max(60, Math.min(200, Math.round(60000 / avg)));
+        bpmU();
+      }
+    });
+    /* GEN: improv psy pattern generator */
+    const gen = document.createElement('button'); gen.className='stb'; gen.textContent='GEN';
+    gen.addEventListener('click', function () {
+      const scale = [0,0,0,3,5,7,10]; /* psy-ish movement */
+      for (let i = 0; i < Psy.SEQ_LEN; i++) {
+        const on = Math.random() < (i % 4 === 0 ? 0.95 : 0.6);
+        seq.setStep(i, {
+          on: on,
+          vel: (i % 4 === 0 ? 1 : 0.55 + Math.random() * 0.4),
+          tr: (Math.random() < 0.25 ? scale[Math.floor(Math.random() * scale.length)] * (Math.random()<0.5?-1:1) : 0),
+          len: 40 + Math.floor(Math.random() * 8) * 10,
+          tie: (Math.random() < 0.12),
+          rat: (Math.random() < 0.15 ? 2 : 1)
+        });
+      }
+      refresh();
+    });
+    tr.appendChild(snd); tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr); tr.appendChild(tap); tr.appendChild(gen);
     s.appendChild(tr); s.appendChild(grid); s.appendChild(ed);
     seq.onStep = function (pos, note) {
       for (let i = 0; i < Psy.SEQ_LEN; i++) stepBtns[i].classList.toggle('play', i === pos && note >= 0);
@@ -4068,6 +4012,5 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
 })();
 
 </script>
-
 </body>
 </html>
