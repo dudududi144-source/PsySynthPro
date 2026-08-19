@@ -1212,7 +1212,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     const wTie  = document.createElement('button'); wTie.className='stb tie'; wTie.textContent='TIE';
     function updTie(){ wTie.classList.toggle('on', !!seq.steps[sel].tie); }
     wTie.addEventListener('click', function(){ seq.setStep(sel,{tie:!seq.steps[sel].tie}); updTie(); refresh(); });
-    ed.appendChild(wRoot); ed.appendChild(wNote); ed.appendChild(wVel); ed.appendChild(wLen); ed.appendChild(wTie);
+    ed.appendChild(wRoot); ed.appendChild(wSwing); ed.appendChild(wNote); ed.appendChild(wVel); ed.appendChild(wLen); ed.appendChild(wTie);
     const grid = document.createElement('div'); grid.className = 'seq2-grid';
     function refresh() {
       for (let i = 0; i < Psy.SEQ_LEN; i++) {
@@ -1220,7 +1220,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
         stepBtns[i].className = 'sq2' + (st.on ? ' on' : '') + (i === sel ? ' sel' : '') + (st.tie ? ' tie' : '');
         stepBtns[i].style.opacity = st.on ? (0.45 + 0.55 * st.vel) : 0.25;
       }
-      wRoot._upd(); wNote._upd(); wVel._upd(); wLen._upd(); updTie();
+      wRoot._upd(); wSwing._upd(); wNote._upd(); wVel._upd(); wLen._upd(); updTie();
     }
     for (let i = 0; i < Psy.SEQ_LEN; i++) {
       const b = document.createElement('button'); b.className = 'sq2';
