@@ -453,6 +453,10 @@ class SynthEngine {
       });
       self.node.port.onmessage = function (e) {
         if (e.data && e.data.type === 'voices' && self.onVoices) self.onVoices(e.data.count);
+        else if (e.data && e.data.type === 'error') {
+          var es = document.getElementById('psyErrStrip');
+          if (es) { es.style.display = 'block'; es.textContent = 'WORKLET ERROR: ' + e.data.msg; }
+        }
       };
 
       self.fxInput = self.ctx.createGain();
