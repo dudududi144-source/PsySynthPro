@@ -190,7 +190,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     const halfLen = this.wtLen / 2;
     let aaLvl = Math.floor(Math.log2(Math.max(1, halfLen / Math.max(1, maxH))));
     aaLvl = Math.max(0, Math.min(mips.length - 1, aaLvl));
-    const scanPos = Math.max(0, Math.min(1, p.wtPos / 100)) * (mips.length - 1);
+    const scanPos = Math.max(0, Math.min(1, this.p.wtPos / 100)) * (mips.length - 1);
     let baseLvl = Math.max(aaLvl, Math.min(mips.length - 1, Math.floor(scanPos)));
     if (!isFinite(baseLvl)) baseLvl = 0; baseLvl = Math.max(0, Math.min(mips.length-1, baseLvl|0));
     const nextLvl = Math.min(mips.length - 1, baseLvl + 1);
