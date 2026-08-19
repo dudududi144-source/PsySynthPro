@@ -1194,9 +1194,9 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     let sel = 0;
     function stepper(label, get, set, min, max, stepv, fmt) {
       const w = document.createElement('div'); w.className = 'stp';
+      const dec = document.createElement('button'); dec.className = 'stb'; dec.textContent = '-';
       const t = document.createElement('span'); t.className = 'stl'; t.textContent = label;
       const v = document.createElement('span'); v.className = 'stv';
-      const dec = document.createElement('button'); dec.className = 'stb'; dec.textContent = '-';
       const inc = document.createElement('button'); inc.className = 'stb'; inc.textContent = '+';
       function upd() { v.textContent = fmt(get()); }
       dec.addEventListener('click', function () { set(Math.max(min, get() - stepv)); upd(); });
@@ -1205,14 +1205,18 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
       w._upd = upd; return w;
     }
     const ed = document.createElement('div'); ed.className = 'seq2-ed';
+    const wRoot = stepper('ROOT', function(){return seq.root;}, function(x){seq.root=x;}, 24, 60, 1, function(x){return x;});
+    const wSwing = stepper('SWING', function(){return seq.swing;}, function(x){seq.swing=x;}, 0, 60, 5, function(x){return x+'%';});
+    const wHuman = stepper('HUMAN', function(){return seq.human;}, function(x){seq.human=x;}, 0, 100, 10, function(x){return x+'%';});
+    const wRat = stepper('RAT', function(){return seq.steps[sel].rat||1;}, function(x){seq.setStep(sel,{rat:x});}, 1, 4, 1, function(x){return 'x'+x;});
     const wNote = stepper('NOTE', function(){return seq.steps[sel].tr;}, function(x){seq.setStep(sel,{tr:x});}, -12, 12, 1, function(x){return (x>0?'+':'')+x;});
-    const wVel  = stepper('VEL',  function(){return Math.round(seq.steps[sel].vel*100);}, function(x){seq.setStep(sel,{vel:x/100});}, 5, 100, 5, function(x){return x;});
-    const wLen  = stepper('LEN',  function(){return seq.steps[sel].len;}, function(x){seq.setStep(sel,{len:x});}, 10, 200, 10, function(x){return x+'%';});
-    const wRoot = stepper('KEY', function(){return seq.root;}, function(x){seq.root=x;}, 24, 60, 1, function(x){return x;});
-    const wTie  = document.createElement('button'); wTie.className='stb tie'; wTie.textContent='TIE';
+    const wVel = stepper('VEL', function(){return Math.round(seq.steps[sel].vel*100);}, function(x){seq.setStep(sel,{vel:x/100});}, 5, 100, 5, function(x){return x;});
+    const wLen = stepper('LEN', function(){return seq.steps[sel].len;}, function(x){seq.setStep(sel,{len:x});}, 10, 200, 10, function(x){return x+'%';});
+    const wTie = document.createElement('button'); wTie.className='stb tie'; wTie.textContent='TIE';
     function updTie(){ wTie.classList.toggle('on', !!seq.steps[sel].tie); }
     wTie.addEventListener('click', function(){ seq.setStep(sel,{tie:!seq.steps[sel].tie}); updTie(); refresh(); });
-    ed.appendChild(wRoot); ed.appendChild(wSwing); ed.appendChild(wNote); ed.appendChild(wVel); ed.appendChild(wLen); ed.appendChild(wTie);
+    ed.appendChild(wRoot); ed.appendChild(wSwing); ed.appendChild(wHuman); ed.appendChild(wRat);
+    ed.appendChild(wNote); ed.appendChild(wVel); ed.appendChild(wLen); ed.appendChild(wTie);
     const grid = document.createElement('div'); grid.className = 'seq2-grid';
     function refresh() {
       for (let i = 0; i < Psy.SEQ_LEN; i++) {
@@ -1220,7 +1224,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
         stepBtns[i].className = 'sq2' + (st.on ? ' on' : '') + (i === sel ? ' sel' : '') + (st.tie ? ' tie' : '');
         stepBtns[i].style.opacity = st.on ? (0.45 + 0.55 * st.vel) : 0.25;
       }
-      wRoot._upd(); wSwing._upd(); wNote._upd(); wVel._upd(); wLen._upd(); updTie();
+      wRoot._upd(); wSwing._upd(); wHuman._upd(); wRat._upd(); wNote._upd(); wVel._upd(); wLen._upd(); updTie();
     }
     for (let i = 0; i < Psy.SEQ_LEN; i++) {
       const b = document.createElement('button'); b.className = 'sq2';
@@ -1228,6 +1232,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
       grid.appendChild(b); stepBtns.push(b);
     }
     const tr = document.createElement('div'); tr.className = 'seq2-tr';
+    const snd = document.createElement('span'); snd.className='stl'; snd.textContent='SEQ→SYNTH';
     const run = document.createElement('button'); run.className = 'stb run'; run.textContent = 'RUN';
     run.addEventListener('click', function () {
       if (!seq.enabled && !engine.ready) { var pb = document.getElementById('bPower'); if (pb) pb.click(); }
@@ -1243,19 +1248,16 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     Object.keys(Psy.SEQ_PATTERNS).forEach(function (k) { const o = document.createElement('option'); o.textContent = k; pat.appendChild(o); });
     pat.addEventListener('change', function () { seq.loadPattern(pat.value); refresh(); });
     const clr = document.createElement('button'); clr.className='stb'; clr.textContent='CLR';
-    clr.addEventListener('click', function(){ for(let i=0;i<Psy.SEQ_LEN;i++) seq.setStep(i,{on:false,tie:false,tr:0,len:70,vel:0.72}); refresh(); });
-    const snd = document.createElement('span'); snd.className='stl'; snd.textContent='SEQ→SYNTH';
+    clr.addEventListener('click', function(){ for(let i=0;i<Psy.SEQ_LEN;i++) seq.setStep(i,{on:false,tie:false,tr:0,len:70,vel:0.72,rat:1}); refresh(); });
     tr.appendChild(snd); tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr);
-    const hint = document.createElement('div'); hint.className='stl'; hint.style.margin='4px 0 0'; hint.textContent='SEQ DRIVES THE LOADED PATCH (same engine + FX)';
-    s.appendChild(tr); s.appendChild(hint); s.appendChild(grid); s.appendChild(ed);
+    s.appendChild(tr); s.appendChild(grid); s.appendChild(ed);
     seq.onStep = function (pos, note) {
       for (let i = 0; i < Psy.SEQ_LEN; i++) stepBtns[i].classList.toggle('play', i === pos && note >= 0);
     };
     bpmU(); refresh();
     host.appendChild(s);
   }
-
-  /* ── COMPACT PRESET MENU ──────────────────────────────────────── */
+/* ── COMPACT PRESET MENU ──────────────────────────────────────── */
   function buildPresetMenu() {
     const wrap = document.getElementById('presets');
     if (!wrap) return;
