@@ -797,3 +797,10 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 }
 
 #bPower { display: none; }
+
+/* ══════════ TOUCH ERGONOMICS (44px min targets) ══════════ */
+@media (max-width:700px){
+  .stb, .tbtn, .cb, .cbtn .cb { min-height: 44px; }
+  .sq2 { min-height: 40px; }
+  .msel { min-height: 44px; }
+}
