@@ -436,13 +436,9 @@ class SynthEngine {
     const AC = window.AudioContext || window.webkitAudioContext;
     this.ctx = new AC({ latencyHint: 'interactive' });
     const self = this;
-    const blob = new Blob([WORKLET_SOURCE], { type: 'application/javascript' });
-    const blobUrl = URL.createObjectURL(blob);
     let load;
     if (self.ctx.audioWorklet) {
-      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js').catch(function () {
-        return self.ctx.audioWorklet.addModule(blobUrl);
-      });
+      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js');
     } else {
       self.fallbackMode = true; self.node = null; load = Promise.resolve();
     }
@@ -537,7 +533,7 @@ class SynthEngine {
 
       self.ready = true;
       self.sendParams();
-      URL.revokeObjectURL(blobUrl);
+
       return self.ctx.resume();
     }).catch(function (e) {
       var es = document.getElementById('psyErrStrip');
