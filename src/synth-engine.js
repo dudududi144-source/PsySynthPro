@@ -442,9 +442,12 @@ class SynthEngine {
       return self.ctx.audioWorklet.addModule(blobUrl);
     });
     return load.then(function () {
-      self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
-        numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
-      });
+      self.fallbackMode = false;
+      try {
+        self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
+          numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
+        });
+      } catch (e) { self.node = null; self.fallbackMode = true; }
       self.node.port.onmessage = function (e) {
         if (e.data && e.data.type === 'voices' && self.onVoices) self.onVoices(e.data.count);
         else if (e.data && e.data.type === 'error') {
@@ -454,7 +457,7 @@ class SynthEngine {
       };
 
       self.fxInput = self.ctx.createGain();
-      self.node.connect(self.fxInput);
+      if (self.node) self.node.connect(self.fxInput);
 
       self.master = self.ctx.createGain();
       self.master.gain.value = self._fin(self.params.master, 80) / 100;
@@ -581,12 +584,12 @@ class SynthEngine {
     if (this.master) this.master.gain.value = this.params.master / 100;
     this.sendParams();
   }
-  noteOn(note, vel) { if (this.node) this.node.port.postMessage({ type: 'noteOn', note: note, vel: vel }); }
-  noteOff(note) { if (this.node) this.node.port.postMessage({ type: 'noteOff', note: note }); }
+  noteOn(note, vel) { if (this.fallbackMode) { if (this.ctx) this.fbNoteOn(note, vel); return; } if (this.node) this.node.port.postMessage({ type: 'noteOn', note: note, vel: vel }); }
+  noteOff(note) { if (this.fallbackMode) { this.fbNoteOff(note); return; } if (this.node) this.node.port.postMessage({ type: 'noteOff', note: note }); }
   noteOnAt(note, vel, when) { if (this.node) this.node.port.postMessage({ type: 'noteOnAt', note: note, vel: vel, when: when }); }
   noteOffAt(note, when) { if (this.node) this.node.port.postMessage({ type: 'noteOffAt', note: note, when: when }); }
   noteBend(note, semis) { if (this.node) this.node.port.postMessage({ type: 'noteBend', note: note, bend: semis }); }
-  panic() { if (this.node) this.node.port.postMessage({ type: 'panic' }); }
+  panic() { if (this.fallbackMode) { for (const n in this.fbVoices) this.fbNoteOff(+n); return; } if (this.node) this.node.port.postMessage({ type: 'panic' }); }
   latencyMs() {
     if (!this.ctx) return 0;
     return ((this.ctx.baseLatency || 0) + (this.ctx.outputLatency || 0)) * 1000;
