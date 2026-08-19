@@ -227,6 +227,7 @@ class SynthProcessor extends AudioWorkletProcessor {
   }
 
   process(inputs, outputs) {
+    try {
     const out = outputs[0];
     const nCh = out.length;
     const N = out[0].length;
@@ -399,7 +400,6 @@ class SynthProcessor extends AudioWorkletProcessor {
         if (p.lfoTarget === 2) ampMod = 1 - (p.lfoDepth / 200) + lfoVal * (p.lfoDepth / 200);
         ampMod *= 1 - (p.lfoAmp / 200) + lfoVal * (p.lfoAmp / 200);
         ampMod *= Math.max(0, 1 + mAmp);
-        ampMod *= Math.max(0, 1 + mAmp);
         acc += fsig * v.amp * ampMod;
       }
 
@@ -414,6 +414,12 @@ class SynthProcessor extends AudioWorkletProcessor {
       let count = 0;
       for (const v of this.voices) if (v.active) count++;
       this.port.postMessage({ type: 'voices', count: count });
+    }
+    } catch (e) {
+      if (!this._errTick) this._errTick = 0;
+      if (this._errTick <= 0) { this.port.postMessage({ type: 'error', msg: String(e && e.message ? e.message : e) }); this._errTick = 200; }
+      this._errTick--;
+      return true;
     }
     return true;
   }
