@@ -3,13 +3,17 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
 Psy.DEFAULT = {
   wave: 0, detune: 0, unison: 3, spread: 12, sub: 25, noise: 0,
-  fmRatio: 2, fmDepth: 12,
-  filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
+  fmRatio: 2, fmDepth: 12, fm2Ratio: 3, fm2Depth: 0, fm3Ratio: 4, fm3Depth: 0, fm4Ratio: 5, fm4Depth: 0, fm5Ratio: 6, fm5Depth: 0, fm6Ratio: 7, fm6Depth: 0,
+  filterType: 0, cutoff: 2600, res: 2, filterEnv: 55, wtPos: 0,
   attack: 12, decay: 260, sustain: 70, release: 650,
-  lfoWave: 0, lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35,
+  fAttack: 5, fDecay: 300, fSustain: 40, fRelease: 400, fEnvAmt: 60,
+  lfoWave: 0, lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35, lfo2Rate: 5, lfo2Wave: 0,
+  lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0,
+  m0s: 0, m0a: 0, m0d: 0, m1s: 0, m1a: 0, m1d: 0, m2s: 0, m2a: 0, m2d: 0, m3s: 0, m3a: 0, m3d: 0,
+  m4s: 0, m4a: 0, m4d: 0, m5s: 0, m5a: 0, m5d: 0, m6s: 0, m6a: 0, m6d: 0, m7s: 0, m7a: 0, m7d: 0,
   glideTime: 0,
-  master: 80, reverb: 35, delay: 22, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0,
-  modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0
+  fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0.8,
+  master: 80, reverb: 35, delay: 22
 };
 
 /* wave: 0=SAW 1=SQR 2=TRI 3=SINE 4=USER(wavetable) | filterType: 0=LP 1=HP 2=BP 3=NOTCH
