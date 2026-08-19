@@ -71,7 +71,21 @@ class SynthProcessor extends AudioWorkletProcessor {
   }
 
   onMessage(m) {
-    if (m.type === 'params') Object.assign(this.p, m.values);
+    if (m.type === 'params') {
+      Object.assign(this.p, m.values);
+      const p = this.p;
+      const cl = (v,lo,hi,fb)=> (typeof v==='number'&&isFinite(v))? Math.max(lo,Math.min(hi,v)) : fb;
+      p.cutoff = cl(p.cutoff,40,16000,2600);
+      p.res = cl(p.res,0.1,20,2);
+      p.unison = cl(p.unison,1,7,3);
+      p.master = cl(p.master,10,100,80);
+      p.attack = cl(p.attack,1,3000,12);
+      p.release = cl(p.release,30,5000,650);
+      p.fAttack = cl(p.fAttack,1,3000,5);
+      p.fRelease = cl(p.fRelease,30,5000,400);
+      p.fDecay = cl(p.fDecay,10,3000,300);
+      p.decay = cl(p.decay,10,3000,260);
+    }
     else if (m.type === 'noteOn') this.noteOn(m.note, m.vel);
     else if (m.type === 'noteOff') this.noteOff(m.note);
     else if (m.type === 'noteOnAt') {
