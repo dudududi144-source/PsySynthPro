@@ -1340,7 +1340,18 @@ $('bPower').addEventListener('click', function () {
       engine.set('wtPos', Math.round(r(0,100)));
       syncUI();
     });
+    /* A/B compare */
+    let abSlot = 'A'; const abMem = { A: null, B: null };
+    const bA = document.createElement('button'); bA.className='stb on'; bA.textContent='A';
+    const bB = document.createElement('button'); bB.className='stb'; bB.textContent='B';
+    const bCp = document.createElement('button'); bCp.className='stb'; bCp.textContent='A→B';
+    function snap(){ const o={}; for(const k in engine.params) o[k]=engine.params[k]; return o; }
+    function applySnap(o){ if(!o) return; engine.setAll(o); syncUI(); }
+    bA.addEventListener('click', function(){ if(abSlot!=='A'){ abMem[abSlot]=snap(); abSlot='A'; applySnap(abMem.A); } bA.classList.add('on'); bB.classList.remove('on'); bCp.textContent='A→B'; });
+    bB.addEventListener('click', function(){ if(abSlot!=='B'){ abMem[abSlot]=snap(); abSlot='B'; applySnap(abMem.B); } bB.classList.add('on'); bA.classList.remove('on'); bCp.textContent='B→A'; });
+    bCp.addEventListener('click', function(){ if(abSlot==='A'){ abMem.B=snap(); } else { abMem.A=snap(); } });
     wrap.appendChild(cat); wrap.appendChild(sel); wrap.appendChild(save); wrap.appendChild(srch); wrap.appendChild(rnd);
+    wrap.appendChild(bA); wrap.appendChild(bB); wrap.appendChild(bCp);
     fill();
   }
 
