@@ -140,7 +140,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
     for (const x of this.voices) if (x !== v) x.age++;
     v.active = true; v.note = note; v.vel = vel; v.age = 0; v.bend = 0;
-    v.pan = 0.5 + (Math.random() - 0.5) * 0.7 * (this.num(this.p.width,0,100,60)/100);
+    v.pan = 0.5 + (Math.random() - 0.5) * 0.7 * (Math.max(0, Math.min(100, (this.p.width == null ? 60 : this.p.width)))/100);
     v.baseFreq = 440 * Math.pow(2, (note - 69) / 12);
     v.bendMul = 1;
     v.coefTick = 0; v.resEffCached = -1;
