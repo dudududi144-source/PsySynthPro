@@ -22,7 +22,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       m5s: 0, m5a: 0, m5d: 0,
       m6s: 0, m6a: 0, m6d: 0,
       m7s: 0, m7a: 0, m7d: 0,
-      glideTime: 0,
+      glideTime: 0, width: 60,
       master: 80, reverb: 35, delay: 22,
       fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0.8,
     };
@@ -32,7 +32,7 @@ class SynthProcessor extends AudioWorkletProcessor {
         active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
         phase: 0, modPhase: 0, mod2Phase: 0, mod3Phase: 0, mod4Phase: 0, mod5Phase: 0, mod6Phase: 0, subPhase: 0, triInt: 0,
         uniPhase: [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
-        amp: 0, stage: 0, fAmp: 0, fStage: 0, ic1eq: 0, ic2eq: 0, smoothFc: 0, z1: 0, z2: 0, z3: 0, z4: 0,
+        amp: 0, stage: 0, fAmp: 0, fStage: 0, pan: 0.5, ic1eq: 0, ic2eq: 0, smoothFc: 0, z1: 0, z2: 0, z3: 0, z4: 0,
         coefTick: 0, a1: 0, a2: 0, a3: 0, resEffCached: -1,
         targetBaseFreq: 0, glideRate: 0
       });
@@ -140,6 +140,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     }
     for (const x of this.voices) if (x !== v) x.age++;
     v.active = true; v.note = note; v.vel = vel; v.age = 0; v.bend = 0;
+    v.pan = 0.5 + (Math.random() - 0.5) * 0.7 * (this.num(this.p.width,0,100,60)/100);
     v.baseFreq = 440 * Math.pow(2, (note - 69) / 12);
     v.bendMul = 1;
     v.coefTick = 0; v.resEffCached = -1;
@@ -257,7 +258,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       if (this.lfo2Phase >= 1) this.lfo2Phase -= 1;
       const lfo2Sin = Math.sin(TWO_PI * this.lfo2Phase);
       const lfo2Val = p.lfo2Wave === 1 ? (lfo2Sin >= 0 ? 1 : -1) : lfo2Sin;
-      let acc = 0;
+      let accL = 0, accR = 0;
 
       for (const v of this.voices) {
         if (!v.active) continue;
@@ -386,13 +387,14 @@ class SynthProcessor extends AudioWorkletProcessor {
         if (p.lfoTarget === 2) ampMod = 1 - (p.lfoDepth / 200) + lfoVal * (p.lfoDepth / 200);
         ampMod *= 1 - (p.lfoAmp / 200) + lfoVal * (p.lfoAmp / 200);
         ampMod *= Math.max(0, 1 + mAmp);
-        acc += fsig * v.amp * ampMod;
+        { const g = fsig * v.amp * ampMod; accL += g * (1 - v.pan); accR += g * v.pan; }
       }
 
       const master = p.master / 100;
-      let s = Math.tanh(acc * master * 0.8);
-      if (!isFinite(s)) s = 0;
-      for (let c = 0; c < nCh; c++) out[c][i] = s;
+      let sL = Math.tanh(accL * master * 0.8);
+      let sR = Math.tanh(accR * master * 0.8);
+      if (!isFinite(sL)) sL = 0; if (!isFinite(sR)) sR = 0;
+      out[0][i] = sL; if (nCh > 1) out[1][i] = sR;
     }
     this._voiceTick += N;
     if (this._voiceTick >= 2048) {
