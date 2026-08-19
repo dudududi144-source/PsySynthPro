@@ -384,7 +384,8 @@ class SynthProcessor extends AudioWorkletProcessor {
       }
 
       const master = p.master / 100;
-      const s = Math.tanh(acc * master * 0.28);
+      let s = Math.tanh(acc * master * 0.55);
+      if (!isFinite(s)) s = 0;
       for (let c = 0; c < nCh; c++) out[c][i] = s;
     }
     this._voiceTick += N;
