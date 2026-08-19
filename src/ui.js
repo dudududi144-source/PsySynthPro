@@ -1037,7 +1037,12 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
       'LAT ' + (engine.latencyMs ? (engine.latencyMs() || 0) : 0).toFixed(1) + 'ms • 12 VOX';
   }
 
-  $('bPower').addEventListener('click', function () {
+    /* always-on: first touch anywhere powers the synth */
+  document.addEventListener('pointerdown', function __autoPower() {
+    if (!engine.ready) $('bPower').click();
+    document.removeEventListener('pointerdown', __autoPower);
+  });
+$('bPower').addEventListener('click', function () {
     if (engine.ready) return;
     engine.boot().then(function () {
       $('bPower').classList.add('on');
