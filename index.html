@@ -238,7 +238,6 @@ body {
   width: 42px; height: 128px; margin: 0 1px;
   border: 1px solid #0a0c10; border-radius: 0 0 6px 6px;
   background:
-    radial-gradient(circle, rgba(255,122,40,0.38) 1px, transparent 1.6px) 0 0/8px 8px,
     linear-gradient(180deg, #faf6ee 0%, #eee8da 80%, #dcd5c4 100%);
   box-shadow: 0 5px 0 #a89f8d, 0 8px 14px rgba(0,0,0,0.55), inset 0 -2px 4px rgba(0,0,0,0.08);
 }
@@ -246,7 +245,8 @@ body {
   width: 26px; height: 80px; margin: 0 -13px; z-index: 2;
   border: 1px solid #000; border-radius: 0 0 5px 5px;
   background:
-    radial-gradient(circle, rgba(255,122,40,0.28) 1px, transparent 1.5px) 0 0/7px 7px,
+    background: linear-gradient(180deg,#2b2f36,#171b21); /*clean*/
+    background-xnt 1.5px) 0 0/7px 7px,
     linear-gradient(180deg, #2c2f36 0%, #14161a 60%, #0a0b0e 100%);
   box-shadow: 0 4px 0 #000, 0 6px 10px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
 }
@@ -807,13 +807,15 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   .klabel { font-size: 7.5px; letter-spacing: 0.8px; }
 }
 
+#bPower { display: none; }
+
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v8.7.0 · proportion · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v8.7.1 · always-on · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px"></div>
-<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><button id="bPower" class="tbtn power">&#9211; POWER</button><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>STANDBY</div></div><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v8.7.0 · proportion · 2026-08-19 &bull; PROPORTION FIXED</span></div></div>
-<script>window.__psyBuild="v8.7.0 · proportion · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
+<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap anywhere to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v8.7.1 · always-on · 2026-08-19 &bull; ALWAYS-ON &bull; CLEAN KEYS</span></div></div>
+<script>window.__psyBuild="v8.7.1 · always-on · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
 <script>
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
@@ -3828,7 +3830,12 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
       'LAT ' + (engine.latencyMs ? (engine.latencyMs() || 0) : 0).toFixed(1) + 'ms • 12 VOX';
   }
 
-  $('bPower').addEventListener('click', function () {
+    /* always-on: first touch anywhere powers the synth */
+  document.addEventListener('pointerdown', function __autoPower() {
+    if (!engine.ready) $('bPower').click();
+    document.removeEventListener('pointerdown', __autoPower);
+  });
+$('bPower').addEventListener('click', function () {
     if (engine.ready) return;
     engine.boot().then(function () {
       $('bPower').classList.add('on');
