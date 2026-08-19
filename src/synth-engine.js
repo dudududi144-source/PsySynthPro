@@ -170,21 +170,22 @@ class SynthProcessor extends AudioWorkletProcessor {
   readWavetable(phase, inc) {
     if (!this.wtMips) this.wtMips = this.buildMips(this.wtable);
     const mips = this.wtMips;
-    /* pick mip so highest kept harmonic stays under Nyquist */
     const maxH = 0.5 / Math.max(inc, 0.00001);
-    /* each mip level ~halves usable harmonics; pick level so kept harmonics <= maxH */
     const halfLen = this.wtLen / 2;
-    let level = Math.floor(Math.log2(Math.max(1, halfLen / Math.max(1, maxH))));
-    level = Math.max(0, Math.min(mips.length - 1, level));
-    const tbl = mips[level];
-    const pos = phase * this.wtLen;
-    const i0 = Math.floor(pos) % this.wtLen;
-    const i1 = (i0 + 1) % this.wtLen;
-    const frac = pos - Math.floor(pos);
-    const wt = tbl[i0] + (tbl[i1] - tbl[i0]) * frac;
-    /* WT POS: morph wavetable -> sine for scanning feel */
-    const wtpos = Math.max(0, Math.min(1, p.wtPos / 100));
-    return wt * (1 - wtpos) + Math.sin(6.28318530718 * phase) * wtpos;
+    let aaLvl = Math.floor(Math.log2(Math.max(1, halfLen / Math.max(1, maxH))));
+    aaLvl = Math.max(0, Math.min(mips.length - 1, aaLvl));
+    const scanPos = Math.max(0, Math.min(1, p.wtPos / 100)) * (mips.length - 1);
+    const baseLvl = Math.max(aaLvl, Math.min(mips.length - 1, Math.floor(scanPos)));
+    const nextLvl = Math.min(mips.length - 1, baseLvl + 1);
+    const blend = scanPos - Math.floor(scanPos);
+    const FA = mips[baseLvl], FB = mips[nextLvl];
+    const wpos = phase * this.wtLen;
+    const w0 = Math.floor(wpos) % this.wtLen;
+    const w1 = (w0 + 1) % this.wtLen;
+    const wfrac = wpos - Math.floor(wpos);
+    const sA = FA[w0] + (FA[w1] - FA[w0]) * wfrac;
+    const sB = FB[w0] + (FB[w1] - FB[w0]) * wfrac;
+    return sA + (sB - sA) * blend;
   }
 
   oscSample(phase, inc, wave, v) {
