@@ -839,12 +839,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v9.0.1 · urlfix · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v9.1.0 · fallback · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px"></div>
-<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v9.0.1 · urlfix · 2026-08-19 &bull; URL FIX &bull; FILE-WORKLET</span></div></div>
+<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v9.1.0 · fallback · 2026-08-19 &bull; ALWAYS-PLAYS FALLBACK</span></div></div>
 <div id="tapstart"><div class="big">PSYSYNTH PRO<br><span class="sub">TAP TO START</span></div></div>
 <script>(function(){var t=document.getElementById("tapstart");if(!t)return;t.addEventListener("pointerdown",function(){t.style.display="none";var b=document.getElementById("bPower");if(b)b.click();});if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}})();</script>
-<script>window.__psyBuild="v9.0.1 · urlfix · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
+<script>window.__psyBuild="v9.1.0 · fallback · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
 <script>
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
@@ -1646,9 +1646,12 @@ class SynthEngine {
       return self.ctx.audioWorklet.addModule(blobUrl);
     });
     return load.then(function () {
-      self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
-        numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
-      });
+      self.fallbackMode = false;
+      try {
+        self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
+          numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
+        });
+      } catch (e) { self.node = null; self.fallbackMode = true; }
       self.node.port.onmessage = function (e) {
         if (e.data && e.data.type === 'voices' && self.onVoices) self.onVoices(e.data.count);
         else if (e.data && e.data.type === 'error') {
@@ -1658,7 +1661,7 @@ class SynthEngine {
       };
 
       self.fxInput = self.ctx.createGain();
-      self.node.connect(self.fxInput);
+      if (self.node) self.node.connect(self.fxInput);
 
       self.master = self.ctx.createGain();
       self.master.gain.value = self._fin(self.params.master, 80) / 100;
@@ -1785,12 +1788,32 @@ class SynthEngine {
     if (this.master) this.master.gain.value = this.params.master / 100;
     this.sendParams();
   }
-  noteOn(note, vel) { if (this.node) this.node.port.postMessage({ type: 'noteOn', note: note, vel: vel }); }
-  noteOff(note) { if (this.node) this.node.port.postMessage({ type: 'noteOff', note: note }); }
+  noteOn(note, vel) { if (this.fallbackMode) { if (this.ctx) this.fbNoteOn(note, vel); return; } if (this.node) this.node.port.postMessage({ type: 'noteOn', note: note, vel: vel }); }
+  noteOff(note) { if (this.fallbackMode) { this.fbNoteOff(note); return; } if (this.node) this.node.port.postMessage({ type: 'noteOff', note: note }); }
   noteOnAt(note, vel, when) { if (this.node) this.node.port.postMessage({ type: 'noteOnAt', note: note, vel: vel, when: when }); }
   noteOffAt(note, when) { if (this.node) this.node.port.postMessage({ type: 'noteOffAt', note: note, when: when }); }
   noteBend(note, semis) { if (this.node) this.node.port.postMessage({ type: 'noteBend', note: note, bend: semis }); }
-  panic() { if (this.node) this.node.port.postMessage({ type: 'panic' }); }
+  panic() { if (this.fallbackMode) { for (const n in this.fbVoices) this.fbNoteOff(+n); return; } if (this.node) this.node.port.postMessage({ type: 'panic' }); }
+  fbNoteOn(note, vel) {
+    if (!this.fbVoices) this.fbVoices = {};
+    if (this.fbVoices[note]) this.fbNoteOff(note);
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator(); osc.type = 'sawtooth';
+    osc.frequency.value = 440 * Math.pow(2, (note - 69) / 12);
+    const flt = this.ctx.createBiquadFilter(); flt.type = 'lowpass';
+    flt.frequency.value = this._fin(this.params.cutoff, 2600); flt.Q.value = this._fin(this.params.res, 2);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel || 0.8, t + 0.01);
+    osc.connect(flt); flt.connect(g); g.connect(this.fxInput || this.master);
+    osc.start(t); this.fbVoices[note] = { osc: osc, g: g };
+  }
+  fbNoteOff(note) {
+    if (!this.fbVoices) return; const v = this.fbVoices[note]; if (!v) return;
+    const t = this.ctx.currentTime;
+    v.g.gain.cancelScheduledValues(t); v.g.gain.setValueAtTime(v.g.gain.value, t);
+    v.g.gain.linearRampToValueAtTime(0.0001, t + 0.2); v.osc.stop(t + 0.25);
+    delete this.fbVoices[note];
+  }
   latencyMs() {
     if (!this.ctx) return 0;
     return ((this.ctx.baseLatency || 0) + (this.ctx.outputLatency || 0)) * 1000;
