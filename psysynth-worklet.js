@@ -322,8 +322,10 @@ class SynthProcessor extends AudioWorkletProcessor {
         if (p.fm4Depth > 0) { v.mod4Phase += (fB * p.fm4Ratio) / sr; if (v.mod4Phase >= 1) v.mod4Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod4Phase) * (p.fm4Depth / 100) * fB * 2; }
         if (p.fm5Depth > 0) { v.mod5Phase += (fB * p.fm5Ratio) / sr; if (v.mod5Phase >= 1) v.mod5Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod5Phase) * (p.fm5Depth / 100) * fB * 2; }
         if (p.fm6Depth > 0) { v.mod6Phase += (fB * p.fm6Ratio) / sr; if (v.mod6Phase >= 1) v.mod6Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod6Phase) * (p.fm6Depth / 100) * fB * 2; }
+        v.driftPh += v.driftRate / sr; if (v.driftPh >= 1) v.driftPh -= 1;
+        const drift = 1 + Math.sin(6.28318530718 * v.driftPh) * 0.0015;
         for (let u = 0; u < un; u++) {
-          const fU = fB * uniMuls[u];
+          const fU = fB * drift * uniMuls[u];
           let inc = Math.max(0.00001, (fU + fmSum) / sr);
           if (!isFinite(inc)) inc = 0.01;
           v.uniPhase[u] += inc;
