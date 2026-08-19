@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v8.3.0 · swing · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v8.3.1 · ratchet · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -691,7 +691,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v8.3.0 · swing · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v8.3.1 · ratchet · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -718,11 +718,11 @@ button:focus-visible, .key:focus-visible {
   </div>
   <div class="sections" id="sections"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v8.3.0 · swing · 2026-08-19 &bull; SWING &bull; SEQ=SYNTH &bull; INTEGRATED</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v8.3.1 · ratchet · 2026-08-19 &bull; RATCHET &bull; SWING &bull; SEQ=SYNTH</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v8.3.0 · swing · 2026-08-19';
+window.__psyBuild = 'v8.3.1 · ratchet · 2026-08-19';
 window.__psyShow = function (t) { var es = document.getElementById('psyErrStrip'); if (es) { es.style.display='block'; es.textContent = t; } };
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
@@ -2067,7 +2067,7 @@ class Sequencer {
     this.selected = -1;
     this.steps = [];
     for (let i = 0; i < SEQ_LEN; i++)
-      this.steps.push({ on: true, vel: (i % 4 === 0 ? 1 : 0.72), tr: 0, len: 70, tie: false });
+      this.steps.push({ on: true, vel: (i % 4 === 0 ? 1 : 0.72), tr: 0, len: 70, tie: false, rat: 1 });
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
     this.root = 45; /* A1 default rolling-bass root when nothing held */
     this.swing = 0; /* 0..60 % swing on offbeats */
@@ -2107,7 +2107,7 @@ class Sequencer {
     for (let i = 0; i < SEQ_LEN; i++) {
       this.steps[i].on = p.g[i] === 1;
       this.steps[i].vel = p.a[i] === 1 ? 1 : 0.72;
-      this.steps[i].tie = false; this.steps[i].tr = 0; this.steps[i].len = 70;
+      this.steps[i].tie = false; this.steps[i].tr = 0; this.steps[i].len = 70; this.steps[i].rat = 1;
     }
     return true;
   }
@@ -2129,9 +2129,18 @@ class Sequencer {
         const vel = Math.max(0.05, Math.min(1, st.vel));
         const gateSec = Math.max(0.03, stepDur * ((st.len == null ? 70 : st.len) / 100));
         const t = this.nextTime + ((i % 2 === 1) ? (this.swing / 100) * stepDur * 0.5 : 0);
-        const cont = prev.on && prev.tie && this.lastNote === note;
-        if (!cont) this.engine.noteOnAt(note, vel, t);
-        if (!st.tie) this.engine.noteOffAt(note, t + gateSec);
+        const rat = Math.max(1, Math.min(4, st.rat || 1));
+        if (rat === 1) {
+          const cont = prev.on && prev.tie && this.lastNote === note;
+          if (!cont) this.engine.noteOnAt(note, vel, t);
+          if (!st.tie) this.engine.noteOffAt(note, t + gateSec);
+        } else {
+          const sub = stepDur / rat;
+          for (let r = 0; r < rat; r++) {
+            this.engine.noteOnAt(note, vel, t + r * sub);
+            this.engine.noteOffAt(note, t + r * sub + Math.min(gateSec, sub * 0.9));
+          }
+        }
         this.lastNote = st.tie ? note : -1;
         if (this.onStep) this.onStep(i, note);
       } else {
