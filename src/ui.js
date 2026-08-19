@@ -1249,7 +1249,38 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     pat.addEventListener('change', function () { seq.loadPattern(pat.value); refresh(); });
     const clr = document.createElement('button'); clr.className='stb'; clr.textContent='CLR';
     clr.addEventListener('click', function(){ for(let i=0;i<Psy.SEQ_LEN;i++) seq.setStep(i,{on:false,tie:false,tr:0,len:70,vel:0.72,rat:1}); refresh(); });
-    tr.appendChild(snd); tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr);
+    /* TAP tempo */
+    let taps = [];
+    const tap = document.createElement('button'); tap.className='stb'; tap.textContent='TAP';
+    tap.addEventListener('click', function () {
+      const now = performance.now();
+      taps = taps.filter(function (t) { return now - t < 2500; });
+      taps.push(now);
+      if (taps.length >= 2) {
+        let sum = 0; for (let i = 1; i < taps.length; i++) sum += taps[i] - taps[i-1];
+        const avg = sum / (taps.length - 1);
+        seq.bpm = Math.max(60, Math.min(200, Math.round(60000 / avg)));
+        bpmU();
+      }
+    });
+    /* GEN: improv psy pattern generator */
+    const gen = document.createElement('button'); gen.className='stb'; gen.textContent='GEN';
+    gen.addEventListener('click', function () {
+      const scale = [0,0,0,3,5,7,10]; /* psy-ish movement */
+      for (let i = 0; i < Psy.SEQ_LEN; i++) {
+        const on = Math.random() < (i % 4 === 0 ? 0.95 : 0.6);
+        seq.setStep(i, {
+          on: on,
+          vel: (i % 4 === 0 ? 1 : 0.55 + Math.random() * 0.4),
+          tr: (Math.random() < 0.25 ? scale[Math.floor(Math.random() * scale.length)] * (Math.random()<0.5?-1:1) : 0),
+          len: 40 + Math.floor(Math.random() * 8) * 10,
+          tie: (Math.random() < 0.12),
+          rat: (Math.random() < 0.15 ? 2 : 1)
+        });
+      }
+      refresh();
+    });
+    tr.appendChild(snd); tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr); tr.appendChild(tap); tr.appendChild(gen);
     s.appendChild(tr); s.appendChild(grid); s.appendChild(ed);
     seq.onStep = function (pos, note) {
       for (let i = 0; i < Psy.SEQ_LEN; i++) stepBtns[i].classList.toggle('play', i === pos && note >= 0);
