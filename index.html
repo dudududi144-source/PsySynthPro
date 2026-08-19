@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v6.6.0 · finish · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v6.6.1 · init · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -668,7 +668,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.6.0 · finish · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.6.1 · init · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -698,11 +698,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v6.6.0 · finish · 2026-08-19 &bull; FINISHED &bull; 100+ PRESETS &bull; 6-OP FM &bull; WT SCANNING &bull; LADDER</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v6.6.1 · init · 2026-08-19 &bull; COMPLETE &bull; 100+ PRESETS &bull; 6-OP FM &bull; WT SCANNING &bull; LADDER</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v6.6.0 · finish · 2026-08-19';
+window.__psyBuild = 'v6.6.1 · init · 2026-08-19';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -913,6 +913,9 @@ Psy.PRESETS = {
   'PRO EMOTION LEAD': { wave: 0, unison: 5, spread: 17, detune: 8, filterType: 4, cutoff: 2600, res: 4, filterEnv: 45, fEnvAmt: 50, attack: 8, decay: 400, sustain: 70, release: 900, m1s: 2, m1a: 25, m1d: 2, lfo2Rate: 5, fxChorus: 45, delay: 32, reverb: 45, master: 78 },
   'PRO TRANCE GATE PAD': { wave: 4, unison: 4, spread: 16, wtPos: 50, filterType: 0, cutoff: 1800, res: 2, filterEnv: 30, fEnvAmt: 35, attack: 100, decay: 400, sustain: 70, release: 800, m0s: 1, m0a: 55, m0d: 3, lfoRate: 4, lfoWave: 1, fxChorus: 40, reverb: 55, delay: 30, master: 78 },
   'PRO SUNRISE PAD': { wave: 0, unison: 5, spread: 20, detune: 9, filterType: 0, cutoff: 2000, res: 1, filterEnv: 30, fEnvAmt: 35, attack: 1200, decay: 1000, sustain: 85, release: 3000, m1s: 2, m1a: 12, m1d: 2, lfo2Rate: 0.4, fxChorus: 50, reverb: 75, delay: 40, master: 75 },
+  /* ── UTILITY ─────────────────────────────────────────────── */
+  'INIT': { wave: 0, unison: 1, sub: 0, filterType: 0, cutoff: 8000, res: 1, filterEnv: 0, fEnvAmt: 0, attack: 5, decay: 300, sustain: 70, release: 300, master: 80, reverb: 0, delay: 0 },
+  'TEST TONE': { wave: 3, unison: 1, filterType: 0, cutoff: 12000, res: 1, filterEnv: 0, fEnvAmt: 0, attack: 5, decay: 400, sustain: 80, release: 200, master: 70, reverb: 0, delay: 0 },
 };
 
 </script>
