@@ -1048,12 +1048,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
         $('oName').textContent = 'WT: ' + pendingTable.name;
         pendingTable = null;
       }
-      try {
-        if (!viz && Psy.Viz3D) {
-          viz = new Psy.Viz3D($('viz3d'), engine.analyser);
-          viz.start();
-        }
-      } catch (e) { window.__psyShow('VIZ: ' + e.message); }
+
       try {
         if (!midi && Psy.MidiEngine) {
           midi = new Psy.MidiEngine(engine, {
