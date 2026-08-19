@@ -13,7 +13,7 @@ Psy.DEFAULT = {
   m4s: 0, m4a: 0, m4d: 0, m5s: 0, m5a: 0, m5d: 0, m6s: 0, m6a: 0, m6d: 0, m7s: 0, m7a: 0, m7d: 0,
   glideTime: 0,
   fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0.8,
-  master: 80, reverb: 35, delay: 22
+  master: 80, reverb: 35, delay: 22, width: 60
 };
 
 /* wave: 0=SAW 1=SQR 2=TRI 3=SINE 4=USER(wavetable) | filterType: 0=LP 1=HP 2=BP 3=NOTCH
