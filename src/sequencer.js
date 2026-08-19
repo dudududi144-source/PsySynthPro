@@ -19,6 +19,7 @@ class Sequencer {
     for (let i = 0; i < SEQ_LEN; i++)
       this.steps.push({ on: true, vel: (i % 4 === 0 ? 1 : 0.72), tr: 0, len: 70, tie: false });
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
+    this.root = 45; /* A1 default rolling-bass root when nothing held */
   }
   setEnabled(on) {
     this.enabled = on;
@@ -69,8 +70,9 @@ class Sequencer {
       const i = this.stepPos;
       const st = this.steps[i];
       const prev = this.steps[(i + SEQ_LEN - 1) % SEQ_LEN];
-      if (st.on && this.held.length > 0) {
-        const base = this.held[this.notePtr % this.held.length].note;
+      const src = this.held.length ? this.held : [{ note: this.root, vel: 0.85 }];
+      if (st.on && src.length) {
+        const base = src[this.notePtr % src.length].note;
         this.notePtr++;
         const note = base + (st.tr | 0);
         const vel = Math.max(0.05, Math.min(1, st.vel));
