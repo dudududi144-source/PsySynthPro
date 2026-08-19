@@ -680,6 +680,7 @@ const LAYOUT = [
   }
 
   function loadPreset(i) {
+    if (typeof i === 'string') { const idx = NAMES.indexOf(i); if (idx < 0) { if (Psy.PRESETS[i]) { pushHistory(); engine.setAll(Psy.PRESETS[i]); syncUI(); $('oName').textContent = i; } return; } i = idx; }
     pIdx = (i + NAMES.length) % NAMES.length;
     const name = NAMES[pIdx];
     pushHistory();
@@ -691,6 +692,13 @@ const LAYOUT = [
     if (btns[pIdx]) btns[pIdx].classList.add('on');
   }
 
+  function saveUserPreset(name) {
+    const snap = {}; for (const k in engine.params) snap[k] = engine.params[k];
+    Psy.PRESETS[name] = snap;
+    if (NAMES.indexOf(name) < 0) NAMES.push(name);
+    $('oName').textContent = name;
+    return true;
+  }
   function presetCategory(name) {
     if (/BASS/.test(name)) return 'BASS';
     if (/LEAD/.test(name)) return 'LEAD';
