@@ -32,7 +32,7 @@ class SynthProcessor extends AudioWorkletProcessor {
         active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
         phase: 0, modPhase: 0, mod2Phase: 0, mod3Phase: 0, mod4Phase: 0, mod5Phase: 0, mod6Phase: 0, subPhase: 0, triInt: 0,
         uniPhase: [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
-        amp: 0, stage: 0, fAmp: 0, fStage: 0, pan: 0.5, ic1eq: 0, ic2eq: 0, smoothFc: 0, z1: 0, z2: 0, z3: 0, z4: 0,
+        amp: 0, stage: 0, fAmp: 0, fStage: 0, pan: 0.5, driftPh: Math.random(), driftRate: 0.3 + Math.random() * 0.5, ic1eq: 0, ic2eq: 0, smoothFc: 0, z1: 0, z2: 0, z3: 0, z4: 0,
         coefTick: 0, a1: 0, a2: 0, a3: 0, resEffCached: -1,
         targetBaseFreq: 0, glideRate: 0
       });
