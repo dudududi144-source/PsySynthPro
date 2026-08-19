@@ -275,6 +275,10 @@ class SynthEngine {
       self.sendParams();
       URL.revokeObjectURL(url);
       return self.ctx.resume();
+    }).catch(function (e) {
+      var es = document.getElementById('psyErrStrip');
+      if (es) { es.style.display = 'block'; es.textContent = 'BOOT ERROR: ' + (e && e.message ? e.message : e); }
+      throw e;
     });
   }
 
