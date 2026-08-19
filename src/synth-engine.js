@@ -442,12 +442,13 @@ class SynthEngine {
       return self.ctx.audioWorklet.addModule(blobUrl);
     });
     return load.catch(function (e) { self.fallbackMode = true; self.node = null; }).then(function () {
-      self.fallbackMode = false;
+      if (!self.fallbackMode) {
       try {
         self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
           numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
         });
       } catch (e) { self.node = null; self.fallbackMode = true; }
+      }
       self.node.port.onmessage = function (e) {
         if (e.data && e.data.type === 'voices' && self.onVoices) self.onVoices(e.data.count);
         else if (e.data && e.data.type === 'error') {
