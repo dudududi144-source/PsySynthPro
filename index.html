@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v6.5.0 · pro3 · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v6.5.1 · fix-default · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -657,7 +657,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.5.0 · pro3 · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.5.1 · fix-default · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -687,11 +687,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v6.5.0 · pro3 · 2026-08-19 &bull; 100+ PRESETS &bull; PRO SERIES 1-3 &bull; 6-OP FM &bull; WT SCANNING</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v6.5.1 · fix-default · 2026-08-19 &bull; FIXED &bull; 100+ PRESETS &bull; 6-OP FM &bull; WT SCANNING</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v6.5.0 · pro3 · 2026-08-19';
+window.__psyBuild = 'v6.5.1 · fix-default · 2026-08-19';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -753,13 +753,17 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 
 Psy.DEFAULT = {
   wave: 0, detune: 0, unison: 3, spread: 12, sub: 25, noise: 0,
-  fmRatio: 2, fmDepth: 12,
-  filterType: 0, cutoff: 2600, res: 2, filterEnv: 55,
+  fmRatio: 2, fmDepth: 12, fm2Ratio: 3, fm2Depth: 0, fm3Ratio: 4, fm3Depth: 0, fm4Ratio: 5, fm4Depth: 0, fm5Ratio: 6, fm5Depth: 0, fm6Ratio: 7, fm6Depth: 0,
+  filterType: 0, cutoff: 2600, res: 2, filterEnv: 55, wtPos: 0,
   attack: 12, decay: 260, sustain: 70, release: 650,
-  lfoWave: 0, lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35,
+  fAttack: 5, fDecay: 300, fSustain: 40, fRelease: 400, fEnvAmt: 60,
+  lfoWave: 0, lfoTarget: 0, lfoRate: 2.2, lfoDepth: 35, lfo2Rate: 5, lfo2Wave: 0,
+  lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0,
+  m0s: 0, m0a: 0, m0d: 0, m1s: 0, m1a: 0, m1d: 0, m2s: 0, m2a: 0, m2d: 0, m3s: 0, m3a: 0, m3d: 0,
+  m4s: 0, m4a: 0, m4d: 0, m5s: 0, m5a: 0, m5d: 0, m6s: 0, m6a: 0, m6d: 0, m7s: 0, m7a: 0, m7d: 0,
   glideTime: 0,
-  master: 80, reverb: 35, delay: 22, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0,
-  modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0
+  fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0.8,
+  master: 80, reverb: 35, delay: 22
 };
 
 /* wave: 0=SAW 1=SQR 2=TRI 3=SINE 4=USER(wavetable) | filterType: 0=LP 1=HP 2=BP 3=NOTCH
@@ -1494,6 +1498,7 @@ var PsySynth = (window.PsySynth = window.PsySynth || {});
 class SynthEngine {
   constructor() {
     this.ctx = null;
+    this._fin = function (v, fb) { return (typeof v === 'number' && isFinite(v)) ? v : fb; };
     this.node = null;
     this.analyser = null;
     this.ready = false;
@@ -1520,7 +1525,7 @@ class SynthEngine {
       self.node.connect(self.fxInput);
 
       self.master = self.ctx.createGain();
-      self.master.gain.value = self.params.master / 100;
+      self.master.gain.value = self._fin(self.params.master, 80) / 100;
 
       self.dry = self.ctx.createGain();
       self.dry.gain.value = 0.9;
@@ -1528,7 +1533,7 @@ class SynthEngine {
       self.dry.connect(self.master);
 
       self.delSend = self.ctx.createGain();
-      self.delSend.gain.value = (self.params.delay / 100) * 0.55;
+      self.delSend.gain.value = (self._fin(self.params.delay, 22) / 100) * 0.55;
       self.delay = self.ctx.createDelay(2);
       self.delay.delayTime.value = 0.32;
       self.delFb = self.ctx.createGain();
@@ -1540,7 +1545,7 @@ class SynthEngine {
       self.delay.connect(self.master);
 
       self.revSend = self.ctx.createGain();
-      self.revSend.gain.value = (self.params.reverb / 100) * 0.85;
+      self.revSend.gain.value = (self._fin(self.params.reverb, 35) / 100) * 0.85;
       self.conv = self.ctx.createConvolver();
       self.conv.buffer = self.makeIR(2.6, 3.1);
       self.fxInput.connect(self.revSend);
@@ -1549,7 +1554,7 @@ class SynthEngine {
 
       /* FX RACK: distortion / chorus / bitcrush as parallel sends */
       self.distSend = self.ctx.createGain();
-      self.distSend.gain.value = (self.params.fxDist / 100) * 0.6;
+      self.distSend.gain.value = (self._fin(self.params.fxDist, 0) / 100) * 0.6;
       self.waveshaper = self.ctx.createWaveShaper();
       self.waveshaper.curve = self.makeDistCurve(60);
       self.waveshaper.oversample = '2x';
@@ -1557,11 +1562,11 @@ class SynthEngine {
       self.distSend.connect(self.waveshaper);
       self.waveshaper.connect(self.master);
       self.chSend = self.ctx.createGain();
-      self.chSend.gain.value = (self.params.fxChorus / 100) * 0.5;
+      self.chSend.gain.value = (self._fin(self.params.fxChorus, 0) / 100) * 0.5;
       self.chDelay = self.ctx.createDelay(1);
       self.chDelay.delayTime.value = 0.02;
       self.chLfo = self.ctx.createOscillator();
-      self.chLfo.frequency.value = self.params.chRate;
+      self.chLfo.frequency.value = self._fin(self.params.chRate, 0.8);
       self.chLfoDepth = self.ctx.createGain();
       self.chLfoDepth.gain.value = 0.004;
       self.chLfo.connect(self.chLfoDepth);
@@ -1571,7 +1576,7 @@ class SynthEngine {
       self.chSend.connect(self.chDelay);
       self.chDelay.connect(self.master);
       self.crSend = self.ctx.createGain();
-      self.crSend.gain.value = (self.params.fxCrush / 100) * 0.5;
+      self.crSend.gain.value = (self._fin(self.params.fxCrush, 0) / 100) * 0.5;
       self.crusher = self.ctx.createWaveShaper();
       self.crusher.curve = self.makeCrushCurve(6);
       self.fxInput.connect(self.crSend);
@@ -1618,10 +1623,10 @@ class SynthEngine {
     this.params[key] = value;
     if (key === 'delay' && this.delSend) this.delSend.gain.value = (value / 100) * 0.55;
     else if (key === 'reverb' && this.revSend) this.revSend.gain.value = (value / 100) * 0.85;
-      if (this.distSend) this.distSend.gain.value = (this.params.fxDist / 100) * 0.6;
-      if (this.chSend) this.chSend.gain.value = (this.params.fxChorus / 100) * 0.5;
-      if (this.crSend) this.crSend.gain.value = (this.params.fxCrush / 100) * 0.5;
-      if (this.chLfo) this.chLfo.frequency.value = this.params.chRate;
+      if (this.distSend) this.distSend.gain.value = (this._fin(this.params.fxDist,0) / 100) * 0.6;
+      if (this.chSend) this.chSend.gain.value = (this._fin(this.params.fxChorus,0) / 100) * 0.5;
+      if (this.crSend) this.crSend.gain.value = (this._fin(this.params.fxCrush,0) / 100) * 0.5;
+      if (this.chLfo) this.chLfo.frequency.value = this._fin(this.params.chRate,0.8);
     else if (key === 'master' && this.master) this.master.gain.value = value / 100;
     else this.sendParams();
   }
