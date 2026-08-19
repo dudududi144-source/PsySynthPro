@@ -1025,7 +1025,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     if (!engine.ready) return;
     $('oMeta').innerHTML =
       (engine.ctx.sampleRate / 1000).toFixed(0) + 'kHz WORKLET<br>' +
-      'LAT ' + engine.latencyMs().toFixed(1) + 'ms • 16 VOX';
+      'LAT ' + (engine.latencyMs ? (engine.latencyMs() || 0) : 0).toFixed(1) + 'ms • 12 VOX';
   }
 
   $('bPower').addEventListener('click', function () {
