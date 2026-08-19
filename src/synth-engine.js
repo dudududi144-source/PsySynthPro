@@ -23,7 +23,7 @@ class SynthEngine {
     const self = this;
     let load;
     if (self.ctx.audioWorklet) {
-      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js?v=950');
+      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js?v=961');
     } else {
       self.fallbackMode = true; self.node = null; load = Promise.resolve();
     }
