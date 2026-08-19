@@ -315,7 +315,8 @@ class SynthProcessor extends AudioWorkletProcessor {
 
         let sig = 0;
         for (let u = 0; u < un; u++) {
-          const f = baseFreq * bendMul * pitchMod * uniMuls[u];
+          let f = baseFreq * bendMul * pitchMod * uniMuls[u];
+          if (!isFinite(f) || f <= 0) f = 220;
           v.modPhase += (f * p.fmRatio) / sr;
           if (v.modPhase >= 1) v.modPhase -= 1;
           v.mod2Phase += (f * p.fm2Ratio) / sr;
@@ -335,9 +336,8 @@ class SynthProcessor extends AudioWorkletProcessor {
           const fm5Hz = Math.sin(TWO_PI * v.mod5Phase) * (p.fm5Depth / 100) * f * 2;
           const fm6Hz = Math.sin(TWO_PI * v.mod6Phase) * (p.fm6Depth / 100) * f * 2;
           const fmHz = Math.sin(TWO_PI * v.modPhase) * fmDepthEff;
-          if (!isFinite(f) || f <= 0) f = 220;
           const inc = Math.max(0.00001, (f + fmHz + fm2Hz + fm3Hz + fm4Hz + fm5Hz + fm6Hz) / sr);
-          if (!isFinite(inc)) { /* skip bad sample */ }
+          if (!isFinite(inc)) inc = 0.01;
           v.uniPhase[u] += inc;
           if (v.uniPhase[u] >= 1) v.uniPhase[u] -= 1;
           sig += this.oscSample(v.uniPhase[u], Math.min(inc, 0.49), p.wave, v);
