@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WORKLET TEST</title></head>
+<body style="background:#111;color:#7ff3ff;font-family:monospace;padding:30px">
+<h2>PSYSYNTH WORKLET TEST</h2>
+<button id="b" style="font-size:20px;padding:16px 30px">PLAY</button>
+<div id="o" style="margin-top:20px;font-size:14px">tap PLAY</div>
+<script>
+var ctx;
+document.getElementById('b').addEventListener('click', function () {
+  var o = document.getElementById('o');
+  try {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume();
+    if (!ctx.audioWorklet) { o.textContent = 'NO AUDIOWORKLET SUPPORT on this browser'; return; }
+    ctx.audioWorklet.addModule('psysynth-worklet.js').then(function () {
+      var n = new AudioWorkletNode(ctx, 'psysynth-processor');
+      n.connect(ctx.destination);
+      n.port.postMessage({ type: 'params', values: { cutoff: 2000, res: 4, master: 80, unison: 3 } });
+      n.port.postMessage({ type: 'noteOn', note: 45, vel: 0.9 });
+      o.textContent = 'PLAYING (worklet OK)';
+      setTimeout(function () { n.port.postMessage({ type: 'noteOff', note: 45 }); }, 900);
+    }).catch(function (e) {
+      o.textContent = 'WORKLET FAIL: ' + (e && e.message ? e.message : e);
+    });
+  } catch (e) {
+    o.textContent = 'ERROR: ' + (e && e.message ? e.message : e);
+  }
+});
+</script>
+</body></html>
