@@ -435,10 +435,13 @@ class SynthEngine {
     if (this.ready) return Promise.resolve();
     const AC = window.AudioContext || window.webkitAudioContext;
     this.ctx = new AC({ latencyHint: 'interactive' });
-    const blob = new Blob([WORKLET_SOURCE], { type: 'application/javascript' });
-    const url = URL.createObjectURL(blob);
     const self = this;
-    return this.ctx.audioWorklet.addModule(url).then(function () {
+    const blob = new Blob([WORKLET_SOURCE], { type: 'application/javascript' });
+    const blobUrl = URL.createObjectURL(blob);
+    const load = self.ctx.audioWorklet.addModule('psysynth-worklet.js').catch(function () {
+      return self.ctx.audioWorklet.addModule(blobUrl);
+    });
+    return load.then(function () {
       self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
         numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
       });
