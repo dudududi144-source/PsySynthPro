@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v6.5.1 · fix-default · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v6.5.2 · polish · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -155,7 +155,7 @@ body {
 
 /* ══════════ KNOBS ══════════ */
 .kwrap { display: flex; flex-direction: column; align-items: center; gap: 2px; touch-action: none; }
-.kzone { position: relative; cursor: ns-resize; }
+.kzone { position: relative; cursor: ns-resize; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 2px 6px rgba(0,0,0,0.5); background: radial-gradient(circle at 50% 45%, #1a1e26 0%, #10131a 70%); }
 .kzone svg { display: block; }
 .kcap {
   position: absolute; left: 50%; top: 50%;
@@ -657,7 +657,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.5.1 · fix-default · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.5.2 · polish · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -687,11 +687,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v6.5.1 · fix-default · 2026-08-19 &bull; FIXED &bull; 100+ PRESETS &bull; 6-OP FM &bull; WT SCANNING</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v6.5.2 · polish · 2026-08-19 &bull; POLISHED &bull; 100+ PRESETS &bull; 6-OP FM &bull; WT SCANNING</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v6.5.1 · fix-default · 2026-08-19';
+window.__psyBuild = 'v6.5.2 · polish · 2026-08-19';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
