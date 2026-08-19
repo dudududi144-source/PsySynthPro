@@ -688,10 +688,10 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v8.5.0 · tap-gen · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v8.5.1 · save · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px"></div>
-<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><button id="bPower" class="tbtn power">&#9211; POWER</button><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>STANDBY</div></div><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v8.5.0 · tap-gen · 2026-08-19 &bull; TAP &bull; GEN &bull; HUMANIZE &bull; RATCHET &bull; SWING</span></div></div>
-<script>window.__psyBuild="v8.5.0 · tap-gen · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
+<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><button id="bPower" class="tbtn power">&#9211; POWER</button><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>STANDBY</div></div><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v8.5.1 · save · 2026-08-19 &bull; SAVE &bull; TAP &bull; GEN &bull; HUMANIZE</span></div></div>
+<script>window.__psyBuild="v8.5.1 · save · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
 <script>
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
@@ -3349,6 +3349,7 @@ const LAYOUT = [
   }
 
   function loadPreset(i) {
+    if (typeof i === 'string') { const idx = NAMES.indexOf(i); if (idx < 0) { if (Psy.PRESETS[i]) { pushHistory(); engine.setAll(Psy.PRESETS[i]); syncUI(); $('oName').textContent = i; } return; } i = idx; }
     pIdx = (i + NAMES.length) % NAMES.length;
     const name = NAMES[pIdx];
     pushHistory();
@@ -3360,6 +3361,13 @@ const LAYOUT = [
     if (btns[pIdx]) btns[pIdx].classList.add('on');
   }
 
+  function saveUserPreset(name) {
+    const snap = {}; for (const k in engine.params) snap[k] = engine.params[k];
+    Psy.PRESETS[name] = snap;
+    if (NAMES.indexOf(name) < 0) NAMES.push(name);
+    $('oName').textContent = name;
+    return true;
+  }
   function presetCategory(name) {
     if (/BASS/.test(name)) return 'BASS';
     if (/LEAD/.test(name)) return 'LEAD';
