@@ -1,3 +1,4 @@
+window.__psyShow = function (t) { var es = document.getElementById('psyErrStrip'); if (es) { es.style.display='block'; es.textContent = t; } };
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
 
