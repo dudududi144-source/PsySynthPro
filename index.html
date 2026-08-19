@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v6.7.5 · diag · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v6.7.6 · lighter · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -668,7 +668,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.7.5 · diag · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.7.6 · lighter · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -693,16 +693,16 @@ button:focus-visible, .key:focus-visible {
   <div class="midi-row">
     <div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER to enable</div>
     <div class="midi-event" id="midiEvent"></div>
-    <div class="perf-hud" id="perfHud">VOICES 0/16</div>
+    <div class="perf-hud" id="perfHud">VOICES 0/12</div>
   </div>
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v6.7.5 · diag · 2026-08-19 &bull; SELF-DIAGNOSTICS &bull; 111 PRESETS &bull; 6-OP FM &bull; LADDER</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v6.7.6 · lighter · 2026-08-19 &bull; LIGHTER CPU &bull; SELF-DIAG &bull; 111 PRESETS &bull; 6-OP FM</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v6.7.5 · diag · 2026-08-19';
+window.__psyBuild = 'v6.7.6 · lighter · 2026-08-19';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -1149,7 +1149,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0.8,
     };
     this.voices = [];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 12; i++) {
       this.voices.push({
         active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
         phase: 0, modPhase: 0, mod2Phase: 0, mod3Phase: 0, mod4Phase: 0, mod5Phase: 0, mod6Phase: 0, subPhase: 0, triInt: 0,
@@ -1432,35 +1432,26 @@ class SynthProcessor extends AudioWorkletProcessor {
         const pitchMod = Math.pow(2, pitchExp);
 
         let sig = 0;
+        /* FM computed once per voice (not per unison) — major CPU saving */
+        let fB = baseFreq * bendMul * pitchMod;
+        if (!isFinite(fB) || fB <= 0) fB = 220;
+        let fmSum = 0;
+        const fmA = (p.fmDepth / 100) + lfoVal * (p.lfoFM / 100) + envNorm * (p.envFM / 100) + mFm;
+        if (fmA !== 0) { v.modPhase += (fB * p.fmRatio) / sr; if (v.modPhase >= 1) v.modPhase -= 1; fmSum += Math.sin(TWO_PI * v.modPhase) * fmA * fB * 2; }
+        if (p.fm2Depth > 0) { v.mod2Phase += (fB * p.fm2Ratio) / sr; if (v.mod2Phase >= 1) v.mod2Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod2Phase) * (p.fm2Depth / 100) * fB * 2; }
+        if (p.fm3Depth > 0) { v.mod3Phase += (fB * p.fm3Ratio) / sr; if (v.mod3Phase >= 1) v.mod3Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod3Phase) * (p.fm3Depth / 100) * fB * 2; }
+        if (p.fm4Depth > 0) { v.mod4Phase += (fB * p.fm4Ratio) / sr; if (v.mod4Phase >= 1) v.mod4Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod4Phase) * (p.fm4Depth / 100) * fB * 2; }
+        if (p.fm5Depth > 0) { v.mod5Phase += (fB * p.fm5Ratio) / sr; if (v.mod5Phase >= 1) v.mod5Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod5Phase) * (p.fm5Depth / 100) * fB * 2; }
+        if (p.fm6Depth > 0) { v.mod6Phase += (fB * p.fm6Ratio) / sr; if (v.mod6Phase >= 1) v.mod6Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod6Phase) * (p.fm6Depth / 100) * fB * 2; }
         for (let u = 0; u < un; u++) {
-          let f = baseFreq * bendMul * pitchMod * uniMuls[u];
-          if (!isFinite(f) || f <= 0) f = 220;
-          v.modPhase += (f * p.fmRatio) / sr;
-          if (v.modPhase >= 1) v.modPhase -= 1;
-          v.mod2Phase += (f * p.fm2Ratio) / sr;
-          if (v.mod2Phase >= 1) v.mod2Phase -= 1;
-          v.mod3Phase += (f * p.fm3Ratio) / sr;
-          if (v.mod3Phase >= 1) v.mod3Phase -= 1;
-          v.mod4Phase += (f * p.fm4Ratio) / sr;
-          if (v.mod4Phase >= 1) v.mod4Phase -= 1;
-          v.mod5Phase += (f * p.fm5Ratio) / sr;
-          if (v.mod5Phase >= 1) v.mod5Phase -= 1;
-          v.mod6Phase += (f * p.fm6Ratio) / sr;
-          if (v.mod6Phase >= 1) v.mod6Phase -= 1;
-          const fmDepthEff = (p.fmDepth / 100) * f * 2 + lfoVal * (p.lfoFM / 100) * f * 2 + envNorm * (p.envFM / 100) * f * 2 + mFm * f * 2;
-          const fm2Hz = Math.sin(TWO_PI * v.mod2Phase) * (p.fm2Depth / 100) * f * 2;
-          const fm3Hz = Math.sin(TWO_PI * v.mod3Phase) * (p.fm3Depth / 100) * f * 2;
-          const fm4Hz = Math.sin(TWO_PI * v.mod4Phase) * (p.fm4Depth / 100) * f * 2;
-          const fm5Hz = Math.sin(TWO_PI * v.mod5Phase) * (p.fm5Depth / 100) * f * 2;
-          const fm6Hz = Math.sin(TWO_PI * v.mod6Phase) * (p.fm6Depth / 100) * f * 2;
-          const fmHz = Math.sin(TWO_PI * v.modPhase) * fmDepthEff;
-          const inc = Math.max(0.00001, (f + fmHz + fm2Hz + fm3Hz + fm4Hz + fm5Hz + fm6Hz) / sr);
+          const fU = fB * uniMuls[u];
+          let inc = Math.max(0.00001, (fU + fmSum) / sr);
           if (!isFinite(inc)) inc = 0.01;
           v.uniPhase[u] += inc;
           if (v.uniPhase[u] >= 1) v.uniPhase[u] -= 1;
           sig += this.oscSample(v.uniPhase[u], Math.min(inc, 0.49), p.wave, v);
         }
-        sig /= un;
+        
 
         if (p.sub > 0) {
           v.subPhase += (baseFreq * bendMul / 2) / sr;
