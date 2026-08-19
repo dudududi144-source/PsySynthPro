@@ -1306,10 +1306,11 @@ $('bPower').addEventListener('click', function () {
     const cat = document.createElement('select'); cat.className = 'msel';
     ['ALL','BASS','LEAD','PAD','ARP','FX','WT','USER','PRO'].forEach(function (c) { const o = document.createElement('option'); o.textContent = c; cat.appendChild(o); });
     const sel = document.createElement('select'); sel.className = 'msel big';
-    function fill() {
+    function fill(term) {
       sel.innerHTML = '';
       const names = Object.keys(Psy.PRESETS).filter(function (n) {
-        const c = cat.value;
+        const c = cat.value; const q = term || '';
+        if (q && n.indexOf(q) < 0) return false;
         if (c === 'ALL') return true;
         if (c === 'PRO') return n.indexOf('PRO') === 0;
         if (c === 'USER') return n.indexOf('USER') === 0 || n.indexOf('INIT') === 0;
@@ -1327,7 +1328,19 @@ $('bPower').addEventListener('click', function () {
         fill();
       } catch (e) {}
     });
-    wrap.appendChild(cat); wrap.appendChild(sel); wrap.appendChild(save);
+    const srch = document.createElement('input'); srch.type='text'; srch.className='msel'; srch.id='psearch2'; srch.placeholder='SEARCH...';
+    srch.addEventListener('input', function(){ fill(srch.value.toUpperCase()); });
+    const rnd = document.createElement('button'); rnd.className='stb'; rnd.textContent='RND';
+    rnd.addEventListener('click', function(){
+      const r = function(lo,hi){ return lo + Math.random()*(hi-lo); };
+      engine.set('cutoff', Math.round(r(300,6000)));
+      engine.set('res', Math.round(r(1,14)));
+      engine.set('fmDepth', Math.round(r(0,60)));
+      engine.set('filterEnv', Math.round(r(30,90)));
+      engine.set('wtPos', Math.round(r(0,100)));
+      syncUI();
+    });
+    wrap.appendChild(cat); wrap.appendChild(sel); wrap.appendChild(save); wrap.appendChild(srch); wrap.appendChild(rnd);
     fill();
   }
 
