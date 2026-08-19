@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v6.0.0 · fm3op · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v6.1.0 · wt-scan · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -657,7 +657,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.0.0 · fm3op · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.1.0 · wt-scan · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -687,11 +687,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v6.0.0 · fm3op · 2026-08-19 &bull; 3-OP FM &bull; 52 PRESETS &bull; MOD RINGS &bull; LADDER &bull; FX RACK</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v6.1.0 · wt-scan · 2026-08-19 &bull; WT SCANNING &bull; 3-OP FM &bull; 52 PRESETS &bull; MOD RINGS &bull; LADDER</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v6.0.0 · fm3op · 2026-08-19';
+window.__psyBuild = 'v6.1.0 · wt-scan · 2026-08-19';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -1204,21 +1204,22 @@ class SynthProcessor extends AudioWorkletProcessor {
   readWavetable(phase, inc) {
     if (!this.wtMips) this.wtMips = this.buildMips(this.wtable);
     const mips = this.wtMips;
-    /* pick mip so highest kept harmonic stays under Nyquist */
     const maxH = 0.5 / Math.max(inc, 0.00001);
-    /* each mip level ~halves usable harmonics; pick level so kept harmonics <= maxH */
     const halfLen = this.wtLen / 2;
-    let level = Math.floor(Math.log2(Math.max(1, halfLen / Math.max(1, maxH))));
-    level = Math.max(0, Math.min(mips.length - 1, level));
-    const tbl = mips[level];
-    const pos = phase * this.wtLen;
-    const i0 = Math.floor(pos) % this.wtLen;
-    const i1 = (i0 + 1) % this.wtLen;
-    const frac = pos - Math.floor(pos);
-    const wt = tbl[i0] + (tbl[i1] - tbl[i0]) * frac;
-    /* WT POS: morph wavetable -> sine for scanning feel */
-    const wtpos = Math.max(0, Math.min(1, p.wtPos / 100));
-    return wt * (1 - wtpos) + Math.sin(6.28318530718 * phase) * wtpos;
+    let aaLvl = Math.floor(Math.log2(Math.max(1, halfLen / Math.max(1, maxH))));
+    aaLvl = Math.max(0, Math.min(mips.length - 1, aaLvl));
+    const scanPos = Math.max(0, Math.min(1, p.wtPos / 100)) * (mips.length - 1);
+    const baseLvl = Math.max(aaLvl, Math.min(mips.length - 1, Math.floor(scanPos)));
+    const nextLvl = Math.min(mips.length - 1, baseLvl + 1);
+    const blend = scanPos - Math.floor(scanPos);
+    const FA = mips[baseLvl], FB = mips[nextLvl];
+    const wpos = phase * this.wtLen;
+    const w0 = Math.floor(wpos) % this.wtLen;
+    const w1 = (w0 + 1) % this.wtLen;
+    const wfrac = wpos - Math.floor(wpos);
+    const sA = FA[w0] + (FA[w1] - FA[w0]) * wfrac;
+    const sB = FB[w0] + (FB[w1] - FB[w0]) * wfrac;
+    return sA + (sB - sA) * blend;
   }
 
   oscSample(phase, inc, wave, v) {
