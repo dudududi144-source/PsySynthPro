@@ -405,6 +405,7 @@ var PsySynth = (window.PsySynth = window.PsySynth || {});
 class SynthEngine {
   constructor() {
     this.ctx = null;
+    this._fin = function (v, fb) { return (typeof v === 'number' && isFinite(v)) ? v : fb; };
     this.node = null;
     this.analyser = null;
     this.ready = false;
@@ -431,7 +432,7 @@ class SynthEngine {
       self.node.connect(self.fxInput);
 
       self.master = self.ctx.createGain();
-      self.master.gain.value = self.params.master / 100;
+      self.master.gain.value = self._fin(self.params.master, 80) / 100;
 
       self.dry = self.ctx.createGain();
       self.dry.gain.value = 0.9;
@@ -439,7 +440,7 @@ class SynthEngine {
       self.dry.connect(self.master);
 
       self.delSend = self.ctx.createGain();
-      self.delSend.gain.value = (self.params.delay / 100) * 0.55;
+      self.delSend.gain.value = (self._fin(self.params.delay, 22) / 100) * 0.55;
       self.delay = self.ctx.createDelay(2);
       self.delay.delayTime.value = 0.32;
       self.delFb = self.ctx.createGain();
@@ -451,7 +452,7 @@ class SynthEngine {
       self.delay.connect(self.master);
 
       self.revSend = self.ctx.createGain();
-      self.revSend.gain.value = (self.params.reverb / 100) * 0.85;
+      self.revSend.gain.value = (self._fin(self.params.reverb, 35) / 100) * 0.85;
       self.conv = self.ctx.createConvolver();
       self.conv.buffer = self.makeIR(2.6, 3.1);
       self.fxInput.connect(self.revSend);
@@ -460,7 +461,7 @@ class SynthEngine {
 
       /* FX RACK: distortion / chorus / bitcrush as parallel sends */
       self.distSend = self.ctx.createGain();
-      self.distSend.gain.value = (self.params.fxDist / 100) * 0.6;
+      self.distSend.gain.value = (self._fin(self.params.fxDist, 0) / 100) * 0.6;
       self.waveshaper = self.ctx.createWaveShaper();
       self.waveshaper.curve = self.makeDistCurve(60);
       self.waveshaper.oversample = '2x';
@@ -468,11 +469,11 @@ class SynthEngine {
       self.distSend.connect(self.waveshaper);
       self.waveshaper.connect(self.master);
       self.chSend = self.ctx.createGain();
-      self.chSend.gain.value = (self.params.fxChorus / 100) * 0.5;
+      self.chSend.gain.value = (self._fin(self.params.fxChorus, 0) / 100) * 0.5;
       self.chDelay = self.ctx.createDelay(1);
       self.chDelay.delayTime.value = 0.02;
       self.chLfo = self.ctx.createOscillator();
-      self.chLfo.frequency.value = self.params.chRate;
+      self.chLfo.frequency.value = self._fin(self.params.chRate, 0.8);
       self.chLfoDepth = self.ctx.createGain();
       self.chLfoDepth.gain.value = 0.004;
       self.chLfo.connect(self.chLfoDepth);
@@ -482,7 +483,7 @@ class SynthEngine {
       self.chSend.connect(self.chDelay);
       self.chDelay.connect(self.master);
       self.crSend = self.ctx.createGain();
-      self.crSend.gain.value = (self.params.fxCrush / 100) * 0.5;
+      self.crSend.gain.value = (self._fin(self.params.fxCrush, 0) / 100) * 0.5;
       self.crusher = self.ctx.createWaveShaper();
       self.crusher.curve = self.makeCrushCurve(6);
       self.fxInput.connect(self.crSend);
@@ -529,10 +530,10 @@ class SynthEngine {
     this.params[key] = value;
     if (key === 'delay' && this.delSend) this.delSend.gain.value = (value / 100) * 0.55;
     else if (key === 'reverb' && this.revSend) this.revSend.gain.value = (value / 100) * 0.85;
-      if (this.distSend) this.distSend.gain.value = (this.params.fxDist / 100) * 0.6;
-      if (this.chSend) this.chSend.gain.value = (this.params.fxChorus / 100) * 0.5;
-      if (this.crSend) this.crSend.gain.value = (this.params.fxCrush / 100) * 0.5;
-      if (this.chLfo) this.chLfo.frequency.value = this.params.chRate;
+      if (this.distSend) this.distSend.gain.value = (this._fin(this.params.fxDist,0) / 100) * 0.6;
+      if (this.chSend) this.chSend.gain.value = (this._fin(this.params.fxChorus,0) / 100) * 0.5;
+      if (this.crSend) this.crSend.gain.value = (this._fin(this.params.fxCrush,0) / 100) * 0.5;
+      if (this.chLfo) this.chLfo.frequency.value = this._fin(this.params.chRate,0.8);
     else if (key === 'master' && this.master) this.master.gain.value = value / 100;
     else this.sendParams();
   }
