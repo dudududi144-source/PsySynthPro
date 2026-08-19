@@ -20,6 +20,7 @@ class Sequencer {
       this.steps.push({ on: true, vel: (i % 4 === 0 ? 1 : 0.72), tr: 0, len: 70, tie: false });
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
     this.root = 45; /* A1 default rolling-bass root when nothing held */
+    this.swing = 0; /* 0..60 % swing on offbeats */
   }
   setEnabled(on) {
     this.enabled = on;
@@ -77,9 +78,10 @@ class Sequencer {
         const note = base + (st.tr | 0);
         const vel = Math.max(0.05, Math.min(1, st.vel));
         const gateSec = Math.max(0.03, stepDur * ((st.len == null ? 70 : st.len) / 100));
+        const t = this.nextTime + ((i % 2 === 1) ? (this.swing / 100) * stepDur * 0.5 : 0);
         const cont = prev.on && prev.tie && this.lastNote === note;
-        if (!cont) this.engine.noteOnAt(note, vel, this.nextTime);
-        if (!st.tie) this.engine.noteOffAt(note, this.nextTime + gateSec);
+        if (!cont) this.engine.noteOnAt(note, vel, t);
+        if (!st.tie) this.engine.noteOffAt(note, t + gateSec);
         this.lastNote = st.tie ? note : -1;
         if (this.onStep) this.onStep(i, note);
       } else {
