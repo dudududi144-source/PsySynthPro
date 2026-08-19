@@ -516,7 +516,14 @@ class SynthEngine {
       self.crusher.connect(self.master);
       self.analyser = self.ctx.createAnalyser();
       self.analyser.fftSize = 2048;
-      self.master.connect(self.analyser);
+      self.limiter = self.ctx.createDynamicsCompressor();
+      self.limiter.threshold.value = -6;
+      self.limiter.knee.value = 3;
+      self.limiter.ratio.value = 12;
+      self.limiter.attack.value = 0.003;
+      self.limiter.release.value = 0.25;
+      self.master.connect(self.limiter);
+      self.limiter.connect(self.analyser);
       self.analyser.connect(self.ctx.destination);
 
       self.ready = true;
