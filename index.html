@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v6.2.0 · fm6op · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v6.3.0 · pro-presets · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -657,7 +657,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.2.0 · fm6op · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.3.0 · pro-presets · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -687,11 +687,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v6.2.0 · fm6op · 2026-08-19 &bull; 6-OP FM &bull; WT SCANNING &bull; 52 PRESETS &bull; MOD RINGS &bull; LADDER</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v6.3.0 · pro-presets · 2026-08-19 &bull; PRO SERIES &bull; 64 PRESETS &bull; 6-OP FM &bull; WT SCANNING &bull; LADDER</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v6.2.0 · fm6op · 2026-08-19';
+window.__psyBuild = 'v6.3.0 · pro-presets · 2026-08-19';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -843,6 +843,20 @@ Psy.PRESETS = {
   'CRUSH BASS': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 85, noise: 0, fmRatio: 0, fmDepth: 0, fm2Ratio: 0, fm2Depth: 0, filterType: 4, cutoff: 900, res: 12, filterEnv: 50, attack: 2, decay: 180, sustain: 45, release: 140, fAttack: 5, fDecay: 300, fSustain: 40, fRelease: 400, fEnvAmt: 50, lfoWave: 0, lfoTarget: 0, lfoRate: 2, lfoDepth: 0, lfo2Rate: 5, lfo2Wave: 0, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, m0s: 1, m0a: 50, m0d: 1, m1s: 0, m1a: 0, m1d: 0, m2s: 0, m2a: 0, m2d: 0, m3s: 0, m3a: 0, m3d: 0, m4s: 0, m4a: 0, m4d: 0, m5s: 0, m5a: 0, m5d: 0, m6s: 0, m6a: 0, m6d: 0, m7s: 0, m7a: 0, m7d: 0, glideTime: 0, wtPos: 0, fxDist: 35, fxChorus: 0, fxCrush: 50, chRate: 0, master: 82, reverb: 20, delay: 15 },
   'CHORUS PAD': { wave: 4, detune: 0, unison: 5, spread: 20, sub: 50, noise: 0, fmRatio: 0, fmDepth: 0, fm2Ratio: 0, fm2Depth: 0, filterType: 0, cutoff: 1800, res: 1, filterEnv: 50, attack: 800, decay: 900, sustain: 85, release: 2600, fAttack: 5, fDecay: 300, fSustain: 40, fRelease: 400, fEnvAmt: 50, lfoWave: 0, lfoTarget: 0, lfoRate: 2, lfoDepth: 0, lfo2Rate: 0.6, lfo2Wave: 0, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, m0s: 0, m0a: 0, m0d: 0, m1s: 2, m1a: 30, m1d: 1, m2s: 0, m2a: 0, m2d: 0, m3s: 0, m3a: 0, m3d: 0, m4s: 0, m4a: 0, m4d: 0, m5s: 0, m5a: 0, m5d: 0, m6s: 0, m6a: 0, m6d: 0, m7s: 0, m7a: 0, m7d: 0, glideTime: 0, wtPos: 0, fxDist: 0, fxChorus: 60, fxCrush: 0, chRate: 0, master: 82, reverb: 70, delay: 15 },
   'ACID LAD 303': { wave: 0, detune: 0, unison: 1, spread: 0, sub: 50, noise: 0, fmRatio: 0, fmDepth: 0, fm2Ratio: 0, fm2Depth: 0, filterType: 4, cutoff: 500, res: 17, filterEnv: 90, attack: 2, decay: 150, sustain: 25, release: 130, fAttack: 5, fDecay: 300, fSustain: 40, fRelease: 400, fEnvAmt: 85, lfoWave: 0, lfoTarget: 0, lfoRate: 2, lfoDepth: 0, lfo2Rate: 5, lfo2Wave: 0, lfoCutoff: 0, lfoPitch: 0, lfoAmp: 0, lfoFM: 0, envPitch: 0, envFM: 0, modLC: 0, modLP: 0, modLA: 0, modLF: 0, modLR: 0, modEC: 0, modEP: 0, modEA: 0, modEF: 0, modER: 0, modVC: 0, modVP: 0, modVA: 0, modVF: 0, modVR: 0, m0s: 1, m0a: 45, m0d: 1, m1s: 0, m1a: 0, m1d: 0, m2s: 0, m2a: 0, m2d: 0, m3s: 0, m3a: 0, m3d: 0, m4s: 0, m4a: 0, m4d: 0, m5s: 0, m5a: 0, m5d: 0, m6s: 0, m6a: 0, m6d: 0, m7s: 0, m7a: 0, m7d: 0, glideTime: 60, wtPos: 0, fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0, master: 82, reverb: 20, delay: 15 },
+
+  /* ── PRO SERIES (hand-tuned, high quality) ─────────────────────── */
+  'PRO ROLLING BASS': { wave: 0, unison: 1, sub: 75, filterType: 4, cutoff: 420, res: 10, filterEnv: 70, fAttack: 2, fDecay: 180, fSustain: 30, fRelease: 140, fEnvAmt: 80, attack: 2, decay: 200, sustain: 40, release: 130, glideTime: 70, fxDist: 20, master: 86, reverb: 8, delay: 6 },
+  'PRO FULLON BASS': { wave: 1, unison: 1, sub: 80, filterType: 4, cutoff: 520, res: 8, filterEnv: 60, fAttack: 1, fDecay: 140, fSustain: 25, fRelease: 110, fEnvAmt: 70, attack: 1, decay: 160, sustain: 35, release: 110, fxDist: 25, master: 87, reverb: 6, delay: 5 },
+  'PRO ACID 303': { wave: 0, unison: 1, sub: 40, filterType: 4, cutoff: 380, res: 17, filterEnv: 92, fAttack: 1, fDecay: 130, fSustain: 15, fRelease: 120, fEnvAmt: 90, attack: 1, decay: 140, sustain: 20, release: 110, m0s: 1, m0a: 35, m0d: 1, lfoRate: 4, master: 85, reverb: 10, delay: 8 },
+  'PRO DARK BASS': { wave: 0, unison: 1, sub: 85, noise: 6, filterType: 4, cutoff: 300, res: 12, filterEnv: 65, fAttack: 2, fDecay: 220, fSustain: 35, fRelease: 160, fEnvAmt: 75, attack: 2, decay: 240, sustain: 40, release: 150, fmDepth: 15, fmRatio: 0.5, fxDist: 30, fxCrush: 15, master: 86, reverb: 12, delay: 7 },
+  'PRO SUPERSAW LEAD': { wave: 0, unison: 5, spread: 16, detune: 8, filterType: 0, cutoff: 3600, res: 3, filterEnv: 40, fEnvAmt: 40, attack: 4, decay: 300, sustain: 70, release: 600, m1s: 2, m1a: 25, m1d: 2, lfo2Rate: 5.5, fxChorus: 40, delay: 30, reverb: 35, master: 80 },
+  'PRO GOA LEAD': { wave: 4, unison: 3, spread: 14, wtPos: 45, filterType: 4, cutoff: 2600, res: 6, filterEnv: 50, fEnvAmt: 55, attack: 4, decay: 280, sustain: 65, release: 550, m0s: 1, m0a: 20, m0d: 1, m1s: 2, m1a: 20, m1d: 2, lfo2Rate: 5, fxChorus: 35, delay: 28, reverb: 38, master: 80 },
+  'PRO EUPHORIC PAD': { wave: 4, unison: 5, spread: 20, wtPos: 60, filterType: 0, cutoff: 1600, res: 1, filterEnv: 25, fEnvAmt: 30, attack: 800, decay: 900, sustain: 85, release: 2800, m1s: 2, m1a: 15, m1d: 1, lfo2Rate: 0.5, lfo2Wave: 0, fxChorus: 55, reverb: 75, delay: 40, master: 76 },
+  'PRO DARK PAD': { wave: 4, unison: 5, spread: 22, wtPos: 30, filterType: 0, cutoff: 1100, res: 2, filterEnv: 20, fEnvAmt: 25, attack: 1000, decay: 1000, sustain: 80, release: 3000, noise: 4, m1s: 1, m1a: 12, m1d: 1, lfo2Rate: 0.3, fxChorus: 45, reverb: 80, delay: 45, master: 74 },
+  'PRO PSY PLUCK': { wave: 0, unison: 1, sub: 20, filterType: 4, cutoff: 2800, res: 8, filterEnv: 85, fAttack: 1, fDecay: 180, fSustain: 10, fRelease: 200, fEnvAmt: 85, attack: 1, decay: 200, sustain: 10, release: 250, delay: 25, reverb: 28, master: 82 },
+  'PRO FM BELL': { wave: 3, fmRatio: 2, fmDepth: 60, fm2Ratio: 5, fm2Depth: 35, fm3Ratio: 7, fm3Depth: 20, filterType: 0, cutoff: 7000, res: 1, attack: 1, decay: 700, sustain: 5, release: 1600, reverb: 60, delay: 32, master: 78 },
+  'PRO FM STAB': { wave: 3, fmRatio: 3, fmDepth: 50, fm2Ratio: 6, fm2Depth: 40, fm4Ratio: 9, fm4Depth: 25, filterType: 0, cutoff: 4000, res: 2, attack: 1, decay: 300, sustain: 15, release: 400, fxDist: 15, delay: 22, reverb: 30, master: 80 },
+  'PRO RISER': { wave: 0, unison: 3, spread: 16, noise: 40, filterType: 0, cutoff: 600, res: 4, filterEnv: 80, fAttack: 1500, fDecay: 800, fSustain: 60, fRelease: 1000, fEnvAmt: 85, attack: 1500, decay: 800, sustain: 60, release: 1200, m0s: 1, m0a: 50, m0d: 1, lfoRate: 6, reverb: 60, delay: 35, master: 78 },
 };
 
 </script>
