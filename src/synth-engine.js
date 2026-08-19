@@ -184,15 +184,19 @@ class SynthProcessor extends AudioWorkletProcessor {
   readWavetable(phase, inc) {
     if (!this.wtMips) this.wtMips = this.buildMips(this.wtable);
     const mips = this.wtMips;
+    if (!isFinite(inc) || inc <= 0) inc = 0.01;
+    if (!isFinite(phase)) phase = 0;
     const maxH = 0.5 / Math.max(inc, 0.00001);
     const halfLen = this.wtLen / 2;
     let aaLvl = Math.floor(Math.log2(Math.max(1, halfLen / Math.max(1, maxH))));
     aaLvl = Math.max(0, Math.min(mips.length - 1, aaLvl));
     const scanPos = Math.max(0, Math.min(1, p.wtPos / 100)) * (mips.length - 1);
-    const baseLvl = Math.max(aaLvl, Math.min(mips.length - 1, Math.floor(scanPos)));
+    let baseLvl = Math.max(aaLvl, Math.min(mips.length - 1, Math.floor(scanPos)));
+    if (!isFinite(baseLvl)) baseLvl = 0; baseLvl = Math.max(0, Math.min(mips.length-1, baseLvl|0));
     const nextLvl = Math.min(mips.length - 1, baseLvl + 1);
     const blend = scanPos - Math.floor(scanPos);
-    const FA = mips[baseLvl], FB = mips[nextLvl];
+    let FA = mips[baseLvl], FB = mips[nextLvl];
+    if (!FA) FA = this.wtable; if (!FB) FB = this.wtable;
     const wpos = phase * this.wtLen;
     const w0 = Math.floor(wpos) % this.wtLen;
     const w1 = (w0 + 1) % this.wtLen;
@@ -331,7 +335,9 @@ class SynthProcessor extends AudioWorkletProcessor {
           const fm5Hz = Math.sin(TWO_PI * v.mod5Phase) * (p.fm5Depth / 100) * f * 2;
           const fm6Hz = Math.sin(TWO_PI * v.mod6Phase) * (p.fm6Depth / 100) * f * 2;
           const fmHz = Math.sin(TWO_PI * v.modPhase) * fmDepthEff;
+          if (!isFinite(f) || f <= 0) f = 220;
           const inc = Math.max(0.00001, (f + fmHz + fm2Hz + fm3Hz + fm4Hz + fm5Hz + fm6Hz) / sr);
+          if (!isFinite(inc)) { /* skip bad sample */ }
           v.uniPhase[u] += inc;
           if (v.uniPhase[u] >= 1) v.uniPhase[u] -= 1;
           sig += this.oscSample(v.uniPhase[u], Math.min(inc, 0.49), p.wave, v);
@@ -398,7 +404,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       }
 
       const master = p.master / 100;
-      let s = Math.tanh(acc * master * 0.55);
+      let s = Math.tanh(acc * master * 0.8);
       if (!isFinite(s)) s = 0;
       for (let c = 0; c < nCh; c++) out[c][i] = s;
     }
