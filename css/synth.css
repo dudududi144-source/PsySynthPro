@@ -824,3 +824,14 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   .key.b { min-width: 18px; }
   .kzone { width: 56px !important; height: 56px !important; }
 }
+
+/* ══════════ PERF MODE (mobile): lighter paint ══════════ */
+@media (max-width:700px){
+  .chassis { box-shadow: none; }
+  .section { box-shadow: none; }
+  .kzone { box-shadow: inset 0 1px 4px rgba(0,0,0,0.7); }
+  .kcap { box-shadow: 0 2px 5px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.12); }
+  .valueArc, .kzone svg { filter: none !important; }
+  .sq2.play { box-shadow: none; outline: 2px solid #7ff3ff; }
+  * { -webkit-tap-highlight-color: transparent; }
+}
