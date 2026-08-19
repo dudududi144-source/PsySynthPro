@@ -1208,10 +1208,11 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     const wNote = stepper('NOTE', function(){return seq.steps[sel].tr;}, function(x){seq.setStep(sel,{tr:x});}, -12, 12, 1, function(x){return (x>0?'+':'')+x;});
     const wVel  = stepper('VEL',  function(){return Math.round(seq.steps[sel].vel*100);}, function(x){seq.setStep(sel,{vel:x/100});}, 5, 100, 5, function(x){return x;});
     const wLen  = stepper('LEN',  function(){return seq.steps[sel].len;}, function(x){seq.setStep(sel,{len:x});}, 10, 200, 10, function(x){return x+'%';});
+    const wRoot = stepper('ROOT', function(){return seq.root;}, function(x){seq.root=x;}, 24, 60, 1, function(x){return x;});
     const wTie  = document.createElement('button'); wTie.className='stb tie'; wTie.textContent='TIE';
     function updTie(){ wTie.classList.toggle('on', !!seq.steps[sel].tie); }
     wTie.addEventListener('click', function(){ seq.setStep(sel,{tie:!seq.steps[sel].tie}); updTie(); refresh(); });
-    ed.appendChild(wNote); ed.appendChild(wVel); ed.appendChild(wLen); ed.appendChild(wTie);
+    ed.appendChild(wRoot); ed.appendChild(wNote); ed.appendChild(wVel); ed.appendChild(wLen); ed.appendChild(wTie);
     const grid = document.createElement('div'); grid.className = 'seq2-grid';
     function refresh() {
       for (let i = 0; i < Psy.SEQ_LEN; i++) {
@@ -1219,7 +1220,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
         stepBtns[i].className = 'sq2' + (st.on ? ' on' : '') + (i === sel ? ' sel' : '') + (st.tie ? ' tie' : '');
         stepBtns[i].style.opacity = st.on ? (0.45 + 0.55 * st.vel) : 0.25;
       }
-      wNote._upd(); wVel._upd(); wLen._upd(); updTie();
+      wRoot._upd(); wNote._upd(); wVel._upd(); wLen._upd(); updTie();
     }
     for (let i = 0; i < Psy.SEQ_LEN; i++) {
       const b = document.createElement('button'); b.className = 'sq2';
