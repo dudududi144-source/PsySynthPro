@@ -27,7 +27,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0.8,
     };
     this.voices = [];
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 8; i++) {
       this.voices.push({
         active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
         phase: 0, modPhase: 0, mod2Phase: 0, mod3Phase: 0, mod4Phase: 0, mod5Phase: 0, mod6Phase: 0, subPhase: 0, triInt: 0,
