@@ -315,34 +315,26 @@ class SynthProcessor extends AudioWorkletProcessor {
         const pitchMod = Math.pow(2, pitchExp);
 
         let sig = 0;
+        /* FM computed once per voice (not per unison) — major CPU saving */
+        let fB = baseFreq * bendMul * pitchMod;
+        if (!isFinite(fB) || fB <= 0) fB = 220;
+        let fmSum = 0;
+        const fmA = (p.fmDepth / 100) + lfoVal * (p.lfoFM / 100) + envNorm * (p.envFM / 100) + mFm;
+        if (fmA !== 0) { v.modPhase += (fB * p.fmRatio) / sr; if (v.modPhase >= 1) v.modPhase -= 1; fmSum += Math.sin(TWO_PI * v.modPhase) * fmA * fB * 2; }
+        if (p.fm2Depth > 0) { v.mod2Phase += (fB * p.fm2Ratio) / sr; if (v.mod2Phase >= 1) v.mod2Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod2Phase) * (p.fm2Depth / 100) * fB * 2; }
+        if (p.fm3Depth > 0) { v.mod3Phase += (fB * p.fm3Ratio) / sr; if (v.mod3Phase >= 1) v.mod3Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod3Phase) * (p.fm3Depth / 100) * fB * 2; }
+        if (p.fm4Depth > 0) { v.mod4Phase += (fB * p.fm4Ratio) / sr; if (v.mod4Phase >= 1) v.mod4Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod4Phase) * (p.fm4Depth / 100) * fB * 2; }
+        if (p.fm5Depth > 0) { v.mod5Phase += (fB * p.fm5Ratio) / sr; if (v.mod5Phase >= 1) v.mod5Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod5Phase) * (p.fm5Depth / 100) * fB * 2; }
+        if (p.fm6Depth > 0) { v.mod6Phase += (fB * p.fm6Ratio) / sr; if (v.mod6Phase >= 1) v.mod6Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod6Phase) * (p.fm6Depth / 100) * fB * 2; }
         for (let u = 0; u < un; u++) {
-          let f = baseFreq * bendMul * pitchMod * uniMuls[u];
-          if (!isFinite(f) || f <= 0) f = 220;
-          /* conditional FM: skip zero-depth operators (major CPU saving) */
-          let fmHz = 0;
-          const fmA = (p.fmDepth / 100) + lfoVal * (p.lfoFM / 100) + envNorm * (p.envFM / 100) + mFm;
-          if (fmA !== 0) {
-            v.modPhase += (f * p.fmRatio) / sr;
-            if (v.modPhase >= 1) v.modPhase -= 1;
-            fmHz = Math.sin(TWO_PI * v.modPhase) * fmA * f * 2;
-          }
-          let fm2Hz = 0;
-          if (p.fm2Depth > 0) { v.mod2Phase += (f * p.fm2Ratio) / sr; if (v.mod2Phase >= 1) v.mod2Phase -= 1; fm2Hz = Math.sin(TWO_PI * v.mod2Phase) * (p.fm2Depth / 100) * f * 2; }
-          let fm3Hz = 0;
-          if (p.fm3Depth > 0) { v.mod3Phase += (f * p.fm3Ratio) / sr; if (v.mod3Phase >= 1) v.mod3Phase -= 1; fm3Hz = Math.sin(TWO_PI * v.mod3Phase) * (p.fm3Depth / 100) * f * 2; }
-          let fm4Hz = 0;
-          if (p.fm4Depth > 0) { v.mod4Phase += (f * p.fm4Ratio) / sr; if (v.mod4Phase >= 1) v.mod4Phase -= 1; fm4Hz = Math.sin(TWO_PI * v.mod4Phase) * (p.fm4Depth / 100) * f * 2; }
-          let fm5Hz = 0;
-          if (p.fm5Depth > 0) { v.mod5Phase += (f * p.fm5Ratio) / sr; if (v.mod5Phase >= 1) v.mod5Phase -= 1; fm5Hz = Math.sin(TWO_PI * v.mod5Phase) * (p.fm5Depth / 100) * f * 2; }
-          let fm6Hz = 0;
-          if (p.fm6Depth > 0) { v.mod6Phase += (f * p.fm6Ratio) / sr; if (v.mod6Phase >= 1) v.mod6Phase -= 1; fm6Hz = Math.sin(TWO_PI * v.mod6Phase) * (p.fm6Depth / 100) * f * 2; }
-          const inc = Math.max(0.00001, (f + fmHz + fm2Hz + fm3Hz + fm4Hz + fm5Hz + fm6Hz) / sr);
+          const fU = fB * uniMuls[u];
+          let inc = Math.max(0.00001, (fU + fmSum) / sr);
           if (!isFinite(inc)) inc = 0.01;
           v.uniPhase[u] += inc;
           if (v.uniPhase[u] >= 1) v.uniPhase[u] -= 1;
           sig += this.oscSample(v.uniPhase[u], Math.min(inc, 0.49), p.wave, v);
         }
-        sig /= un;
+        
 
         if (p.sub > 0) {
           v.subPhase += (baseFreq * bendMul / 2) / sr;
