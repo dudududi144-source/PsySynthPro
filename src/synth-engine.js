@@ -590,6 +590,26 @@ class SynthEngine {
   noteOffAt(note, when) { if (this.node) this.node.port.postMessage({ type: 'noteOffAt', note: note, when: when }); }
   noteBend(note, semis) { if (this.node) this.node.port.postMessage({ type: 'noteBend', note: note, bend: semis }); }
   panic() { if (this.fallbackMode) { for (const n in this.fbVoices) this.fbNoteOff(+n); return; } if (this.node) this.node.port.postMessage({ type: 'panic' }); }
+  fbNoteOn(note, vel) {
+    if (!this.fbVoices) this.fbVoices = {};
+    if (this.fbVoices[note]) this.fbNoteOff(note);
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator(); osc.type = 'sawtooth';
+    osc.frequency.value = 440 * Math.pow(2, (note - 69) / 12);
+    const flt = this.ctx.createBiquadFilter(); flt.type = 'lowpass';
+    flt.frequency.value = this._fin(this.params.cutoff, 2600); flt.Q.value = this._fin(this.params.res, 2);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel || 0.8, t + 0.01);
+    osc.connect(flt); flt.connect(g); g.connect(this.fxInput || this.master);
+    osc.start(t); this.fbVoices[note] = { osc: osc, g: g };
+  }
+  fbNoteOff(note) {
+    if (!this.fbVoices) return; const v = this.fbVoices[note]; if (!v) return;
+    const t = this.ctx.currentTime;
+    v.g.gain.cancelScheduledValues(t); v.g.gain.setValueAtTime(v.g.gain.value, t);
+    v.g.gain.linearRampToValueAtTime(0.0001, t + 0.2); v.osc.stop(t + 0.25);
+    delete this.fbVoices[note];
+  }
   latencyMs() {
     if (!this.ctx) return 0;
     return ((this.ctx.baseLatency || 0) + (this.ctx.outputLatency || 0)) * 1000;
