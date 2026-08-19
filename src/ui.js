@@ -1229,7 +1229,10 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     }
     const tr = document.createElement('div'); tr.className = 'seq2-tr';
     const run = document.createElement('button'); run.className = 'stb run'; run.textContent = 'RUN';
-    run.addEventListener('click', function () { seq.setEnabled(!seq.enabled); run.classList.toggle('on', seq.enabled); });
+    run.addEventListener('click', function () {
+      if (!seq.enabled && !engine.ready) { var pb = document.getElementById('bPower'); if (pb) pb.click(); }
+      setTimeout(function () { seq.setEnabled(!seq.enabled); run.classList.toggle('on', seq.enabled); }, engine.ready ? 0 : 400);
+    });
     const bpmD = document.createElement('span'); bpmD.className = 'stv';
     const bpmDec = document.createElement('button'); bpmDec.className='stb'; bpmDec.textContent='-';
     const bpmInc = document.createElement('button'); bpmInc.className='stb'; bpmInc.textContent='+';
@@ -1241,7 +1244,8 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     pat.addEventListener('change', function () { seq.loadPattern(pat.value); refresh(); });
     const clr = document.createElement('button'); clr.className='stb'; clr.textContent='CLR';
     clr.addEventListener('click', function(){ for(let i=0;i<Psy.SEQ_LEN;i++) seq.setStep(i,{on:false,tie:false,tr:0,len:70,vel:0.72}); refresh(); });
-    tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr);
+    const snd = document.createElement('span'); snd.className='stl'; snd.textContent='SEQ→SYNTH';
+    tr.appendChild(snd); tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr);
     const hint = document.createElement('div'); hint.className='stl'; hint.style.margin='4px 0 0'; hint.textContent='SEQ DRIVES THE LOADED PATCH (same engine + FX)';
     s.appendChild(tr); s.appendChild(hint); s.appendChild(grid); s.appendChild(ed);
     seq.onStep = function (pos, note) {
