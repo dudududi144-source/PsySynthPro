@@ -84,7 +84,9 @@ const LAYOUT = [
       { type: 'knob', key: 'fmRatio', label: 'RATIO', min: 0.5, max: 8, step: 0.5, def: 2, fmt: function (v) { return 'x' + v; } },
       { type: 'knob', key: 'fmDepth', label: 'DEPTH', min: 0, max: 100, def: 12, fmt: fmtPct },
       { type: 'knob', key: 'fm2Ratio', label: 'B RATIO', min: 0.5, max: 8, step: 0.5, def: 3, fmt: function (v) { return 'x' + v; } },
-      { type: 'knob', key: 'fm2Depth', label: 'B DEPTH', min: 0, max: 100, def: 0, fmt: fmtPct }
+      { type: 'knob', key: 'fm2Depth', label: 'B DEPTH', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fm3Ratio', label: 'C RATIO', min: 0.5, max: 8, step: 0.5, def: 4, fmt: function (v) { return 'x' + v; } },
+      { type: 'knob', key: 'fm3Depth', label: 'C DEPTH', min: 0, max: 100, def: 0, fmt: fmtPct }
     ]},
     { title: 'ZDF SVF', color: '#4dd6e8', items: [
       { type: 'cycle', key: 'filterType', label: 'TYPE', options: [0, 1, 2, 3, 4], display: function (v) { return FTYPES[v]; } },
