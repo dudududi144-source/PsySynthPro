@@ -703,13 +703,93 @@ button:focus-visible, .key:focus-visible {
 .pmenu { display:flex; gap:6px; padding:6px 8px; align-items:center; }
 @media (max-width:560px){ .seq2-grid{grid-template-columns:repeat(8,1fr);} .sq2{height:38px;} }
 
+/* ══════════ PRO THEME — cohesive design system ══════════ */
+:root {
+  --bg: #0a0c10; --panel: #12151b; --panel2: #161a21; --line: #232a35;
+  --txt: #c9d1d9; --mut: #8f99a8; --acc: #7ff3ff;
+}
+body { background: radial-gradient(1200px 600px at 50% -10%, #10141b 0%, var(--bg) 60%); }
+.chassis {
+  background: linear-gradient(180deg, #141821 0%, #0e1117 100%);
+  border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.topbar { border-bottom: 1px solid var(--line); padding: 10px 12px; gap: 8px; }
+.tbtn {
+  border-radius: 8px; border: 1px solid var(--line);
+  background: linear-gradient(180deg, #1b2029, #12161d);
+  color: var(--txt); font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+  padding: 10px 12px; cursor: pointer; transition: all 0.12s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.tbtn:hover { filter: brightness(1.15); }
+.tbtn:active { transform: translateY(1px); }
+.tbtn.power { color: var(--acc); }
+.tbtn.power.on { background: linear-gradient(180deg, #0e3a40, #0a2a30); box-shadow: 0 0 14px rgba(127,243,255,0.25), inset 0 1px 0 rgba(255,255,255,0.08); }
+.oled {
+  background: linear-gradient(180deg, #05070a, #070a0e);
+  border: 1px solid #10151c; border-radius: 10px;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.9);
+}
+.oled .pname { color: var(--acc); letter-spacing: 2px; text-shadow: 0 0 8px rgba(127,243,255,0.5); }
+.section {
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03);
+  padding: 14px;
+}
+.stitle { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: var(--c, var(--acc)); margin-bottom: 10px; }
+.midi-row { gap: 8px; }
+.midi-strip, .midi-event, .perf-hud {
+  border-radius: 7px; border: 1px solid var(--line); background: #0d1016;
+  font-size: 9px; letter-spacing: 1px; color: var(--mut); padding: 6px 8px;
+}
+.seq2 { background: linear-gradient(180deg, #141926, #0f131c); border: 1px solid #26324a; }
+.sq2 { border-radius: 7px; border: 1px solid #26324a; background: #10141d; transition: all 0.1s; }
+.sq2.on { background: linear-gradient(180deg, #2b6fd4, #1f56ab); border-color: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.35); }
+.sq2.sel { outline: 2px solid var(--acc); }
+.sq2.play { box-shadow: 0 0 14px var(--acc); }
+.stb { border-radius: 7px; border: 1px solid var(--line); background: linear-gradient(180deg,#1b2029,#12161d); color: var(--txt); font-weight:700; }
+.stb.run.on { background: linear-gradient(180deg,#0e3a40,#0a2a30); color: var(--acc); box-shadow: 0 0 12px rgba(127,243,255,0.3); }
+.msel { border-radius: 7px; border: 1px solid var(--line); background: #10141d; color: var(--txt); }
+.pmenu { background: linear-gradient(180deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: 10px; }
+/* keyboard */
+.kb { gap: 2px; }
+.key { border-radius: 0 0 6px 6px; border: 1px solid #000; box-shadow: 0 3px 6px rgba(0,0,0,0.5), inset 0 -2px 4px rgba(0,0,0,0.3); }
+.key.white { background: linear-gradient(180deg, #f5f7fa, #d8dde4); }
+.key.black { background: linear-gradient(180deg, #2a2e35, #101216); }
+.key:active, .key.on { filter: brightness(0.85); }
+.brand { color: var(--mut); letter-spacing: 2px; }
+/* focus visibility (a11y) */
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+/* scrollbars */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #2a3444; border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+@media (max-width: 560px) {
+  .chassis { border-radius: 12px; }
+  .topbar { flex-wrap: wrap; }
+  .oled { order: -1; width: 100%; }
+  .section { padding: 12px 10px; }
+}
+
+/* ══════════ PRO POLISH v2 ══════════ */
+.kval { opacity: 0; transition: opacity .15s; }
+.kwrap:active .kval, .kwrap:focus-within .kval { opacity: 1; }
+.stitle { font-family:'Inter',sans-serif; font-size:10px; letter-spacing:2px; font-weight:700; }
+@media (max-width:560px){
+  .topbar { gap:6px; }
+  .tbtn { padding:8px 10px; font-size:9px; }
+  .oled .pname { font-size:11px; }
+}
+
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v8.6.0 · pro-knobs · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v8.6.1 · polish2 · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px"></div>
-<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><button id="bPower" class="tbtn power">&#9211; POWER</button><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>STANDBY</div></div><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v8.6.0 · pro-knobs · 2026-08-19 &bull; PRO KNOBS &bull; MOBILE POLISH</span></div></div>
-<script>window.__psyBuild="v8.6.0 · pro-knobs · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
+<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><button id="bPower" class="tbtn power">&#9211; POWER</button><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>STANDBY</div></div><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; press POWER</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v8.6.1 · polish2 · 2026-08-19 &bull; SUPER PRO &bull; VALUE-ON-DRAG</span></div></div>
+<script>window.__psyBuild="v8.6.1 · polish2 · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
 <script>
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
