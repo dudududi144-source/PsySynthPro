@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v6.7.4 · wt-crash-fix · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v6.7.5 · diag · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -668,7 +668,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.7.4 · wt-crash-fix · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v6.7.5 · diag · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -698,11 +698,11 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v6.7.4 · wt-crash-fix · 2026-08-19 &bull; WT CRASH FIXED &bull; 111 PRESETS &bull; 6-OP FM &bull; LADDER</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v6.7.5 · diag · 2026-08-19 &bull; SELF-DIAGNOSTICS &bull; 111 PRESETS &bull; 6-OP FM &bull; LADDER</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v6.7.4 · wt-crash-fix · 2026-08-19';
+window.__psyBuild = 'v6.7.5 · diag · 2026-08-19';
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
   try {
@@ -1344,6 +1344,7 @@ class SynthProcessor extends AudioWorkletProcessor {
   }
 
   process(inputs, outputs) {
+    try {
     const out = outputs[0];
     const nCh = out.length;
     const N = out[0].length;
@@ -1516,7 +1517,6 @@ class SynthProcessor extends AudioWorkletProcessor {
         if (p.lfoTarget === 2) ampMod = 1 - (p.lfoDepth / 200) + lfoVal * (p.lfoDepth / 200);
         ampMod *= 1 - (p.lfoAmp / 200) + lfoVal * (p.lfoAmp / 200);
         ampMod *= Math.max(0, 1 + mAmp);
-        ampMod *= Math.max(0, 1 + mAmp);
         acc += fsig * v.amp * ampMod;
       }
 
@@ -1531,6 +1531,12 @@ class SynthProcessor extends AudioWorkletProcessor {
       let count = 0;
       for (const v of this.voices) if (v.active) count++;
       this.port.postMessage({ type: 'voices', count: count });
+    }
+    } catch (e) {
+      if (!this._errTick) this._errTick = 0;
+      if (this._errTick <= 0) { this.port.postMessage({ type: 'error', msg: String(e && e.message ? e.message : e) }); this._errTick = 200; }
+      this._errTick--;
+      return true;
     }
     return true;
   }
@@ -1564,6 +1570,10 @@ class SynthEngine {
       });
       self.node.port.onmessage = function (e) {
         if (e.data && e.data.type === 'voices' && self.onVoices) self.onVoices(e.data.count);
+        else if (e.data && e.data.type === 'error') {
+          var es = document.getElementById('psyErrStrip');
+          if (es) { es.style.display = 'block'; es.textContent = 'WORKLET ERROR: ' + e.data.msg; }
+        }
       };
 
       self.fxInput = self.ctx.createGain();
