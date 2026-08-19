@@ -528,7 +528,7 @@ class SynthEngine {
 
       self.ready = true;
       self.sendParams();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(blobUrl);
       return self.ctx.resume();
     }).catch(function (e) {
       var es = document.getElementById('psyErrStrip');
