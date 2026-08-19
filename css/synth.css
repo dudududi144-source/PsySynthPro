@@ -771,3 +771,27 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   .tbtn { padding:8px 10px; font-size:9px; }
   .oled .pname { font-size:11px; }
 }
+
+/* ══════════ PROPORTION FIX (mobile) ══════════ */
+@media (max-width: 700px) {
+  body { padding: 0; }
+  .chassis { width: 100%; padding: 12px 10px 16px; border-radius: 0; }
+  .cheek { display: none; }
+  .topbar { flex-wrap: wrap; gap: 6px; }
+  .oled { width: 100%; order: -1; }
+  .sections { display: block; }
+  .section { width: 100%; box-sizing: border-box; margin-bottom: 12px; }
+  /* mod matrix fits width */
+  .mod-matrix { grid-template-columns: 30px repeat(5, minmax(38px, 1fr)); gap: 8px 6px; width: 100%; }
+  .mod-matrix .kwrap { width: 100%; }
+  .mod-matrix .kzone { width: 42px !important; height: 42px !important; }
+  .matrix-rowlabel { font-size: 8px; padding-right: 2px; }
+  .matrix-collabel { font-size: 8px; }
+  /* seq editor compact 2-col */
+  .seq2-ed { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stp { justify-content: space-between; }
+  /* knobs slightly smaller, labels readable */
+  .kzone { width: 52px !important; height: 52px !important; }
+  .kwrap { width: 56px; }
+  .klabel { font-size: 7.5px; letter-spacing: 0.8px; }
+}
