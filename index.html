@@ -839,12 +839,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v9.1.1 · boot-always · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v9.1.1 · fb2 · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px"></div>
-<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v9.1.1 · boot-always · 2026-08-19 &bull; BOOTS ALWAYS</span></div></div>
+<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/12</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v9.1.1 · fb2 · 2026-08-19 &bull; FALLBACK ON ANY FAIL</span></div></div>
 <div id="tapstart"><div class="big">PSYSYNTH PRO<br><span class="sub">TAP TO START</span></div></div>
 <script>(function(){var t=document.getElementById("tapstart");if(!t)return;t.addEventListener("pointerdown",function(){t.style.display="none";var b=document.getElementById("bPower");if(b)b.click();});if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}})();</script>
-<script>window.__psyBuild="v9.1.1 · boot-always · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
+<script>window.__psyBuild="v9.1.1 · fb2 · 2026-08-19";window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};window.addEventListener("error",function(e){window.__psyShow("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){window.__psyShow("ASYNC ERROR: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
 <script>
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
@@ -1646,12 +1646,13 @@ class SynthEngine {
       return self.ctx.audioWorklet.addModule(blobUrl);
     });
     return load.catch(function (e) { self.fallbackMode = true; self.node = null; }).then(function () {
-      self.fallbackMode = false;
+      if (!self.fallbackMode) {
       try {
         self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
           numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2]
         });
       } catch (e) { self.node = null; self.fallbackMode = true; }
+      }
       self.node.port.onmessage = function (e) {
         if (e.data && e.data.type === 'voices' && self.onVoices) self.onVoices(e.data.count);
         else if (e.data && e.data.type === 'error') {
