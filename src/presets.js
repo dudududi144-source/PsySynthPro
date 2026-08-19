@@ -152,4 +152,7 @@ Psy.PRESETS = {
   'PRO EMOTION LEAD': { wave: 0, unison: 5, spread: 17, detune: 8, filterType: 4, cutoff: 2600, res: 4, filterEnv: 45, fEnvAmt: 50, attack: 8, decay: 400, sustain: 70, release: 900, m1s: 2, m1a: 25, m1d: 2, lfo2Rate: 5, fxChorus: 45, delay: 32, reverb: 45, master: 78 },
   'PRO TRANCE GATE PAD': { wave: 4, unison: 4, spread: 16, wtPos: 50, filterType: 0, cutoff: 1800, res: 2, filterEnv: 30, fEnvAmt: 35, attack: 100, decay: 400, sustain: 70, release: 800, m0s: 1, m0a: 55, m0d: 3, lfoRate: 4, lfoWave: 1, fxChorus: 40, reverb: 55, delay: 30, master: 78 },
   'PRO SUNRISE PAD': { wave: 0, unison: 5, spread: 20, detune: 9, filterType: 0, cutoff: 2000, res: 1, filterEnv: 30, fEnvAmt: 35, attack: 1200, decay: 1000, sustain: 85, release: 3000, m1s: 2, m1a: 12, m1d: 2, lfo2Rate: 0.4, fxChorus: 50, reverb: 75, delay: 40, master: 75 },
+  /* ── UTILITY ─────────────────────────────────────────────── */
+  'INIT': { wave: 0, unison: 1, sub: 0, filterType: 0, cutoff: 8000, res: 1, filterEnv: 0, fEnvAmt: 0, attack: 5, decay: 300, sustain: 70, release: 300, master: 80, reverb: 0, delay: 0 },
+  'TEST TONE': { wave: 3, unison: 1, filterType: 0, cutoff: 12000, res: 1, filterEnv: 0, fEnvAmt: 0, attack: 5, decay: 400, sustain: 80, release: 200, master: 70, reverb: 0, delay: 0 },
 };
