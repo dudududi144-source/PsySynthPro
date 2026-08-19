@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v7.0.2 · boot-catch · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v7.0.3 · resilient-boot · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -668,7 +668,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v7.0.2 · boot-catch · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v7.0.3 · resilient-boot · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -698,23 +698,18 @@ button:focus-visible, .key:focus-visible {
   <div class="sections" id="sections"></div>
   <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v7.0.2 · boot-catch · 2026-08-19 &bull; FULL DIAG &bull; CLEAN ENGINE &bull; 111 PRESETS</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v7.0.3 · resilient-boot · 2026-08-19 &bull; RESILIENT &bull; CLEAN ENGINE &bull; 111 PRESETS</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v7.0.2 · boot-catch · 2026-08-19';
+window.__psyBuild = 'v7.0.3 · resilient-boot · 2026-08-19';
+window.__psyShow = function (t) { var es = document.getElementById('psyErrStrip'); if (es) { es.style.display='block'; es.textContent = t; } };
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
-  try {
-    var es = document.getElementById('psyErrStrip');
-    if (es) { es.style.display = 'block'; es.textContent = 'JS ERROR: ' + (e.message || 'unknown') + ' @ ' + (e.filename || ''); }
-  } catch (er) {}
+  window.__psyShow('JS ERROR: ' + (e.message || 'unknown'));
 });
 window.addEventListener('unhandledrejection', function (e) {
-  try {
-    var es = document.getElementById('psyErrStrip');
-    if (es) { es.style.display = 'block'; es.textContent = 'ASYNC ERROR: ' + (e.reason && e.reason.message ? e.reason.message : e.reason); }
-  } catch (er) {}
+  window.__psyShow('ASYNC ERROR: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
 });
 window.addEventListener('load', function () {
   setTimeout(function () {
@@ -2704,6 +2699,7 @@ Psy.Variation = {
 
 </script>
 <script>
+window.__psyShow = function (t) { var es = document.getElementById('psyErrStrip'); if (es) { es.style.display='block'; es.textContent = t; } };
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
 
@@ -3731,7 +3727,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     if (!engine.ready) return;
     $('oMeta').innerHTML =
       (engine.ctx.sampleRate / 1000).toFixed(0) + 'kHz WORKLET<br>' +
-      'LAT ' + engine.latencyMs().toFixed(1) + 'ms • 16 VOX';
+      'LAT ' + (engine.latencyMs ? (engine.latencyMs() || 0) : 0).toFixed(1) + 'ms • 12 VOX';
   }
 
   $('bPower').addEventListener('click', function () {
@@ -3745,21 +3741,25 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
         $('oName').textContent = 'WT: ' + pendingTable.name;
         pendingTable = null;
       }
-      if (!viz && Psy.Viz3D) {
-        viz = new Psy.Viz3D($('viz3d'), engine.analyser);
-        viz.start();
-      }
-      if (!midi && Psy.MidiEngine) {
-        midi = new Psy.MidiEngine(engine, {
-          status: midiStatus,
-          event: function (txt) { const ev = $('midiEvent'); if (ev) ev.textContent = txt; }
-        });
-        midi.input = noteRouter;
-        midi.init();
-        window.__midi = midi;
-      }
-      updateMeta();
-      syncUI();
+      try {
+        if (!viz && Psy.Viz3D) {
+          viz = new Psy.Viz3D($('viz3d'), engine.analyser);
+          viz.start();
+        }
+      } catch (e) { window.__psyShow('VIZ: ' + e.message); }
+      try {
+        if (!midi && Psy.MidiEngine) {
+          midi = new Psy.MidiEngine(engine, {
+            status: midiStatus,
+            event: function (txt) { const ev = $('midiEvent'); if (ev) ev.textContent = txt; }
+          });
+          midi.input = noteRouter;
+          midi.init();
+          window.__midi = midi;
+        }
+      } catch (e) { window.__psyShow('MIDI: ' + e.message); }
+      try { updateMeta(); } catch (e) { window.__psyShow('META: ' + e.message); }
+      try { syncUI(); } catch (e) { window.__psyShow('SYNC: ' + e.message); }
     }).catch(function (err) {
       $('oMeta').innerHTML = 'AUDIO ERROR';
       alert('Audio engine failed: ' + err.message);
