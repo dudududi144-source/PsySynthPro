@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v7.0.6 · viz-clean · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v8.0.0 · minimal · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -668,7 +668,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v7.0.6 · viz-clean · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v8.0.0 · minimal · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -686,6 +686,8 @@ button:focus-visible, .key:focus-visible {
     <button id="bMidi" class="tbtn midi">&#9836; MIDI</button>
     <button id="bPanic" class="tbtn panic">PANIC</button>
   </div>
+  <div id="seqtop"></div>
+  <div class="prow" id="presets"></div>
   <div class="viz3d-bezel">
     <div class="viz3d-label">SPECTRUM 3D</div>
     <canvas id="viz3d" width="1100" height="180"></canvas>
@@ -696,13 +698,12 @@ button:focus-visible, .key:focus-visible {
     <div class="perf-hud" id="perfHud">VOICES 0/12</div>
   </div>
   <div class="sections" id="sections"></div>
-  <div class="prow" id="presets"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v7.0.6 · viz-clean · 2026-08-19 &bull; VIZ CLEAN &bull; 111 PRESETS &bull; 6-OP FM &bull; LADDER</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v8.0.0 · minimal · 2026-08-19 &bull; MINIMAL &bull; PRO SEQ &bull; PRESET MENU &bull; 111 PRESETS</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v7.0.6 · viz-clean · 2026-08-19';
+window.__psyBuild = 'v8.0.0 · minimal · 2026-08-19';
 window.__psyShow = function (t) { var es = document.getElementById('psyErrStrip'); if (es) { es.style.display='block'; es.textContent = t; } };
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
@@ -2031,10 +2032,7 @@ Psy.Arpeggiator = Arpeggiator;
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
 
-/* ═══════════ Step Sequencer (Phase 8) ═══════════
-   16-step gate pattern with per-step accents. Held notes cycle through
-   the active steps; scheduled sample-accurately via the worklet queue
-   using the same lookahead technique as the arpeggiator.             */
+/* Minimal pro step-sequencer: per-step velocity / transpose / length / tie. */
 
 const SEQ_LEN = 16;
 
@@ -2044,28 +2042,19 @@ class Sequencer {
     this.enabled = false;
     this.hold = false;
     this.bpm = 141;
-    this.stepIdxDiv = 2;   /* Psy.ARP_STEPS index - 1/16 default */
-    this.gate = 70;        /* % of step */
-    this.glide = false;    /* per-step glide: sustain note so next step glides */
+    this.stepIdxDiv = 2;
+    this.glide = false;
     this.lastNote = -1;
+    this.selected = -1;
     this.steps = [];
-    for (let i = 0; i < SEQ_LEN; i++) {
-      /* rolling psy default: all gates on, accents on the quarter steps */
-      this.steps.push({ on: true, accent: (i % 4 === 0) });
-    }
-    this.held = [];
-    this.notePtr = 0;
-    this.stepPos = 0;
-    this.nextTime = 0;
-    this.timer = null;
-    this.onStep = null;   /* callback(pos, note) for UI */
+    for (let i = 0; i < SEQ_LEN; i++)
+      this.steps.push({ on: true, vel: (i % 4 === 0 ? 1 : 0.72), tr: 0, len: 70, tie: false });
+    this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
   }
-
   setEnabled(on) {
     this.enabled = on;
     if (on) {
-      this.stepPos = 0;
-      this.notePtr = 0;
+      this.stepPos = 0; this.notePtr = 0;
       if (this.engine.ctx) this.nextTime = this.engine.ctx.currentTime + 0.08;
       this.startTimer();
     } else {
@@ -2074,25 +2063,10 @@ class Sequencer {
       if (this.lastNote >= 0) { this.engine.noteOff(this.lastNote); this.lastNote = -1; }
     }
   }
-
-  startTimer() {
-    if (this.timer) return;
-    const self = this;
-    this.timer = setInterval(function () { self.tick(); }, 25);
-  }
-  stopTimer() {
-    if (this.timer) { clearInterval(this.timer); this.timer = null; }
-  }
-
-  /* 3-state step toggle: off -> on -> accent -> off */
-  toggleStep(i) {
-    const s = this.steps[i];
-    if (!s.on) { s.on = true; s.accent = false; }
-    else if (!s.accent) { s.accent = true; }
-    else { s.on = false; s.accent = false; }
-    return s;
-  }
-
+  startTimer() { if (this.timer) return; const s = this; this.timer = setInterval(function () { s.tick(); }, 25); }
+  stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
+  toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
+  setStep(i, patch) { Object.assign(this.steps[i], patch); }
   noteOn(note, vel) {
     if (!this.enabled) { this.engine.noteOn(note, vel); return; }
     if (!this.held.some(function (h) { return h.note === note; })) {
@@ -2106,51 +2080,46 @@ class Sequencer {
     this.held = this.held.filter(function (h) { return h.note !== note; });
   }
   panic() { this.held = []; }
-
   loadPattern(name) {
     const p = Psy.SEQ_PATTERNS[name];
     if (!p) return false;
     for (let i = 0; i < SEQ_LEN; i++) {
       this.steps[i].on = p.g[i] === 1;
-      this.steps[i].accent = p.a[i] === 1;
+      this.steps[i].vel = p.a[i] === 1 ? 1 : 0.72;
+      this.steps[i].tie = false; this.steps[i].tr = 0; this.steps[i].len = 70;
     }
     return true;
   }
-
   tick() {
     if (!this.enabled || !this.engine.ctx) return;
     const ctx = this.engine.ctx;
     if (this.nextTime < ctx.currentTime - 0.05) this.nextTime = ctx.currentTime + 0.05;
-
     const stepBeats = Psy.ARP_STEPS[this.stepIdxDiv].beats;
     const stepDur = (60 / this.bpm) * stepBeats;
-
     while (this.nextTime < ctx.currentTime + 0.12) {
-      const st = this.steps[this.stepPos];
+      const i = this.stepPos;
+      const st = this.steps[i];
+      const prev = this.steps[(i + SEQ_LEN - 1) % SEQ_LEN];
       if (st.on && this.held.length > 0) {
-        const note = this.held[this.notePtr % this.held.length].note;
+        const base = this.held[this.notePtr % this.held.length].note;
         this.notePtr++;
-        const vel = st.accent ? 1.0 : 0.72;
-        const gateSec = Math.max(0.03, stepDur * (this.gate / 100));
-        this.engine.noteOnAt(note, vel, this.nextTime);
-        if (!this.glide) {
-          this.engine.noteOffAt(note, this.nextTime + gateSec);
-        }
-        this.lastNote = note;
-        if (this.onStep) this.onStep(this.stepPos, note);
-      } else if (this.onStep) {
-        this.onStep(this.stepPos, -1);
+        const note = base + (st.tr | 0);
+        const vel = Math.max(0.05, Math.min(1, st.vel));
+        const gateSec = Math.max(0.03, stepDur * ((st.len == null ? 70 : st.len) / 100));
+        const cont = prev.on && prev.tie && this.lastNote === note;
+        if (!cont) this.engine.noteOnAt(note, vel, this.nextTime);
+        if (!st.tie) this.engine.noteOffAt(note, this.nextTime + gateSec);
+        this.lastNote = st.tie ? note : -1;
+        if (this.onStep) this.onStep(i, note);
+      } else {
+        this.lastNote = -1;
+        if (this.onStep) this.onStep(i, -1);
       }
-      this.stepPos = (this.stepPos + 1) % SEQ_LEN;
+      this.stepPos = (i + 1) % SEQ_LEN;
       this.nextTime += stepDur;
     }
   }
 }
-
-
-/* ═══════════ PSY-TRANCE PATTERN BANK ═══════════
-   16-step gate/accent patterns. g = gate on, A = gate on + accent.
-   Step grid: 4 beats x 4 sixteenths (beat heads at 0, 4, 8, 12).   */
 
 Psy.SEQ_PATTERNS = {
   'ROLLING 16':   { g: [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1], a: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0] },
@@ -4129,15 +4098,114 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     apply();
   }
 
+
+  /* ── MINIMAL STEP SEQ (top, smart editor) ─────────────────────── */
+  function buildSeqPanel2() {
+    const host = document.getElementById('seqtop') || document.getElementById('sections');
+    const s = document.createElement('div');
+    s.className = 'section seq2';
+    const stepBtns = [];
+    let sel = 0;
+    function stepper(label, get, set, min, max, stepv, fmt) {
+      const w = document.createElement('div'); w.className = 'stp';
+      const t = document.createElement('span'); t.className = 'stl'; t.textContent = label;
+      const v = document.createElement('span'); v.className = 'stv';
+      const dec = document.createElement('button'); dec.className = 'stb'; dec.textContent = '-';
+      const inc = document.createElement('button'); inc.className = 'stb'; inc.textContent = '+';
+      function upd() { v.textContent = fmt(get()); }
+      dec.addEventListener('click', function () { set(Math.max(min, get() - stepv)); upd(); });
+      inc.addEventListener('click', function () { set(Math.min(max, get() + stepv)); upd(); });
+      w.appendChild(dec); w.appendChild(t); w.appendChild(v); w.appendChild(inc);
+      w._upd = upd; return w;
+    }
+    const ed = document.createElement('div'); ed.className = 'seq2-ed';
+    const wNote = stepper('NOTE', function(){return seq.steps[sel].tr;}, function(x){seq.setStep(sel,{tr:x});}, -12, 12, 1, function(x){return (x>0?'+':'')+x;});
+    const wVel  = stepper('VEL',  function(){return Math.round(seq.steps[sel].vel*100);}, function(x){seq.setStep(sel,{vel:x/100});}, 5, 100, 5, function(x){return x;});
+    const wLen  = stepper('LEN',  function(){return seq.steps[sel].len;}, function(x){seq.setStep(sel,{len:x});}, 10, 200, 10, function(x){return x+'%';});
+    const wTie  = document.createElement('button'); wTie.className='stb tie'; wTie.textContent='TIE';
+    function updTie(){ wTie.classList.toggle('on', !!seq.steps[sel].tie); }
+    wTie.addEventListener('click', function(){ seq.setStep(sel,{tie:!seq.steps[sel].tie}); updTie(); refresh(); });
+    ed.appendChild(wNote); ed.appendChild(wVel); ed.appendChild(wLen); ed.appendChild(wTie);
+    const grid = document.createElement('div'); grid.className = 'seq2-grid';
+    function refresh() {
+      for (let i = 0; i < Psy.SEQ_LEN; i++) {
+        const st = seq.steps[i];
+        stepBtns[i].className = 'sq2' + (st.on ? ' on' : '') + (i === sel ? ' sel' : '') + (st.tie ? ' tie' : '');
+        stepBtns[i].style.opacity = st.on ? (0.45 + 0.55 * st.vel) : 0.25;
+      }
+      wNote._upd(); wVel._upd(); wLen._upd(); updTie();
+    }
+    for (let i = 0; i < Psy.SEQ_LEN; i++) {
+      const b = document.createElement('button'); b.className = 'sq2';
+      b.addEventListener('click', function () { sel = i; seq.toggleStep(i); refresh(); });
+      grid.appendChild(b); stepBtns.push(b);
+    }
+    const tr = document.createElement('div'); tr.className = 'seq2-tr';
+    const run = document.createElement('button'); run.className = 'stb run'; run.textContent = 'RUN';
+    run.addEventListener('click', function () { seq.setEnabled(!seq.enabled); run.classList.toggle('on', seq.enabled); });
+    const bpmD = document.createElement('span'); bpmD.className = 'stv';
+    const bpmDec = document.createElement('button'); bpmDec.className='stb'; bpmDec.textContent='-';
+    const bpmInc = document.createElement('button'); bpmInc.className='stb'; bpmInc.textContent='+';
+    function bpmU(){ bpmD.textContent = seq.bpm; }
+    bpmDec.addEventListener('click', function(){ seq.bpm=Math.max(60,seq.bpm-1); bpmU(); });
+    bpmInc.addEventListener('click', function(){ seq.bpm=Math.min(200,seq.bpm+1); bpmU(); });
+    const pat = document.createElement('select'); pat.className = 'msel';
+    Object.keys(Psy.SEQ_PATTERNS).forEach(function (k) { const o = document.createElement('option'); o.textContent = k; pat.appendChild(o); });
+    pat.addEventListener('change', function () { seq.loadPattern(pat.value); refresh(); });
+    const clr = document.createElement('button'); clr.className='stb'; clr.textContent='CLR';
+    clr.addEventListener('click', function(){ for(let i=0;i<Psy.SEQ_LEN;i++) seq.setStep(i,{on:false,tie:false,tr:0,len:70,vel:0.72}); refresh(); });
+    tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr);
+    s.appendChild(tr); s.appendChild(grid); s.appendChild(ed);
+    seq.onStep = function (pos, note) {
+      for (let i = 0; i < Psy.SEQ_LEN; i++) stepBtns[i].classList.toggle('play', i === pos && note >= 0);
+    };
+    bpmU(); refresh();
+    host.appendChild(s);
+  }
+
+  /* ── COMPACT PRESET MENU ──────────────────────────────────────── */
+  function buildPresetMenu() {
+    const wrap = document.getElementById('presets');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    wrap.className = 'pmenu';
+    const cat = document.createElement('select'); cat.className = 'msel';
+    ['ALL','BASS','LEAD','PAD','ARP','FX','WT','USER','PRO'].forEach(function (c) { const o = document.createElement('option'); o.textContent = c; cat.appendChild(o); });
+    const sel = document.createElement('select'); sel.className = 'msel big';
+    function fill() {
+      sel.innerHTML = '';
+      const names = Object.keys(Psy.PRESETS).filter(function (n) {
+        const c = cat.value;
+        if (c === 'ALL') return true;
+        if (c === 'PRO') return n.indexOf('PRO') === 0;
+        if (c === 'USER') return n.indexOf('USER') === 0 || n.indexOf('INIT') === 0;
+        return n.indexOf(c) >= 0;
+      });
+      names.forEach(function (n) { const o = document.createElement('option'); o.textContent = n; sel.appendChild(o); });
+    }
+    cat.addEventListener('change', fill);
+    sel.addEventListener('change', function () { if (typeof loadPreset === 'function') loadPreset(sel.value); });
+    const save = document.createElement('button'); save.className = 'stb'; save.textContent = 'SAVE';
+    save.addEventListener('click', function () {
+      try {
+        const name = 'USER ' + (Object.keys(Psy.PRESETS).filter(function(n){return n.indexOf('USER')===0;}).length + 1);
+        if (typeof saveUserPreset === 'function') saveUserPreset(name); else if (typeof loadPreset==='function') {}
+        fill();
+      } catch (e) {}
+    });
+    wrap.appendChild(cat); wrap.appendChild(sel); wrap.appendChild(save);
+    fill();
+  }
+
   safeBuild('macros', buildMacros);
   safeBuild('tabs', buildTabs);
   safeBuild('sections', buildSections);
   safeBuild('matrix', buildModMatrix);
   safeBuild('arp', buildArpPanel);
-  safeBuild('seq', buildSeqPanel);
+  safeBuild('seq2', buildSeqPanel2);
   safeBuild('wavetable', buildWavetableLab);
   safeBuild('morph', buildMorph);
-  safeBuild('presets', buildPresets);
+  safeBuild('presetmenu', buildPresetMenu);
   safeBuild('recents', renderRecents);
   safeBuild('userbank', renderUserBank);
   safeBuild('savebtn', buildSaveBtn);
