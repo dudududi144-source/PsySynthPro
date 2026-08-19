@@ -1208,7 +1208,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     const wNote = stepper('NOTE', function(){return seq.steps[sel].tr;}, function(x){seq.setStep(sel,{tr:x});}, -12, 12, 1, function(x){return (x>0?'+':'')+x;});
     const wVel  = stepper('VEL',  function(){return Math.round(seq.steps[sel].vel*100);}, function(x){seq.setStep(sel,{vel:x/100});}, 5, 100, 5, function(x){return x;});
     const wLen  = stepper('LEN',  function(){return seq.steps[sel].len;}, function(x){seq.setStep(sel,{len:x});}, 10, 200, 10, function(x){return x+'%';});
-    const wRoot = stepper('ROOT', function(){return seq.root;}, function(x){seq.root=x;}, 24, 60, 1, function(x){return x;});
+    const wRoot = stepper('KEY', function(){return seq.root;}, function(x){seq.root=x;}, 24, 60, 1, function(x){return x;});
     const wTie  = document.createElement('button'); wTie.className='stb tie'; wTie.textContent='TIE';
     function updTie(){ wTie.classList.toggle('on', !!seq.steps[sel].tie); }
     wTie.addEventListener('click', function(){ seq.setStep(sel,{tie:!seq.steps[sel].tie}); updTie(); refresh(); });
@@ -1242,7 +1242,8 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     const clr = document.createElement('button'); clr.className='stb'; clr.textContent='CLR';
     clr.addEventListener('click', function(){ for(let i=0;i<Psy.SEQ_LEN;i++) seq.setStep(i,{on:false,tie:false,tr:0,len:70,vel:0.72}); refresh(); });
     tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr);
-    s.appendChild(tr); s.appendChild(grid); s.appendChild(ed);
+    const hint = document.createElement('div'); hint.className='stl'; hint.style.margin='4px 0 0'; hint.textContent='SEQ DRIVES THE LOADED PATCH (same engine + FX)';
+    s.appendChild(tr); s.appendChild(hint); s.appendChild(grid); s.appendChild(ed);
     seq.onStep = function (pos, note) {
       for (let i = 0; i < Psy.SEQ_LEN; i++) stepBtns[i].classList.toggle('play', i === pos && note >= 0);
     };
