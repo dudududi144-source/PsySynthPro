@@ -1,10 +1,7 @@
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
 
-/* ═══════════ Step Sequencer (Phase 8) ═══════════
-   16-step gate pattern with per-step accents. Held notes cycle through
-   the active steps; scheduled sample-accurately via the worklet queue
-   using the same lookahead technique as the arpeggiator.             */
+/* Minimal pro step-sequencer: per-step velocity / transpose / length / tie. */
 
 const SEQ_LEN = 16;
 
@@ -14,28 +11,19 @@ class Sequencer {
     this.enabled = false;
     this.hold = false;
     this.bpm = 141;
-    this.stepIdxDiv = 2;   /* Psy.ARP_STEPS index - 1/16 default */
-    this.gate = 70;        /* % of step */
-    this.glide = false;    /* per-step glide: sustain note so next step glides */
+    this.stepIdxDiv = 2;
+    this.glide = false;
     this.lastNote = -1;
+    this.selected = -1;
     this.steps = [];
-    for (let i = 0; i < SEQ_LEN; i++) {
-      /* rolling psy default: all gates on, accents on the quarter steps */
-      this.steps.push({ on: true, accent: (i % 4 === 0) });
-    }
-    this.held = [];
-    this.notePtr = 0;
-    this.stepPos = 0;
-    this.nextTime = 0;
-    this.timer = null;
-    this.onStep = null;   /* callback(pos, note) for UI */
+    for (let i = 0; i < SEQ_LEN; i++)
+      this.steps.push({ on: true, vel: (i % 4 === 0 ? 1 : 0.72), tr: 0, len: 70, tie: false });
+    this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
   }
-
   setEnabled(on) {
     this.enabled = on;
     if (on) {
-      this.stepPos = 0;
-      this.notePtr = 0;
+      this.stepPos = 0; this.notePtr = 0;
       if (this.engine.ctx) this.nextTime = this.engine.ctx.currentTime + 0.08;
       this.startTimer();
     } else {
@@ -44,25 +32,10 @@ class Sequencer {
       if (this.lastNote >= 0) { this.engine.noteOff(this.lastNote); this.lastNote = -1; }
     }
   }
-
-  startTimer() {
-    if (this.timer) return;
-    const self = this;
-    this.timer = setInterval(function () { self.tick(); }, 25);
-  }
-  stopTimer() {
-    if (this.timer) { clearInterval(this.timer); this.timer = null; }
-  }
-
-  /* 3-state step toggle: off -> on -> accent -> off */
-  toggleStep(i) {
-    const s = this.steps[i];
-    if (!s.on) { s.on = true; s.accent = false; }
-    else if (!s.accent) { s.accent = true; }
-    else { s.on = false; s.accent = false; }
-    return s;
-  }
-
+  startTimer() { if (this.timer) return; const s = this; this.timer = setInterval(function () { s.tick(); }, 25); }
+  stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
+  toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
+  setStep(i, patch) { Object.assign(this.steps[i], patch); }
   noteOn(note, vel) {
     if (!this.enabled) { this.engine.noteOn(note, vel); return; }
     if (!this.held.some(function (h) { return h.note === note; })) {
@@ -76,51 +49,46 @@ class Sequencer {
     this.held = this.held.filter(function (h) { return h.note !== note; });
   }
   panic() { this.held = []; }
-
   loadPattern(name) {
     const p = Psy.SEQ_PATTERNS[name];
     if (!p) return false;
     for (let i = 0; i < SEQ_LEN; i++) {
       this.steps[i].on = p.g[i] === 1;
-      this.steps[i].accent = p.a[i] === 1;
+      this.steps[i].vel = p.a[i] === 1 ? 1 : 0.72;
+      this.steps[i].tie = false; this.steps[i].tr = 0; this.steps[i].len = 70;
     }
     return true;
   }
-
   tick() {
     if (!this.enabled || !this.engine.ctx) return;
     const ctx = this.engine.ctx;
     if (this.nextTime < ctx.currentTime - 0.05) this.nextTime = ctx.currentTime + 0.05;
-
     const stepBeats = Psy.ARP_STEPS[this.stepIdxDiv].beats;
     const stepDur = (60 / this.bpm) * stepBeats;
-
     while (this.nextTime < ctx.currentTime + 0.12) {
-      const st = this.steps[this.stepPos];
+      const i = this.stepPos;
+      const st = this.steps[i];
+      const prev = this.steps[(i + SEQ_LEN - 1) % SEQ_LEN];
       if (st.on && this.held.length > 0) {
-        const note = this.held[this.notePtr % this.held.length].note;
+        const base = this.held[this.notePtr % this.held.length].note;
         this.notePtr++;
-        const vel = st.accent ? 1.0 : 0.72;
-        const gateSec = Math.max(0.03, stepDur * (this.gate / 100));
-        this.engine.noteOnAt(note, vel, this.nextTime);
-        if (!this.glide) {
-          this.engine.noteOffAt(note, this.nextTime + gateSec);
-        }
-        this.lastNote = note;
-        if (this.onStep) this.onStep(this.stepPos, note);
-      } else if (this.onStep) {
-        this.onStep(this.stepPos, -1);
+        const note = base + (st.tr | 0);
+        const vel = Math.max(0.05, Math.min(1, st.vel));
+        const gateSec = Math.max(0.03, stepDur * ((st.len == null ? 70 : st.len) / 100));
+        const cont = prev.on && prev.tie && this.lastNote === note;
+        if (!cont) this.engine.noteOnAt(note, vel, this.nextTime);
+        if (!st.tie) this.engine.noteOffAt(note, this.nextTime + gateSec);
+        this.lastNote = st.tie ? note : -1;
+        if (this.onStep) this.onStep(i, note);
+      } else {
+        this.lastNote = -1;
+        if (this.onStep) this.onStep(i, -1);
       }
-      this.stepPos = (this.stepPos + 1) % SEQ_LEN;
+      this.stepPos = (i + 1) % SEQ_LEN;
       this.nextTime += stepDur;
     }
   }
 }
-
-
-/* ═══════════ PSY-TRANCE PATTERN BANK ═══════════
-   16-step gate/accent patterns. g = gate on, A = gate on + accent.
-   Step grid: 4 beats x 4 sixteenths (beat heads at 0, 4, 8, 12).   */
 
 Psy.SEQ_PATTERNS = {
   'ROLLING 16':   { g: [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1], a: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0] },
