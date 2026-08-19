@@ -227,7 +227,6 @@ body {
   width: 42px; height: 128px; margin: 0 1px;
   border: 1px solid #0a0c10; border-radius: 0 0 6px 6px;
   background:
-    radial-gradient(circle, rgba(255,122,40,0.38) 1px, transparent 1.6px) 0 0/8px 8px,
     linear-gradient(180deg, #faf6ee 0%, #eee8da 80%, #dcd5c4 100%);
   box-shadow: 0 5px 0 #a89f8d, 0 8px 14px rgba(0,0,0,0.55), inset 0 -2px 4px rgba(0,0,0,0.08);
 }
@@ -235,7 +234,8 @@ body {
   width: 26px; height: 80px; margin: 0 -13px; z-index: 2;
   border: 1px solid #000; border-radius: 0 0 5px 5px;
   background:
-    radial-gradient(circle, rgba(255,122,40,0.28) 1px, transparent 1.5px) 0 0/7px 7px,
+    background: linear-gradient(180deg,#2b2f36,#171b21); /*clean*/
+    background-xnt 1.5px) 0 0/7px 7px,
     linear-gradient(180deg, #2c2f36 0%, #14161a 60%, #0a0b0e 100%);
   box-shadow: 0 4px 0 #000, 0 6px 10px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
 }
@@ -795,3 +795,5 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   .kwrap { width: 56px; }
   .klabel { font-size: 7.5px; letter-spacing: 0.8px; }
 }
+
+#bPower { display: none; }
