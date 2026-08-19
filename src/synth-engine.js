@@ -28,6 +28,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       m6s: 0, m6a: 0, m6d: 0,
       m7s: 0, m7a: 0, m7d: 0,
       glideTime: 0,
+      width: 60,
       master: 80, reverb: 35, delay: 22,
       fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0.8,
     };
