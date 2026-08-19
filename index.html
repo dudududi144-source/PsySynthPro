@@ -10,7 +10,7 @@
 <title>PsySynthPro - Psytrance Synthesizer</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<!-- SELF-CONTAINED BUNDLE v8.2.0 · seq-plays · 2026-08-19 -->
+<!-- SELF-CONTAINED BUNDLE v8.2.1 · integrated · 2026-08-19 -->
 <style>
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css');
 @import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.css');
@@ -691,7 +691,7 @@ button:focus-visible, .key:focus-visible {
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v8.2.0 · seq-plays · 2026-08-19</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,0.93);border:1px solid #2a3444;color:#7ff3ff;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;pointer-events:none">BUILD v8.2.1 · integrated · 2026-08-19</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px;"></div>
 <div class="chassis">
   <div class="cheek l"></div><div class="cheek r"></div>
@@ -718,11 +718,11 @@ button:focus-visible, .key:focus-visible {
   </div>
   <div class="sections" id="sections"></div>
   <div class="kb" id="kb"></div>
-  <div class="brand">PSYSYNTH PRO<span>BUILD v8.2.0 · seq-plays · 2026-08-19 &bull; SEQ PLAYS &bull; ROOT CTRL &bull; LITE</span></div>
+  <div class="brand">PSYSYNTH PRO<span>BUILD v8.2.1 · integrated · 2026-08-19 &bull; SEQ = SYNTH MODE &bull; LITE &bull; PRO</span></div>
 </div>
 <script>
 window.__psyErrors = [];
-window.__psyBuild = 'v8.2.0 · seq-plays · 2026-08-19';
+window.__psyBuild = 'v8.2.1 · integrated · 2026-08-19';
 window.__psyShow = function (t) { var es = document.getElementById('psyErrStrip'); if (es) { es.style.display='block'; es.textContent = t; } };
 window.addEventListener('error', function (e) {
   window.__psyErrors.push((e.message || 'script error') + ' @ ' + (e.filename || 'unknown'));
@@ -3949,7 +3949,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     const wNote = stepper('NOTE', function(){return seq.steps[sel].tr;}, function(x){seq.setStep(sel,{tr:x});}, -12, 12, 1, function(x){return (x>0?'+':'')+x;});
     const wVel  = stepper('VEL',  function(){return Math.round(seq.steps[sel].vel*100);}, function(x){seq.setStep(sel,{vel:x/100});}, 5, 100, 5, function(x){return x;});
     const wLen  = stepper('LEN',  function(){return seq.steps[sel].len;}, function(x){seq.setStep(sel,{len:x});}, 10, 200, 10, function(x){return x+'%';});
-    const wRoot = stepper('ROOT', function(){return seq.root;}, function(x){seq.root=x;}, 24, 60, 1, function(x){return x;});
+    const wRoot = stepper('KEY', function(){return seq.root;}, function(x){seq.root=x;}, 24, 60, 1, function(x){return x;});
     const wTie  = document.createElement('button'); wTie.className='stb tie'; wTie.textContent='TIE';
     function updTie(){ wTie.classList.toggle('on', !!seq.steps[sel].tie); }
     wTie.addEventListener('click', function(){ seq.setStep(sel,{tie:!seq.steps[sel].tie}); updTie(); refresh(); });
@@ -3983,7 +3983,8 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     const clr = document.createElement('button'); clr.className='stb'; clr.textContent='CLR';
     clr.addEventListener('click', function(){ for(let i=0;i<Psy.SEQ_LEN;i++) seq.setStep(i,{on:false,tie:false,tr:0,len:70,vel:0.72}); refresh(); });
     tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr);
-    s.appendChild(tr); s.appendChild(grid); s.appendChild(ed);
+    const hint = document.createElement('div'); hint.className='stl'; hint.style.margin='4px 0 0'; hint.textContent='SEQ DRIVES THE LOADED PATCH (same engine + FX)';
+    s.appendChild(tr); s.appendChild(hint); s.appendChild(grid); s.appendChild(ed);
     seq.onStep = function (pos, note) {
       for (let i = 0; i < Psy.SEQ_LEN; i++) stepBtns[i].classList.toggle('play', i === pos && note >= 0);
     };
