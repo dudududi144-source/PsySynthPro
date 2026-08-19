@@ -441,7 +441,7 @@ class SynthEngine {
     const load = self.ctx.audioWorklet.addModule('psysynth-worklet.js').catch(function () {
       return self.ctx.audioWorklet.addModule(blobUrl);
     });
-    return load.then(function () {
+    return load.catch(function (e) { self.fallbackMode = true; self.node = null; }).then(function () {
       self.fallbackMode = false;
       try {
         self.node = new AudioWorkletNode(self.ctx, 'psysynth-processor', {
