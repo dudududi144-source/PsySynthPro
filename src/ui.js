@@ -647,6 +647,41 @@ const LAYOUT = [
     row.appendChild(dr);
     s.appendChild(row); $('sections').appendChild(s);
   }
+function scopeLoop() {
+    requestAnimationFrame(scopeLoop);
+    if (!pageVisible || !engine.ready) return;
+    if (document.hidden) return;
+    if (window.matchMedia && window.matchMedia('(max-width:700px)').matches) return;
+    scopeLoop._f=(scopeLoop._f||0)+1; if (scopeLoop._f%2) return;
+    const cv = $('scope'), c = cv.getContext('2d');
+    const W = cv._w || cv.width, H = cv._h || cv.height;
+    c.fillStyle = 'rgba(2, 10, 15, 0.42)';
+    c.fillRect(0, 0, W, H);
+    if (!engine.ready) return;
+    const data = new Uint8Array(engine.analyser.fftSize);
+    engine.analyser.getByteTimeDomainData(data);
+    c.strokeStyle = '#86f7ff';
+    c.lineWidth = 1.6;
+    c.shadowColor = '#00e5ff';
+    c.shadowBlur = 7;
+    c.beginPath();
+    for (let i = 0; i < data.length; i += 4) {
+      const x = (i / data.length) * W;
+      const y = (data[i] / 255) * H;
+      if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+    }
+    c.stroke();
+    c.shadowBlur = 0;
+  }
+
+  function updMeter() {
+    requestAnimationFrame(updMeter);
+    if (!engine.ready || !engine.analyser || document.hidden) return;
+    if (!updMeter._td) updMeter._td = new Uint8Array(1024);
+    engine.analyser.getByteTimeDomainData(updMeter._td);
+    var s2 = 0; for (var i = 0; i < 1024; i += 8) { var v = (updMeter._td[i] - 128) / 128; s2 += v * v; }
+    var el = document.getElementById('outmeter'); if (el) el.style.height = Math.min(100, Math.sqrt(s2 / 128) * 220) + '%';
+  }
   function safeBuild(name, fn) { try { fn(); } catch (e) { if (window.__psyShow) window.__psyShow('BUILD ' + name + ': ' + e.message); } }
 function buildKeyboard() {
     const kb = $('kb');
