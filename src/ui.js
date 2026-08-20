@@ -32,6 +32,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     }
   };
   const REG = {};
+  Psy.REG = REG;
   const $ = function (id) { return document.getElementById(id); };
   let pendingTable = null;
   let midi = null;
