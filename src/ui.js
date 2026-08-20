@@ -1388,7 +1388,7 @@ $('bPower').addEventListener('click', function () {
     s.appendChild(row); $('sections').appendChild(s);
   }
   Psy.REG = REG;
-  function ensurePower(){ try { if (window.engine && !engine.ready) { var b = $('bPower'); if (b) b.click(); } } catch(e){} }
+  function ensurePower(){ try { if (window.engine) { if (!engine.ready) { var b = $('bPower'); if (b) b.click(); } else if (engine.ctx && engine.ctx.state === 'suspended') { engine.ctx.resume(); } } } catch(e){} }
   document.addEventListener('pointerdown', ensurePower, true);
   document.addEventListener('keydown', ensurePower, true);
   safeBuild('conductor', buildConductor);
