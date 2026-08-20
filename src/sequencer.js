@@ -68,6 +68,7 @@ class Sequencer {
     if (this.nextTime < ctx.currentTime - 0.05) this.nextTime = ctx.currentTime + 0.05;
     const stepBeats = Psy.ARP_STEPS[this.stepIdxDiv].beats;
     const stepDur = (60 / this.bpm) * stepBeats;
+    try {
     while (this.nextTime < ctx.currentTime + 0.12) {
       const i = this.stepPos;
       const st = this.steps[i];
@@ -104,6 +105,7 @@ class Sequencer {
       this.stepPos = (i + 1) % SEQ_LEN;
       this.nextTime += stepDur;
     }
+    } catch (e) { /* never kill the loop */ }
   }
 }
 
