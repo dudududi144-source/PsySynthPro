@@ -59,34 +59,23 @@ class Conductor {
       this.nextTime += stepDur;
     }
   }
-  /* DRUMS: kick + hats (main-thread one-shots, cheap) */
+  /* DRUMS: pre-rendered buffers (zero per-hit DSP/GC) */
   ensureDrums() {
     if (this.drums || !this.engine.ctx) return;
-    var ctx = this.engine.ctx;
-    var nb = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
-    var d = nb.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    this.drums = { ctx: ctx, noise: nb };
+    var c = this.engine.ctx, sr = c.sampleRate;
+    var kl = Math.floor(sr * 0.3), kb = c.createBuffer(1, kl, sr), kd = kb.getChannelData(0);
+    var ph = 0; for (var n = 0; n < kl; n++) { var t = n / sr; var f = 150 * Math.pow(45 / 150, Math.min(1, t / 0.12)); ph += 2 * Math.PI * f / sr; kd[n] = Math.sin(ph) * Math.exp(-t * 14); }
+    var hl = Math.floor(sr * 0.12), hb = c.createBuffer(1, hl, sr), hd = hb.getChannelData(0), prev = 0;
+    for (var n = 0; n < hl; n++) { var t = n / sr; var x = Math.random() * 2 - 1; hd[n] = (x - prev) * Math.exp(-t * 60); prev = x; }
+    this.drums = { ctx: c, kick: kb, hat: hb };
   }
-  kick(t) {
-    if (!isFinite(t)) return;
-    var c = this.drums.ctx; var o = c.createOscillator(); var g = c.createGain();
-    o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
-    g.gain.setValueAtTime(0.9, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
-    o.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.3);
+  playBuf(buf, t, g) {
+    var c = this.drums.ctx; var s = c.createBufferSource(); s.buffer = buf;
+    var gn = c.createGain(); gn.gain.value = g;
+    s.connect(gn); gn.connect(this.engine.master || this.engine.fxInput); s.start(t);
   }
-  hat(t, open) {
-    if (!isFinite(t)) return;
-    var c = this.drums.ctx; var s = c.createBufferSource(); s.buffer = this.drums.noise;
-    var f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000;
-    var g = c.createGain(); g.gain.setValueAtTime(open ? 0.3 : 0.22, t); g.gain.exponentialRampToValueAtTime(0.001, t + (open ? 0.25 : 0.05));
-    s.connect(f); f.connect(g); g.connect(this.engine.master || this.engine.fxInput); s.start(t); s.stop(t + 0.3);
-  }
-  arrange() {
-    var b = this.bar % 9;
-    if (b < 2) return 'intro';
-    if (b === 8) return 'break';
-    return 'full';
-  }
+  kick(t) { if (isFinite(t)) this.playBuf(this.drums.kick, t, 0.9); }
+  hat(t, open) { if (isFinite(t)) this.playBuf(this.drums.hat, t, open ? 0.3 : 0.22); }
   playStep(i, t, stepDur) {
     var PH = [[0, 5, 3, 4], [0, 6, 5, 4], [0, 3, 5, 4], [0, 2, 5, 4]];
     var root = PH[Math.floor(this.bar / 2) % PH.length][this.bar % 4];
