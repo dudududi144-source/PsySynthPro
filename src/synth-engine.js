@@ -23,7 +23,7 @@ class SynthEngine {
     const self = this;
     let load;
     if (self.ctx.audioWorklet) {
-      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js?v=992');
+      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js?v=1002');
     } else {
       self.fallbackMode = true; self.node = null; load = Promise.resolve();
     }
@@ -43,6 +43,7 @@ class SynthEngine {
         }
       };
 
+      self.params.mobile = (window.matchMedia && window.matchMedia('(max-width:700px)').matches) ? 1 : 0;
       self.fxInput = self.ctx.createGain();
       if (self.node) self.node.connect(self.fxInput);
 
