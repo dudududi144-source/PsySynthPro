@@ -1010,6 +1010,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     requestAnimationFrame(scopeLoop);
     if (!pageVisible || !engine.ready) return;
     if (document.hidden) return;
+    if (window.matchMedia && window.matchMedia('(max-width:700px)').matches) return;
     scopeLoop._f=(scopeLoop._f||0)+1; if (scopeLoop._f%2) return;
     const cv = $('scope'), c = cv.getContext('2d');
     const W = cv._w || cv.width, H = cv._h || cv.height;
