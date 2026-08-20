@@ -580,7 +580,12 @@ const LAYOUT = [
         return n.indexOf(c) >= 0;
       });
       names.forEach(function (n) { const o = document.createElement('option'); o.textContent = n; sel.appendChild(o); });
+      var chips = document.getElementById('pchips'); if (chips) { chips.innerHTML = ''; names.slice(0, 24).forEach(function (n) {
+        var c = document.createElement('button'); c.className = 'preset factory'; c.textContent = n;
+        c.addEventListener('click', function () { try { loadPreset(n); } catch (e) {} });
+        chips.appendChild(c); }); }
     }
+    var chips = document.createElement('div'); chips.id = 'pchips'; chips.className = 'prow';
     cat.addEventListener('change', fill);
     sel.addEventListener('change', function () { if (typeof loadPreset === 'function') loadPreset(sel.value); });
     const save = document.createElement('button'); save.className = 'stb'; save.textContent = 'SAVE';
@@ -613,7 +618,7 @@ const LAYOUT = [
     bA.addEventListener('click', function(){ if(abSlot!=='A'){ abMem[abSlot]=snap(); abSlot='A'; applySnap(abMem.A); } bA.classList.add('on'); bB.classList.remove('on'); bCp.textContent='A→B'; });
     bB.addEventListener('click', function(){ if(abSlot!=='B'){ abMem[abSlot]=snap(); abSlot='B'; applySnap(abMem.B); } bB.classList.add('on'); bA.classList.remove('on'); bCp.textContent='B→A'; });
     bCp.addEventListener('click', function(){ if(abSlot==='A'){ abMem.B=snap(); } else { abMem.A=snap(); } });
-    wrap.appendChild(cat); wrap.appendChild(sel); wrap.appendChild(save); wrap.appendChild(srch); wrap.appendChild(rnd);
+    wrap.appendChild(cat); wrap.appendChild(sel); wrap.appendChild(chips); wrap.appendChild(save); wrap.appendChild(srch); wrap.appendChild(rnd);
     wrap.appendChild(bA); wrap.appendChild(bB); wrap.appendChild(bCp);
     fill();
   }
