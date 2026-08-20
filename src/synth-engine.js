@@ -185,7 +185,7 @@ class SynthEngine {
   noteOn(note, vel) {
     if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); if (this.fallbackMode) { if (this.ctx) this.fbNoteOn(note, vel); return; } if (this.node) this.node.port.postMessage({ type: 'noteOn', note: note, vel: vel }); }
   noteOff(note) { if (this.fallbackMode) { this.fbNoteOff(note); return; } if (this.node) this.node.port.postMessage({ type: 'noteOff', note: note }); }
-  noteOnAt(note, vel, when) { if (this.fallbackMode) { if (this.ctx) this.fbNoteOn(note, vel); return; } if (this.node) this.node.port.postMessage({ type: 'noteOnAt', note: note, vel: vel, when: when }); }
+  noteOnAt(note, vel, when) { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); if (this.fallbackMode) { if (this.ctx) this.fbNoteOn(note, vel); return; } if (this.node) this.node.port.postMessage({ type: 'noteOnAt', note: note, vel: vel, when: when }); }
   noteOffAt(note, when) { if (this.fallbackMode) { const self=this; const dt=this.ctx?Math.max(0,(when-this.ctx.currentTime)*1000):0; setTimeout(function(){ self.fbNoteOff(note); }, dt); return; } if (this.node) this.node.port.postMessage({ type: 'noteOffAt', note: note, when: when }); }
   noteBend(note, semis) { if (this.node) this.node.port.postMessage({ type: 'noteBend', note: note, bend: semis }); }
   panic() { if (this.fallbackMode) { for (const n in this.fbVoices) this.fbNoteOff(+n); return; } if (this.node) this.node.port.postMessage({ type: 'panic' }); }
