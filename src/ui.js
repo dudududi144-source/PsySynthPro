@@ -1245,9 +1245,14 @@ $('bPower').addEventListener('click', function () {
     const tr = document.createElement('div'); tr.className = 'seq2-tr';
     const snd = document.createElement('span'); snd.className='stl'; snd.textContent='SEQ→SYNTH';
     const run = document.createElement('button'); run.className = 'stb run'; run.textContent = 'RUN';
+    function seqTryStart(n) {
+      if (engine.ready) { if (!seq.enabled) seq.setEnabled(true); run.classList.add('on'); }
+      else if (n > 0) setTimeout(function () { seqTryStart(n - 1); }, 200);
+    }
     run.addEventListener('click', function () {
-      if (!seq.enabled && !engine.ready) { var pb = document.getElementById('bPower'); if (pb) pb.click(); }
-      setTimeout(function () { seq.setEnabled(!seq.enabled); run.classList.toggle('on', seq.enabled); }, engine.ready ? 0 : 400);
+      if (seq.enabled) { seq.setEnabled(false); run.classList.remove('on'); return; }
+      if (!engine.ready) { var pb = document.getElementById('bPower'); if (pb) pb.click(); }
+      seqTryStart(15);
     });
     const bpmD = document.createElement('span'); bpmD.className = 'stv';
     const bpmDec = document.createElement('button'); bpmDec.className='stb'; bpmDec.textContent='-';
