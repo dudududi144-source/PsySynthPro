@@ -110,7 +110,7 @@ class Conductor {
     if (i === 0 && (this.bar % 2 === 0)) {
       this.releasePad();
       var tones = [root, root + 4];
-      for (var k = 0; k < 3; k++) { var pn = this.deg2note(tones[k], 1); this.engine.noteOnAt(pn, 0.35, t); this.padHeld.push(pn); }
+      for (var k = 0; k < tones.length; k++) { var pn = this.deg2note(tones[k], 1); this.engine.noteOnAt(pn, 0.35, t); this.padHeld.push(pn); }
     }
     /* AUTONOMOUS MACRO MANAGEMENT: filter sweep + space over bars */
     if (i === 0) {
