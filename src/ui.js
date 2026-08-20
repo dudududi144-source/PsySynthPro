@@ -453,6 +453,752 @@ const LAYOUT = [
 
   /* ═══════ STEP SEQUENCER panel ═══════ */
   const seqBtns = [];
+  function buildSeqPanel() {
+    const s = document.createElement('div');
+    s.className = 'section seq-section';
+    s.innerHTML = '<div class="stitle" style="--c:#60a5fa">STEP SEQ</div>';
+
+    const grid = document.createElement('div');
+    grid.className = 'seq-grid';
+    for (let i = 0; i < Psy.SEQ_LEN; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'seq-btn on' + (seq.steps[i].accent ? ' accent' : '');
+      btn.addEventListener('click', (function (idx) {
+        return function () {
+          const st = seq.toggleStep(idx);
+          seqBtns[idx].classList.toggle('on', st.on);
+          seqBtns[idx].classList.toggle('accent', st.accent);
+        };
+      })(i));
+      seqBtns.push(btn);
+      grid.appendChild(btn);
+    }
+    s.appendChild(grid);
+
+    /* psy pattern bank */
+    const patRow = document.createElement('div');
+    patRow.className = 'seq-patterns';
+    function refreshGrid() {
+      for (let i = 0; i < seqBtns.length; i++) {
+        seqBtns[i].classList.toggle('on', seq.steps[i].on);
+        seqBtns[i].classList.toggle('accent', seq.steps[i].accent);
+      }
+    }
+    const patNames = Object.keys(Psy.SEQ_PATTERNS);
+    const patBtns = [];
+    patNames.forEach(function (name) {
+      const pb = document.createElement('button');
+      pb.className = 'pat-btn';
+      pb.textContent = name;
+      pb.addEventListener('click', function () {
+        seq.loadPattern(name);
+        refreshGrid();
+        patBtns.forEach(function (x) { x.classList.remove('active'); });
+        pb.classList.add('active');
+      });
+      patBtns.push(pb);
+      patRow.appendChild(pb);
+    });
+    s.appendChild(patRow);
+
+    /* psy tempo quick-set */
+    const tempoRow = document.createElement('div');
+    tempoRow.className = 'seq-tempos';
+    const lbl = document.createElement('span');
+    lbl.className = 'tempo-label';
+    lbl.textContent = 'TEMPO';
+    tempoRow.appendChild(lbl);
+    [138, 141, 145, 150].forEach(function (t) {
+      const tb = document.createElement('button');
+      tb.className = 'tempo-btn' + (t === 141 ? ' active' : '');
+      tb.textContent = String(t);
+      tb.addEventListener('click', function () {
+        seq.bpm = t;
+        bpmKnob.set(t, true);
+        tempoRow.querySelectorAll('.tempo-btn').forEach(function (x) { x.classList.remove('active'); });
+        tb.classList.add('active');
+      });
+      tempoRow.appendChild(tb);
+    });
+    s.appendChild(tempoRow);
+
+    /* groove export — render current SEQ pattern to a .mid clip for the DAW */
+    const expRow = document.createElement('div');
+    expRow.className = 'seq-tempos';
+    const expBtn = document.createElement('button');
+    expBtn.className = 'tempo-btn exp';
+    expBtn.style.width = 'auto';
+    expBtn.style.padding = '6px 14px';
+    expBtn.innerHTML = '&#11015; EXPORT GROOVE (.mid)';
+    expBtn.addEventListener('click', function () {
+      let notes = seq.held.map(function (h) { return h.note; });
+      if (notes.length === 0) notes = lastNotes.slice();
+      if (notes.length === 0) notes = [36];
+      notes.sort(function (x, y) { return x - y; });
+      const g = Psy.exportSeqGroove(seq, notes, 2);
+      if (!g.events.length) return;
+      const blob = Psy.buildMidiFile(g.events, g.bpm, 480);
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      Psy.downloadBlob(blob, 'psysynthpro-groove-' + g.bpm + 'bpm-' + stamp + '.mid');
+      expBtn.innerHTML = '&#10003; SAVED';
+      setTimeout(function () { expBtn.innerHTML = '&#11015; EXPORT GROOVE (.mid)'; }, 1200);
+    });
+    expRow.appendChild(expBtn);
+    s.appendChild(expRow);
+
+    const row = document.createElement('div');
+    row.className = 'krow';
+
+    seqToggle = new Psy.CycleBtn(row, {
+      color: '#60a5fa', label: 'SEQ', options: ['OFF', 'ON'], value: 'OFF',
+      display: function (v) { return v; },
+      onChange: function (v) {
+        seq.setEnabled(v === 'ON');
+        seqToggle.btn.classList.toggle('armed', v === 'ON');
+        if (v === 'ON' && arp.enabled) {
+          arp.setEnabled(false);
+          if (arpToggle) { arpToggle.setValue('OFF'); arpToggle.btn.classList.remove('armed'); }
+        }
+      }
+    });
+
+    new Psy.CycleBtn(row, {
+      color: '#60a5fa', label: 'HOLD', options: ['OFF', 'ON'], value: 'OFF',
+      display: function (v) { return v; },
+      onChange: function (v) { seq.hold = (v === 'ON'); if (v === 'OFF') seq.held = []; }
+    });
+
+    new Psy.CycleBtn(row, {
+      color: '#60a5fa', label: 'GLIDE', options: ['OFF', 'ON'], value: 'OFF',
+      display: function (v) { return v; },
+      onChange: function (v) {
+        seq.glide = (v === 'ON');
+        if (v === 'OFF' && seq.lastNote >= 0) { seq.engine.noteOff(seq.lastNote); seq.lastNote = -1; }
+      }
+    });
+
+    const bpmKnob = new Psy.Knob(row, {
+      color: '#60a5fa', label: 'BPM', min: 60, max: 200, def: 138,
+      fmt: function (v) { return String(Math.round(v)); },
+      onChange: function (v) { seq.bpm = v; }
+    });
+
+    new Psy.CycleBtn(row, {
+      color: '#60a5fa', label: 'STEP', options: [0, 1, 2], value: 2,
+      display: function (v) { return Psy.ARP_STEPS[v].label; },
+      onChange: function (v) { seq.stepIdxDiv = v; }
+    });
+
+    new Psy.Knob(row, {
+      color: '#60a5fa', label: 'GATE', min: 10, max: 100, def: 70,
+      fmt: fmtPct,
+      onChange: function (v) { seq.gate = v; }
+    });
+
+    s.appendChild(row);
+    $('sections').appendChild(s);
+
+    let lastPlay = -1;
+    seq.onStep = function (pos, note) {
+      if (lastPlay >= 0 && seqBtns[lastPlay]) seqBtns[lastPlay].classList.remove('playing');
+      lastPlay = (note >= 0) ? pos : -1;
+      if (lastPlay >= 0 && seqBtns[lastPlay]) seqBtns[lastPlay].classList.add('playing');
+      if (note >= 0) {
+        const k = document.querySelector('[data-n="' + note + '"]');
+        if (k) {
+          k.classList.add('seq-flash');
+          setTimeout(function () { k.classList.remove('seq-flash'); }, 100);
+        }
+      }
+    };
+  }
+
+  /* ═══════ presets / keyboard / scope ═══════ */
+  let pIdx = 0;
+  /* ── user preset bank (localStorage) ── */
+  const BANK_KEY = 'psysynth.userPresets.v1';
+  function loadBank() {
+    try { return JSON.parse(localStorage.getItem(BANK_KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function saveBank(bank) {
+    try { localStorage.setItem(BANK_KEY, JSON.stringify(bank)); } catch (e) {}
+  }
+  function clearPresetOn() {
+    document.querySelectorAll('.preset').forEach(function (x) { x.classList.remove('on'); });
+  }
+  function renderUserBank() {
+    const wrap = $('presets');
+    wrap.querySelectorAll('.preset.user').forEach(function (x) {
+      if (x.parentNode && x.parentNode.removeChild) x.parentNode.removeChild(x);
+    });
+    const saveBtn = wrap.querySelector ? wrap.querySelector('.preset.save') : null;
+    const bank = loadBank();
+    Object.keys(bank).forEach(function (name) {
+      const b = document.createElement('button');
+      b.className = 'preset user';
+      b.title = 'load · \u2715 delete';
+      const label = document.createElement('span');
+      label.textContent = name;
+      const del = document.createElement('span');
+      del.className = 'pdel';
+      del.textContent = '\u2715';
+      del.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (window.confirm && window.confirm('Delete preset "' + name + '"?') === false) return;
+        const bk = loadBank();
+        delete bk[name];
+        saveBank(bk);
+        renderUserBank();
+      });
+      b.appendChild(label);
+      b.appendChild(del);
+      b.addEventListener('click', function () {
+        engine.setAll(bank[name]);
+        syncUI();
+        $('oName').textContent = name;
+        clearPresetOn();
+        b.classList.add('on');
+      });
+      if (saveBtn && wrap.insertBefore) wrap.insertBefore(b, saveBtn); else wrap.appendChild(b);
+    });
+  }
+  function buildSaveBtn() {
+    const wrap = $('presets');
+    const b = document.createElement('button');
+    b.className = 'preset save';
+    b.textContent = 'SAVE \ud83d\udcbe';
+    b.addEventListener('click', function () {
+      const bank = loadBank();
+      let name = window.prompt ? window.prompt('Save current sound as:', 'MY PSY ' + (Object.keys(bank).length + 1)) : ('MY PSY ' + (Object.keys(bank).length + 1));
+      if (!name) return;
+      name = String(name).trim().slice(0, 24);
+      if (!name) return;
+      bank[name] = Object.assign({}, engine.params);
+      saveBank(bank);
+      renderUserBank();
+      $('oName').textContent = name;
+      clearPresetOn();
+    });
+    wrap.appendChild(b);
+  }
+
+  function loadPreset(i) {
+    if (typeof i === 'string') { const idx = NAMES.indexOf(i); if (idx < 0) { if (Psy.PRESETS[i]) { pushHistory(); engine.setAll(Psy.PRESETS[i]); syncUI(); $('oName').textContent = i; } return; } i = idx; }
+    pIdx = (i + NAMES.length) % NAMES.length;
+    const name = NAMES[pIdx];
+    pushHistory();
+    engine.setAll(Psy.PRESETS[name]);
+    syncUI();
+    $('oName').textContent = name;
+    clearPresetOn();
+    const btns = document.querySelectorAll('.preset.factory');
+    if (btns[pIdx]) btns[pIdx].classList.add('on');
+  }
+
+  function saveUserPreset(name) {
+    const snap = {}; for (const k in engine.params) snap[k] = engine.params[k];
+    Psy.PRESETS[name] = snap;
+    if (NAMES.indexOf(name) < 0) NAMES.push(name);
+    $('oName').textContent = name;
+    return true;
+  }
+  function presetCategory(name) {
+    if (/BASS/.test(name)) return 'BASS';
+    if (/LEAD/.test(name)) return 'LEAD';
+    if (/PAD|DRONE|CHOIR/.test(name)) return 'PAD';
+    if (/ARP|PLUCK|STAB|BLEEP|ROLLING/.test(name)) return 'ARP';
+    if (/FX|RISER|IMPACT/.test(name)) return 'FX';
+    if (/^WT/.test(name)) return 'WT';
+    return 'OTHER';
+  }
+
+  let activeCategory = 'ALL';
+  let searchTerm = '';
+  let paramHistory = [];
+  let slotA = null, slotB = null;
+  let pageVisible = true;
+  document.addEventListener('visibilitychange', function () {
+    pageVisible = !document.hidden;
+  });
+  function getRecents() {
+    try { return JSON.parse(localStorage.getItem('psy.recents') || '[]'); } catch (e) { return []; }
+  }
+  function pushRecent(name) {
+    let r = getRecents().filter(function (x) { return x !== name; });
+    r.unshift(name);
+    r = r.slice(0, 6);
+    try { localStorage.setItem('psy.recents', JSON.stringify(r)); } catch (e) {}
+  }
+
+  /* render recently-used presets into the bottom recents row */
+  function renderRecents() {
+    const wrap = document.getElementById('recents');
+    if (!wrap) return;
+    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+    const lab = document.createElement('span');
+    lab.className = 'recents-label';
+    lab.textContent = 'RECENT:';
+    wrap.appendChild(lab);
+    getRecents().forEach(function (name) {
+      const b = document.createElement('button');
+      b.className = 'preset recent';
+      b.textContent = name;
+      b.addEventListener('click', function () {
+        // user preset or factory?
+        if (Psy.PresetStore.get(name)) { loadUserPreset(name); renderRecents(); }
+        else {
+          const idx = NAMES.indexOf(name);
+          if (idx >= 0) loadPreset(idx);
+        }
+      });
+      wrap.appendChild(b);
+    });
+  }
+
+
+  function buildPresets() {
+    const wrap = $('presets');
+    /* category filter row */
+    const catRow = document.createElement('div');
+    catRow.className = 'catrow';
+    const cats = ['ALL', 'BASS', 'LEAD', 'PAD', 'ARP', 'FX', 'WT', 'USER'];
+    cats.forEach(function (cat) {
+      const b = document.createElement('button');
+      b.className = 'catbtn' + (cat === 'ALL' ? ' active' : '');
+      b.textContent = cat;
+      b.addEventListener('click', function () {
+        activeCategory = cat;
+        catRow.querySelectorAll('.catbtn').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        renderPresetButtons2();
+      });
+      catRow.appendChild(b);
+    });
+    wrap.appendChild(catRow);
+    const searchIn = document.createElement('input');
+    searchIn.type = 'text';
+    searchIn.className = 'psearch';
+    searchIn.placeholder = 'SEARCH PRESETS...';
+    searchIn.setAttribute('aria-label', 'Search presets');
+    searchIn.addEventListener('input', function () {
+      searchTerm = searchIn.value.toUpperCase();
+      renderPresetButtons2();
+    });
+    wrap.appendChild(searchIn);
+    const utilRow = document.createElement('div');
+    utilRow.className = 'catrow';
+    function ubtn(label, fn) {
+      const b = document.createElement('button');
+      b.className = 'catbtn';
+      b.textContent = label;
+      b.addEventListener('click', fn);
+      utilRow.appendChild(b);
+      return b;
+    }
+    ubtn('UNDO', doUndo);
+    ubtn('A', function () { loadSlot('A'); });
+    ubtn('B', function () { loadSlot('B'); });
+    ubtn('COPY>B', function () { copyToSlot('B'); });
+    ubtn('COPY>A', function () { copyToSlot('A'); });
+    wrap.appendChild(utilRow);
+    const btnWrap = document.createElement('div');
+    btnWrap.className = 'pbtns';
+    btnWrap.id = 'pbtns';
+    wrap.appendChild(btnWrap);
+    /* point 'presets' button rendering into btnWrap */
+    window.__pbtnWrap = btnWrap;
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'catbtn savebtn';
+    saveBtn.textContent = 'SAVE CURRENT';
+    saveBtn.addEventListener('click', saveCurrentPreset);
+    wrap.appendChild(saveBtn);
+    const genBtn = document.createElement('button');
+    genBtn.className = 'catbtn genbtn';
+    genBtn.textContent = 'GEN VARIATIONS';
+    genBtn.addEventListener('click', generateVariations);
+    wrap.appendChild(genBtn);
+    renderPresetButtons2();
+  }
+  function loadUserPreset(name) {
+    const patch = Psy.PresetStore.get(name);
+    if (!patch) return;
+    engine.setAll(patch);
+    syncUI();
+    $('oName').textContent = name;
+    pushRecent(name);
+  }
+
+  function renderPresetButtons2() {
+    const wrap = window.__pbtnWrap;
+    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+    /* factory presets */
+    NAMES.forEach(function (name, i) {
+      if (activeCategory !== 'ALL' && activeCategory !== 'USER' && presetCategory(name) !== activeCategory) return;
+      if (activeCategory === 'USER') return;
+      if (searchTerm && name.toUpperCase().indexOf(searchTerm) < 0) return;
+      const b = document.createElement('button');
+      b.className = 'preset factory';
+      b.textContent = name;
+      b.addEventListener('click', function () { loadPreset(i); pushRecent(name); renderRecents(); });
+      wrap.appendChild(b);
+    });
+    /* user presets */
+    if (activeCategory === 'ALL' || activeCategory === 'USER') {
+      Psy.PresetStore.list().forEach(function (name) {
+        if (searchTerm && name.toUpperCase().indexOf(searchTerm) < 0) return;
+        const wrap2 = document.createElement('span');
+        wrap2.className = 'upwrap';
+        const b = document.createElement('button');
+        b.className = 'preset user';
+        b.textContent = name;
+        b.addEventListener('click', function () { loadUserPreset(name); renderRecents(); });
+        wrap2.appendChild(b);
+        const del = document.createElement('button');
+        del.className = 'updel';
+        del.textContent = 'x';
+        del.addEventListener('click', function (e) {
+          e.stopPropagation();
+          Psy.PresetStore.remove(name);
+          renderPresetButtons2();
+        });
+        wrap2.appendChild(del);
+        wrap.appendChild(wrap2);
+      });
+    }
+  }
+
+  function saveCurrentPreset() {
+    const name = window.prompt ? window.prompt('Save current sound as:', 'MY SOUND') : 'MY SOUND';
+    if (!name) return;
+    const patch = {};
+    for (const k in engine.params) patch[k] = engine.params[k];
+    if (Psy.PresetStore.save(name, patch)) {
+      activeCategory = 'USER';
+      const catRow = document.querySelector('.catrow');
+      if (catRow) {
+        catRow.querySelectorAll('.catbtn').forEach(function (x) {
+          x.classList.toggle('active', x.textContent === 'USER');
+        });
+      }
+      renderPresetButtons2();
+      pushRecent(name);
+    }
+  }
+
+  function snapshotParams() { return Object.assign({}, engine.params); }
+  function pushHistory() { paramHistory.push(snapshotParams()); if (paramHistory.length > 32) paramHistory.shift(); }
+  function doUndo() {
+    const p = paramHistory.pop();
+    if (p) { engine.setAll(p); syncUI(); $('oName').textContent = 'UNDO'; }
+  }
+  function copyToSlot(slot) {
+    if (slot === 'A') slotA = snapshotParams(); else slotB = snapshotParams();
+    $('oName').textContent = 'COPIED TO ' + slot;
+  }
+  function loadSlot(slot) {
+    pushHistory();
+    const p = (slot === 'A') ? slotA : slotB;
+    if (p) { engine.setAll(Object.assign({}, p)); syncUI(); $('oName').textContent = 'SLOT ' + slot; }
+  }
+
+  /* Generate musical variations of the current patch, save them as user presets */
+  function generateVariations() {
+    const base = {};
+    for (const k in engine.params) base[k] = engine.params[k];
+    const count = window.prompt ? parseInt(window.prompt('How many variations? (1-32)', '8'), 10) : 8;
+    const n = Math.max(1, Math.min(32, isNaN(count) ? 8 : count));
+    const baseName = ($('oName').textContent || 'SOUND').slice(0, 16).trim();
+    const vars = Psy.Variation.generateMany(base, baseName, n, 0.5);
+    let saved = 0;
+    for (const vr of vars) {
+      if (Psy.PresetStore.save(vr.name, vr.patch)) saved++;
+    }
+    activeCategory = 'USER';
+    const catRow = document.querySelector('.catrow');
+    if (catRow) {
+      catRow.querySelectorAll('.catbtn').forEach(function (x) {
+        x.classList.toggle('active', x.textContent === 'USER');
+      });
+    }
+    renderPresetButtons2();
+  }
+
+const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 'B3', 60: 'C4', 62: 'D4', 64: 'E4', 65: 'F4', 67: 'G4', 69: 'A4', 71: 'B4', 72: 'C5', 74: 'D5', 76: 'E5', 77: 'F5', 79: 'G5', 81: 'A5', 83: 'B5', 84: 'C6' };
+
+  /* ── Octave shift: OCT -/+ buttons + Z/X keys ── */
+  let octShift = 0;
+  function noteName(n) {
+    const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[n % 12] + (Math.floor(n / 12) - 1);
+  }
+  function updateOctLabel() {
+    const lbl = $('octLabel');
+    if (lbl) lbl.textContent = noteName(48 + octShift * 12) + ' \u2013 ' + noteName(72 + octShift * 12) + '  [Z/X]';
+  }
+  function applyOctave() {
+    document.querySelectorAll('#kb .key').forEach(function (k) {
+      const base = parseInt(k.dataset.base, 10);
+      k.dataset.n = String(base + octShift * 12);
+      k.title = noteName(base + octShift * 12);
+    });
+    updateOctLabel();
+  }
+  function buildOctRow() {
+    const kb = $('kb');
+    const row = document.createElement('div');
+    row.className = 'oct-row';
+    const dn = document.createElement('button');
+    dn.className = 'oct-btn'; dn.textContent = 'OCT \u2212';
+    const lbl = document.createElement('span');
+    lbl.className = 'oct-label'; lbl.id = 'octLabel';
+    const up = document.createElement('button');
+    up.className = 'oct-btn'; up.textContent = 'OCT +';
+    dn.addEventListener('click', function () { if (octShift > -2) { octShift--; applyOctave(); } });
+    up.addEventListener('click', function () { if (octShift < 2) { octShift++; applyOctave(); } });
+    row.appendChild(dn); row.appendChild(lbl); row.appendChild(up);
+    kb.parentNode.insertBefore(row, kb);
+    updateOctLabel();
+  }
+
+  function buildKeyboard() {
+    const kb = $('kb');
+    for (let n = 48; n <= 84; n++) {
+      const black = [1, 3, 6, 8, 10].indexOf(n % 12) >= 0;
+      const k = document.createElement('div');
+      k.className = 'key ' + (black ? 'b' : 'w');
+      k.dataset.base = n;
+      k.dataset.n = n;
+      k.title = noteName(n);
+      k.addEventListener('pointerdown', function (e) {
+        const rect = k.getBoundingClientRect();
+        const rel = (e.clientY - rect.top) / Math.max(1, rect.height);
+        const vel = Math.max(0.25, Math.min(1, 1.05 - rel));
+        noteOn(parseInt(k.dataset.n, 10), vel);
+      });
+      k.addEventListener('pointerup', function () { noteOff(parseInt(k.dataset.n, 10)); });
+      k.addEventListener('pointerleave', function () { noteOff(parseInt(k.dataset.n, 10)); });
+      kb.appendChild(k);
+    }
+  }
+
+  function noteOn(n, vel) {
+    if (!engine.ready) return;
+    if (lastNotes.indexOf(n) < 0) { lastNotes.push(n); if (lastNotes.length > 8) lastNotes.shift(); }
+    noteRouter.noteOn(n, vel === undefined ? 0.8 : vel);
+    const k = document.querySelector('[data-n="' + n + '"]');
+    if (k) k.classList.add('on');
+  }
+  function noteOff(n) {
+    if (!engine.ready) return;
+    noteRouter.noteOff(n);
+    const k = document.querySelector('[data-n="' + n + '"]');
+    if (k) k.classList.remove('on');
+  }
+
+  function setupCanvases() {
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    if (dpr === 1) return;
+    const cv = $('scope');
+    if (!cv) return;
+    const w = cv.width, h = cv.height;
+    cv._w = w; cv._h = h;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    const c2 = cv.getContext('2d');
+    if (c2 && c2.setTransform) c2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function scopeLoop() {
+    requestAnimationFrame(scopeLoop);
+    if (!pageVisible || !engine.ready) return;
+    if (document.hidden) return;
+    if (window.matchMedia && window.matchMedia('(max-width:700px)').matches) return;
+    scopeLoop._f=(scopeLoop._f||0)+1; if (scopeLoop._f%2) return;
+    const cv = $('scope'), c = cv.getContext('2d');
+    const W = cv._w || cv.width, H = cv._h || cv.height;
+    c.fillStyle = 'rgba(2, 10, 15, 0.42)';
+    c.fillRect(0, 0, W, H);
+    if (!engine.ready) return;
+    const data = new Uint8Array(engine.analyser.fftSize);
+    engine.analyser.getByteTimeDomainData(data);
+    c.strokeStyle = '#86f7ff';
+    c.lineWidth = 1.6;
+    c.shadowColor = '#00e5ff';
+    c.shadowBlur = 7;
+    c.beginPath();
+    for (let i = 0; i < data.length; i += 4) {
+      const x = (i / data.length) * W;
+      const y = (data[i] / 255) * H;
+      if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+    }
+    c.stroke();
+    c.shadowBlur = 0;
+  }
+
+  function updateMeta() {
+    if (!engine.ready) return;
+    $('oMeta').innerHTML =
+      (engine.ctx.sampleRate / 1000).toFixed(0) + 'kHz WORKLET<br>' +
+      'LAT ' + (engine.latencyMs ? (engine.latencyMs() || 0) : 0).toFixed(1) + 'ms • 12 VOX';
+  }
+
+    /* always-on: first touch anywhere powers the synth */
+  document.addEventListener('pointerdown', function __autoPower() {
+    if (!engine.ready) $('bPower').click();
+    document.removeEventListener('pointerdown', __autoPower);
+  });
+$('bPower').addEventListener('click', function () {
+    if (engine.ready) return;
+    engine.boot().then(function () {
+      $('bPower').classList.add('on');
+      if (pendingTable) {
+        engine.setWavetable(pendingTable.table);
+        engine.set('wave', 4);
+        if (REG.wave) REG.wave.setValue(4);
+        $('oName').textContent = 'WT: ' + pendingTable.name;
+        pendingTable = null;
+      }
+
+      try {
+        if (!midi && Psy.MidiEngine) {
+          midi = new Psy.MidiEngine(engine, {
+            status: midiStatus,
+            event: function (txt) { const ev = $('midiEvent'); if (ev) ev.textContent = txt; }
+          });
+          midi.input = noteRouter;
+          midi.init();
+          window.__midi = midi;
+        }
+      } catch (e) { window.__psyShow('MIDI: ' + e.message); }
+      try { updateMeta(); } catch (e) { window.__psyShow('META: ' + e.message); }
+      try { syncUI(); } catch (e) { window.__psyShow('SYNC: ' + e.message); }
+    }).catch(function (err) {
+      $('oMeta').innerHTML = 'AUDIO ERROR';
+      alert('Audio engine failed: ' + err.message);
+    });
+  });
+  $('bPrev').addEventListener('click', function () { loadPreset(pIdx - 1); });
+  $('bNext').addEventListener('click', function () { loadPreset(pIdx + 1); });
+  $('bPanic').addEventListener('click', function () { engine.panic(); if (arp) arp.panic(); if (seq) seq.panic(); });
+
+  $('bRec').addEventListener('click', function () {
+    if (!engine.ready) return;
+    if (!recorder) recorder = new Psy.Recorder(engine);
+    const btn = $('bRec');
+    if (!recorder.recording) {
+      if (recorder.start()) {
+        btn.classList.add('armed');
+        btn.innerHTML = '&#9632; STOP';
+      }
+    } else {
+      const blob = recorder.stop();
+      btn.classList.remove('armed');
+      btn.innerHTML = '&#9679; REC';
+      if (blob) {
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        Psy.downloadBlob(blob, 'psysynthpro-' + stamp + '.wav');
+        $('oName').textContent = 'WAV SAVED';
+      }
+    }
+  });
+
+  $('bMidi').addEventListener('click', function () {
+    if (!engine.ready) return;
+    if (!midiRec) midiRec = new Psy.MidiRecorder(engine);
+    const btn = $('bMidi');
+    if (!midiRec.capturing) {
+      if (midiRec.start()) {
+        btn.classList.add('armed');
+        btn.innerHTML = '&#9632; STOP';
+      }
+    } else {
+      const bpm = seq.enabled ? seq.bpm : (arp.enabled ? arp.bpm : 120);
+      const blob = midiRec.stop(bpm);
+      btn.classList.remove('armed');
+      btn.innerHTML = '&#9836; MIDI';
+      if (blob) {
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        Psy.downloadBlob(blob, 'psysynthpro-' + stamp + '.mid');
+        $('oName').textContent = 'MIDI SAVED';
+      } else {
+        $('oName').textContent = 'NO NOTES';
+      }
+    }
+  });
+
+  const KEYMAP = { a: 60, w: 61, s: 62, e: 63, d: 64, f: 65, t: 66, g: 67, y: 68, h: 69, u: 70, j: 71, k: 72, o: 73, l: 74, p: 75 };
+  document.addEventListener('keydown', function (e) {
+    if (e.repeat) return;
+    const key = e.key.toLowerCase();
+    if (key === 'z') { if (octShift > -2) { octShift--; applyOctave(); } return; }
+    if (key === 'x') { if (octShift < 2) { octShift++; applyOctave(); } return; }
+    const n = KEYMAP[key];
+    if (n !== undefined) noteOn(n + octShift * 12);
+  });
+  document.addEventListener('keyup', function (e) {
+    const n = KEYMAP[e.key.toLowerCase()];
+    if (n !== undefined) noteOff(n + octShift * 12);
+  });
+
+  function safeBuild(name, fn) {
+    try { fn(); }
+    catch (err) {
+      if (window.__psyErrors) window.__psyErrors.push(name + ': ' + err.message);
+      else console.error(name, err);
+    }
+  }
+
+  /* Mod rings: highlight knobs that are active modulation destinations */
+  const DEST_PARAM = { 1: 'cutoff', 2: null, 3: null, 4: 'fmDepth', 5: 'res' };
+  function refreshModRings() {
+    const active = {};
+    for (let i=0;i<8;i++) {
+      const s = engine.params['m'+i+'s'], a = engine.params['m'+i+'a'], d = engine.params['m'+i+'d'];
+      if (s && a && d) { const pk = DEST_PARAM[d]; if (pk) active[pk] = true; }
+    }
+    for (const k in REG) {
+      const c = REG[k];
+      if (c && c.zone) c.zone.classList.toggle('modulated', !!active[k]);
+    }
+  }
+  /* Tab organization */
+  const TABMAP = {"POLYBLEP OSC": "SYNTH", "FM OPERATOR": "SYNTH", "ZDF SVF": "SYNTH", "ENVELOPES": "SYNTH", "LFO 1+2": "MOD", "FREE MOD MATRIX": "MOD", "PERFORMANCE MACROS": "MOD", "FX RACK": "FX", "SPACE FX": "FX", "ARPEGGIATOR": "PERF", "STEP SEQ": "PERF", "WAVETABLE LAB": "PERF", "PRESET MORPH": "PERF"};
+  function buildTabs() {
+    const wrap = $('sections');
+    const bar = document.createElement('div');
+    bar.className = 'tabbar';
+    const tabs = ['SYNTH','MOD','FX','PERF'];
+    let active = 'SYNTH';
+    function apply() {
+      wrap.querySelectorAll('.section').forEach(function (sec) {
+        const t = sec.getAttribute('data-tab');
+        sec.setAttribute('data-hidden', (t && t !== active) ? '1' : '0');
+      });
+    }
+    tabs.forEach(function (tb) {
+      const b = document.createElement('button');
+      b.className = 'tabbtn' + (tb === active ? ' active' : '');
+      b.textContent = tb;
+      b.addEventListener('click', function () {
+        active = tb;
+        bar.querySelectorAll('.tabbtn').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        apply();
+      });
+      bar.appendChild(b);
+    });
+    wrap.parentNode.insertBefore(bar, wrap);
+    // tag sections by their title
+    wrap.querySelectorAll('.section').forEach(function (sec) {
+      const h = sec.querySelector('.stitle');
+      const name = h ? h.textContent.trim() : '';
+      sec.setAttribute('data-tab', TABMAP[name] || 'SYNTH');
+    });
+    apply();
+  }
+
+
+  /* ── MINIMAL STEP SEQ (top, smart editor) ─────────────────────── */
   function buildSeqPanel2() {
     const host = document.getElementById('seqtop') || document.getElementById('sections');
     const s = document.createElement('div');
@@ -618,9 +1364,6 @@ const LAYOUT = [
     fill();
   }
 
-  function safeBuild(name, fn) {
-    try { fn(); } catch (e) { if (window.__psyShow) window.__psyShow('BUILD ' + name + ': ' + e.message); }
-  }
   safeBuild('macros', buildMacros);
   safeBuild('tabs', buildTabs);
   safeBuild('sections', buildSections);
