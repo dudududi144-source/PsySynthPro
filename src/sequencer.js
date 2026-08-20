@@ -24,6 +24,8 @@ class Sequencer {
     this.drums = { k: [], s: [], h: [] };
     for (let di = 0; di < SEQ_LEN; di++) { this.drums.k.push(di % 4 === 0); this.drums.s.push(di === 4 || di === 12); this.drums.h.push(di % 2 === 0); }
     this.human = 0; /* 0..100 % humanize: micro timing+velocity life */
+    this.dmix = { k: 0.9, s: 0.7, h: 0.5 };
+    this.dmute = { k: false, s: false, h: false };
   }
   setEnabled(on) {
     this.enabled = on;
@@ -40,7 +42,12 @@ class Sequencer {
   startTimer() { if (this.timer) return; const s = this; this.timer = setInterval(function () { s.tick(); }, 25); }
   stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
   toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
-  toggleDrum(lane, i) { this.drums[lane][i] = !this.drums[lane][i]; return this.drums[lane][i]; }
+  ensureDrumBus() { if (!this.engine.ctx) return; if (this._dbus) return; this._dbus = this.engine.ctx.createGain(); this._dbus.gain.value = 1; this._dbus.connect(this.engine.master || this.engine.fxInput); }
+  _noise() { const ctx = this.engine.ctx; if (!this._nb) { const b = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; this._nb = b; } return this._nb; }
+  kick(t) { if (this.dmute.k) return; this.ensureDrumBus(); const ctx = this.engine.ctx; const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.12); g.gain.setValueAtTime(this.dmix.k, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.28); o.connect(g); g.connect(this._dbus); o.start(t); o.stop(t + 0.3); }
+  snare(t) { if (this.dmute.s) return; this.ensureDrumBus(); const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = this._noise(); const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800; const g = ctx.createGain(); g.gain.setValueAtTime(this.dmix.s, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18); src.connect(f); f.connect(g); g.connect(this._dbus); src.start(t); src.stop(t + 0.2); }
+  hat(t, open) { if (this.dmute.h) return; this.ensureDrumBus(); const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = this._noise(); const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000; const g = ctx.createGain(); const dur = open ? 0.3 : 0.05; g.gain.setValueAtTime(this.dmix.h, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur); src.connect(f); f.connect(g); g.connect(this._dbus); src.start(t); src.stop(t + dur + 0.02); }
+    toggleDrum(lane, i) { this.drums[lane][i] = !this.drums[lane][i]; return this.drums[lane][i]; }
   chords() {
     const deg = [0,0,0,0, 3,3,3,3, 5,5,5,5, 7,7,3,3];
     for (let i = 0; i < SEQ_LEN; i++) { this.steps[i].on = (i % 4 === 0); this.steps[i].tr = deg[i]; this.steps[i].tie = false; this.steps[i].len = 60; this.steps[i].vel = (i % 8 === 0) ? 1 : 0.8; this.steps[i].rat = 1; }
@@ -90,10 +97,10 @@ class Sequencer {
       const st = this.steps[i];
       const tStep = this.nextTime + ((i % 2 === 1) ? (this.swing / 100) * stepDur * 0.5 : 0);
       var C = window.__cond;
-      try { if (this.drums && C && C.drumsOn) {
-        if (this.drums.k[i] && typeof C.kick === 'function') C.kick(tStep);
-        if (this.drums.s[i] && typeof C.snare === 'function') C.snare(tStep);
-        if (this.drums.h[i] && typeof C.hat === 'function') C.hat(tStep, false);
+      try { if (this.drums) {
+        if (this.drums.k[i]) this.kick(tStep);
+        if (this.drums.s[i]) this.snare(tStep);
+        if (this.drums.h[i]) this.hat(tStep, false);
       } } catch (e) {}
       const prev = this.steps[(i + SEQ_LEN - 1) % SEQ_LEN];
       const src = this.held.length ? this.held : [{ note: this.root, vel: 0.85 }];
