@@ -1240,7 +1240,7 @@ $('bPower').addEventListener('click', function () {
   var host = document.getElementById('seqtop') || document.getElementById('sections');
   var s = document.createElement('div'); s.className = 'section seq2';
   s.innerHTML = '<div class="stitle" style="--c:#2dd4bf">STEP SEQUENCER</div>';
-  var seq = window.__seq || (window.__seq = new Psy.Sequencer(engine));
+  var seq = new Psy.Sequencer(engine); window.__seq = seq;
   var sel = 0; var cells = []; var drumCells = [];
   var tr = document.createElement('div'); tr.className = 'krow';
   var run = document.createElement('button'); run.className = 'stb'; run.textContent = 'RUN';
@@ -1259,6 +1259,9 @@ $('bPower').addEventListener('click', function () {
   var rnd = document.createElement('button'); rnd.className = 'stb'; rnd.textContent = 'RANDOM';
   rnd.addEventListener('click', function () { for (var i = 0; i < Psy.SEQ_LEN; i++) { seq.steps[i].on = Math.random() < 0.5; seq.steps[i].vel = 0.5 + Math.random() * 0.5; seq.drums.k[i] = (i % 4 === 0) || Math.random() < 0.1; seq.drums.h[i] = Math.random() < 0.6; seq.drums.s[i] = (i === 4 || i === 12); } paint(); });
   tr.appendChild(rnd);
+  var mel = document.createElement('button'); mel.className = 'stb'; mel.textContent = 'MELODIC';
+  mel.addEventListener('click', function () { seq.melodic(); paint(); });
+  tr.appendChild(mel);
   s.appendChild(tr);
   var kr = document.createElement('div'); kr.className = 'krow';
   new Psy.Knob(kr, { label: 'SWING', color: '#2dd4bf', min: 0, max: 60, def: 0, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.swing = v; } });
