@@ -104,8 +104,11 @@ class Knob {
   }
 
   norm() {
-    if (this.log) return Math.log(this.value / this.min) / Math.log(this.max / this.min);
-    return (this.value - this.min) / (this.max - this.min);
+    var p;
+    if (this.log && this.min > 0 && this.max > 0) p = Math.log(this.value / this.min) / Math.log(this.max / this.min);
+    else p = (this.value - this.min) / (this.max - this.min);
+    if (!isFinite(p)) p = 0;
+    return Math.min(1, Math.max(0, p));
   }
   fromNorm(p) {
     p = Math.min(1, Math.max(0, p));
@@ -113,6 +116,7 @@ class Knob {
     return this.min + p * (this.max - this.min);
   }
   set(v, silent) {
+    if (!isFinite(v)) v = (this.cfg.def !== undefined ? this.cfg.def : this.min);
     if (this.cfg.step) v = Math.round(v / this.cfg.step) * this.cfg.step;
     this.value = Math.min(this.max, Math.max(this.min, v));
     this.render();
