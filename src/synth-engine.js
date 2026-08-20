@@ -23,7 +23,7 @@ class SynthEngine {
     const self = this;
     let load;
     if (self.ctx.audioWorklet) {
-      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js?v=1002');
+      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js?v=1022');
     } else {
       self.fallbackMode = true; self.node = null; load = Promise.resolve();
     }
@@ -118,6 +118,7 @@ class SynthEngine {
       self.analyser.connect(self.ctx.destination);
 
       self.ready = true;
+      try { var om = document.getElementById('oMeta'); if (om) om.innerHTML = (self.fallbackMode ? 'FALLBACK MODE' : 'WORKLET DSP') + '<br>READY'; } catch (e) {}
       self.sendParams();
 
       return self.ctx.resume();
@@ -182,7 +183,7 @@ class SynthEngine {
     if (!this.fbVoices) this.fbVoices = {};
     if (this.fbVoices[note]) this.fbNoteOff(note);
     const t = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator(); osc.type = 'sawtooth';
+    const osc = this.ctx.createOscillator(); osc.type = ['sawtooth','square','triangle','sine','sawtooth'][(this.params.wave|0)] || 'sawtooth';
     osc.frequency.value = 440 * Math.pow(2, (note - 69) / 12);
     const flt = this.ctx.createBiquadFilter(); flt.type = 'lowpass';
     flt.frequency.value = this._fin(this.params.cutoff, 2600); flt.Q.value = this._fin(this.params.res, 2);
