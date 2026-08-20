@@ -108,6 +108,121 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     $('sections').appendChild(s);
   }
 
+  const LAYOUT = [
+    { title: 'POLYBLEP OSC', color: '#ffb454', items: [
+      { type: 'cycle', key: 'wave', label: 'WAVE', options: [0, 1, 2, 3, 4], display: function (v) { return WAVES[v]; } },
+      { type: 'knob', key: 'detune', label: 'DETUNE', min: -100, max: 100, def: 0, fmt: fmtCt },
+      { type: 'knob', key: 'unison', label: 'UNISON', min: 1, max: 7, step: 2, def: 3 },
+      { type: 'knob', key: 'spread', label: 'SPREAD', min: 0, max: 50, def: 12, fmt: fmtCt },
+      { type: 'knob', key: 'sub', label: 'SUB', min: 0, max: 100, def: 25, fmt: fmtPct },
+      { type: 'knob', key: 'noise', label: 'NOISE', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'glideTime', label: 'GLIDE', min: 0, max: 500, def: 0, fmt: fmtMs }
+    ]},
+    { title: 'FM OPERATOR', color: '#ffd166', items: [
+      { type: 'knob', key: 'fmRatio', label: 'RATIO', min: 0.5, max: 8, step: 0.5, def: 2, fmt: function (v) { return 'x' + v; } },
+      { type: 'knob', key: 'fmDepth', label: 'DEPTH', min: 0, max: 100, def: 12, fmt: fmtPct },
+      { type: 'knob', key: 'fm2Ratio', label: 'B RATIO', min: 0.5, max: 8, step: 0.5, def: 3, fmt: function (v) { return 'x' + v; } },
+      { type: 'knob', key: 'fm2Depth', label: 'B DEPTH', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fm3Ratio', label: 'C RATIO', min: 0.5, max: 8, step: 0.5, def: 4, fmt: function (v) { return 'x' + v; } },
+      { type: 'knob', key: 'fm3Depth', label: 'C DEPTH', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fm4Ratio', label: 'D RATIO', min: 0.5, max: 8, step: 0.5, def: 5, fmt: function (v) { return 'x' + v; } },
+      { type: 'knob', key: 'fm4Depth', label: 'D DEPTH', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fm5Ratio', label: 'E RATIO', min: 0.5, max: 8, step: 0.5, def: 6, fmt: function (v) { return 'x' + v; } },
+      { type: 'knob', key: 'fm5Depth', label: 'E DEPTH', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fm6Ratio', label: 'F RATIO', min: 0.5, max: 8, step: 0.5, def: 7, fmt: function (v) { return 'x' + v; } },
+      { type: 'knob', key: 'fm6Depth', label: 'F DEPTH', min: 0, max: 100, def: 0, fmt: fmtPct }
+    ]},
+    { title: 'ZDF SVF', color: '#4dd6e8', items: [
+      { type: 'cycle', key: 'filterType', label: 'TYPE', options: [0, 1, 2, 3, 4], display: function (v) { return FTYPES[v]; } },
+      { type: 'knob', key: 'cutoff', label: 'CUTOFF', min: 40, max: 16000, log: true, def: 2600, fmt: fmtHz },
+      { type: 'knob', key: 'res', label: 'RES', min: 0.1, max: 20, step: 0.1, def: 2 },
+      { type: 'knob', key: 'wtPos', label: 'WT POS', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'filterEnv', label: 'ENV AMT', min: 0, max: 100, def: 55, fmt: fmtPct }
+    ]},
+    { title: 'ENVELOPES', color: '#e8ecf2', items: [
+      { type: 'knob', key: 'attack', label: 'ATTACK', min: 1, max: 3000, log: true, def: 12, fmt: fmtMs },
+      { type: 'knob', key: 'decay', label: 'DECAY', min: 10, max: 3000, log: true, def: 260, fmt: fmtMs },
+      { type: 'knob', key: 'sustain', label: 'SUSTAIN', min: 0, max: 100, def: 70, fmt: fmtPct },
+      { type: 'knob', key: 'release', label: 'RELEASE', min: 30, max: 5000, log: true, def: 650, fmt: fmtMs }
+    ,
+{ type: 'knob', key: 'fAttack', label: 'ATTACK', min: 1, max: 1000, def: 5, fmt: fmtMs },
+      { type: 'knob', key: 'fDecay', label: 'DECAY', min: 10, max: 2000, def: 300, fmt: fmtMs },
+      { type: 'knob', key: 'fSustain', label: 'SUSTAIN', min: 0, max: 100, def: 40, fmt: fmtPct },
+      { type: 'knob', key: 'fRelease', label: 'RELEASE', min: 30, max: 4000, def: 400, fmt: fmtMs },
+      { type: 'knob', key: 'fEnvAmt', label: 'AMOUNT', min: 0, max: 100, def: 60, fmt: fmtPct }
+      ]},
+    { title: 'LFO 1+2', color: '#b8e05a', items: [
+      { type: 'cycle', key: 'lfoWave', label: 'WAVE', options: [0, 1], display: function (v) { return v === 1 ? 'SQR' : 'SIN'; } },
+      { type: 'cycle', key: 'lfoTarget', label: 'TARGET', options: [0, 1, 2], display: function (v) { return LTYPES[v]; } },
+      { type: 'knob', key: 'lfoRate', label: 'RATE', min: 0.1, max: 20, step: 0.1, def: 2.2, fmt: function (v) { return v.toFixed(1) + 'Hz'; } },
+      { type: 'knob', key: 'lfoDepth', label: 'DEPTH', min: 0, max: 100, def: 35, fmt: fmtPct }
+    ,
+{ type: 'cycle', key: 'lfo2Wave', label: 'WAVE', options: [0,1], display: function (v) { return v===1?'SQR':'SIN'; } },
+      { type: 'knob', key: 'lfo2Rate', label: 'RATE', min: 0.1, max: 20, step: 0.1, def: 5, fmt: function (v) { return v.toFixed(1)+'Hz'; } }
+      ]},
+    { title: 'FREE MOD MATRIX', color: '#fbbf24', items: modSlotItems() },
+    { title: 'FX RACK', color: '#ff6b6b', items: [
+      { type: 'knob', key: 'fxDist', label: 'DIST', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fxChorus', label: 'CHORUS', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'fxCrush', label: 'CRUSH', min: 0, max: 100, def: 0, fmt: fmtPct },
+      { type: 'knob', key: 'chRate', label: 'CH RATE', min: 0.1, max: 8, step: 0.1, def: 0.8, fmt: function (v) { return v.toFixed(1)+'Hz'; } }
+    ]},
+    { title: 'SPACE FX', color: '#f07dc2', items: [
+      { type: 'knob', key: 'reverb', label: 'REVERB', min: 0, max: 100, def: 35, fmt: fmtPct },
+      { type: 'knob', key: 'delay', label: 'DELAY', min: 0, max: 100, def: 22, fmt: fmtPct },
+      { type: 'knob', key: 'width', label: 'WIDTH', min: 0, max: 100, def: 60, fmt: fmtPct },
+      { type: 'knob', key: 'master', label: 'MASTER', min: 0, max: 100, def: 80, fmt: fmtPct }
+    ]}
+  ];
+
+  function buildModMatrix() {
+    const s = document.createElement('div');
+    s.className = 'section matrix-section';
+    s.innerHTML = '<div class="stitle" style="--c:#fbbf24">MOD MATRIX</div>';
+    const grid = document.createElement('div');
+    grid.className = 'mod-matrix';
+    const sources = [
+      { pre: 'modL', label: 'LFO' },
+      { pre: 'modE', label: 'ENV' },
+      { pre: 'modV', label: 'VEL' }
+    ];
+    const dests = [
+      { suf: 'C', label: 'CUT' },
+      { suf: 'P', label: 'PIT' },
+      { suf: 'A', label: 'AMP' },
+      { suf: 'F', label: 'FM' },
+      { suf: 'R', label: 'RES' }
+    ];
+    const corner = document.createElement('div');
+    corner.className = 'matrix-corner';
+    grid.appendChild(corner);
+    dests.forEach(function (dst) {
+      const h = document.createElement('div');
+      h.className = 'matrix-collabel';
+      h.textContent = dst.label;
+      grid.appendChild(h);
+    });
+    sources.forEach(function (src) {
+      const rl = document.createElement('div');
+      rl.className = 'matrix-rowlabel';
+      rl.textContent = src.label;
+      grid.appendChild(rl);
+      dests.forEach(function (dst) {
+        const key = src.pre + dst.suf;
+        const knob = new Psy.Knob(grid, {
+          label: '', color: '#fbbf24', min: -100, max: 100, def: 0, size: 54,
+          value: engine.params[key] || 0,
+          fmt: function (v) { return (v > 0 ? '+' : '') + Math.round(v); },
+          onChange: function (v) { engine.set(key, v); }
+        });
+        REG[key] = knob;
+      });
+    });
+    s.appendChild(grid);
+    $('sections').appendChild(s);
+  }
+
+  
   function buildSections() {
     const root = $('sections');
     LAYOUT.forEach(function (sec) {
