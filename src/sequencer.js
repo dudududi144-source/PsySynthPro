@@ -79,6 +79,7 @@ class Sequencer {
     if (this.nextTime < ctx.currentTime - 0.05) this.nextTime = ctx.currentTime + 0.05;
     const stepBeats = (Psy.ARP_STEPS && Psy.ARP_STEPS[this.stepIdxDiv]) ? Psy.ARP_STEPS[this.stepIdxDiv].beats : 0.25;
     const stepDur = (60 / this.bpm) * stepBeats;
+    const oct = ((window.__octShift || 0) | 0) * 12;
     try {
       while (this.nextTime < ctx.currentTime + 0.12) {
         const i = this.stepPos;
@@ -94,12 +95,12 @@ class Sequencer {
           if (this.drums.hc[i]) this.hit('hc', tStep);
           if (this.drums.ho[i]) this.hit('ho', tStep);
           if (this.drums.sh[i]) this.hit('sh', tStep, );
-          if (this.offbass && i % 2 === 1) this._bass(tStep, 440 * Math.pow(2, (this.root - 12 - 69) / 12), 0.5);
+          if (this.offbass && i % 2 === 1) this._bass(tStep, 440 * Math.pow(2, (this.root - 12 + oct - 69) / 12), 0.5);
         } catch (e) {}
-        const src = this.held.length ? this.held : [{ note: this.root, vel: 0.85 }];
+        const src = this.held.length ? this.held : [{ note: this.root + oct, vel: 0.85 }];
         if (st.on && src.length) {
           const base = src[this.notePtr % src.length].note; this.notePtr++;
-          const note = base + (st.tr | 0);
+          const note = base + (st.tr | 0) + oct;
           let vel = Math.max(0.05, Math.min(1, st.vel));
           const gateSec = Math.max(0.03, stepDur * ((st.len == null ? 75 : st.len) / 100));
           const hum = (this.human || 0) / 100;
