@@ -60,10 +60,11 @@ class Conductor {
     }
   }
   playStep(i, t, stepDur) {
-    var root = this.prog()[Math.floor(this.bar % 4)];
+    var PH = [[0, 5, 3, 4], [0, 6, 5, 4], [0, 3, 5, 4], [0, 2, 5, 4]];
+    var root = PH[Math.floor(this.bar / 2) % PH.length][this.bar % 4];
     var drive = this.complexity;
     /* BASS: rolling 16ths on chord root (psytrance) */
-    var bassPat = euclid(16, drive > 0.4 ? 16 : 8);
+    var bassPat = euclid(16, drive > 0.7 ? 16 : (drive > 0.4 ? 8 : 4));
     if (bassPat[i]) {
       var bn = this.deg2note(root, 0);
       var vel = (i % 4 === 0) ? 0.95 : 0.7;
@@ -82,7 +83,7 @@ class Conductor {
     /* PAD: chord on bar start */
     if (i === 0) {
       this.releasePad();
-      var tones = [root, root + 2, root + 4];
+      var tones = [root, root + 4];
       for (var k = 0; k < 3; k++) { var pn = this.deg2note(tones[k], 1); this.engine.noteOnAt(pn, 0.35, t); this.padHeld.push(pn); }
     }
     /* AUTONOMOUS MACRO MANAGEMENT: filter sweep + space over bars */
