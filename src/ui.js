@@ -1008,12 +1008,21 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     if (c2 && c2.setTransform) c2.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  function scopeLoop() {
+  function updMeter() {
+    if (!engine.analyser) return;
+    if (!updMeter._td) updMeter._td = new Uint8Array(1024);
+    engine.analyser.getByteTimeDomainData(updMeter._td);
+    var s = 0; for (var i = 0; i < 1024; i += 8) { var v = (updMeter._td[i] - 128) / 128; s += v * v; }
+    var rms = Math.sqrt(s / 128);
+    var el = document.getElementById('outmeter'); if (el) el.style.height = Math.min(100, rms * 220) + '%';
+  }
+function scopeLoop() {
     requestAnimationFrame(scopeLoop);
     if (!pageVisible || !engine.ready) return;
     if (document.hidden) return;
     if (window.matchMedia && window.matchMedia('(max-width:700px)').matches) return;
     scopeLoop._f=(scopeLoop._f||0)+1; if (scopeLoop._f%2) return;
+    updMeter();
     const cv = $('scope'), c = cv.getContext('2d');
     const W = cv._w || cv.width, H = cv._h || cv.height;
     if (!engine.analyser) return;
