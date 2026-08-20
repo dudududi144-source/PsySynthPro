@@ -941,12 +941,12 @@ body.perform .wavetable, body.perform .morph { display: none; }
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v9.9.9 · spectrum · 2026-08-20</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v10.0.0 · conductor · 2026-08-20</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px"></div>
-<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/6</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v9.9.9 · spectrum · 2026-08-20 &bull; FFT SPECTRUM</span></div></div>
+<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/6</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v10.0.0 · conductor · 2026-08-20 &bull; CONDUCTOR AI</span></div></div>
 <div id="tapstart"><div class="big">PSYSYNTH PRO<br><span class="sub">TAP TO START</span></div></div>
 <script>(function(){var t=document.getElementById("tapstart");if(!t)return;t.addEventListener("pointerdown",function(){t.style.display="none";var b=document.getElementById("bPower");if(b)b.click();});if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}})();</script>
-<script>window.__psyBuild="v9.9.9 · spectrum · 2026-08-20";window.__psyErrs=0;window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};function __psyBump(msg){window.__psyErrs++;var b=document.getElementById("psyBadge");if(b){b.textContent="BUILD v9.9.9 · spectrum · 2026-08-20 · ERR "+window.__psyErrs;b.style.color="#ff7b72";b.style.borderColor="#f85149";}window.__psyShow("["+window.__psyErrs+"] "+msg);}window.addEventListener("error",function(e){__psyBump("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){__psyBump("ASYNC: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
+<script>window.__psyBuild="v10.0.0 · conductor · 2026-08-20";window.__psyErrs=0;window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};function __psyBump(msg){window.__psyErrs++;var b=document.getElementById("psyBadge");if(b){b.textContent="BUILD v10.0.0 · conductor · 2026-08-20 · ERR "+window.__psyErrs;b.style.color="#ff7b72";b.style.borderColor="#f85149";}window.__psyShow("["+window.__psyErrs+"] "+msg);}window.addEventListener("error",function(e){__psyBump("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){__psyBump("ASYNC: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
 <script>
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
@@ -1964,6 +1964,107 @@ Psy.SEQ_PATTERNS = {
 
 Psy.SEQ_LEN = SEQ_LEN;
 Psy.Sequencer = Sequencer;
+
+</script>
+<script>
+var Psy = (window.PsySynth = window.PsySynth || {});
+
+/* CONDUCTOR: autonomous harmonic+rhythmic intelligence.
+   Generates bass/lead/pad within key & scale, euclidean rhythms,
+   and steers macros/FX end-to-end for evolving arrangements. */
+
+Psy.SCALES = {
+  minor: [0, 2, 3, 5, 7, 8, 10],
+  phrygian: [0, 1, 3, 5, 7, 8, 10],
+  harmonic: [0, 2, 3, 5, 7, 8, 11],
+  dorian: [0, 2, 3, 5, 7, 9, 10],
+  major: [0, 2, 4, 5, 7, 9, 11]
+};
+
+function euclid(n, k) {
+  var res = [], bucket = 0;
+  for (var i = 0; i < n; i++) { bucket += k; if (bucket >= n) { bucket -= n; res.push(1); } else res.push(0); }
+  return res;
+}
+
+class Conductor {
+  constructor(engine) {
+    this.engine = engine;
+    this.enabled = false;
+    this.key = 45; this.scale = 'minor';
+    this.bpm = 141; this.complexity = 0.6;
+    this.stepPos = 0; this.bar = 0; this.nextTime = 0;
+    this.timer = null; this.padHeld = [];
+    this.leadDeg = 0; this.seed = 1;
+  }
+  rnd() { this.seed = (this.seed * 16807) % 2147483647; return (this.seed - 1) / 2147483646; }
+  reseed(s) { this.seed = (s || 12345) % 2147483646 + 1; }
+  deg2note(deg, oct) {
+    var sc = Psy.SCALES[this.scale] || Psy.SCALES.minor;
+    var L = sc.length;
+    var idx = ((deg % L) + L) % L;
+    return this.key + 12 * oct + sc[idx] + 12 * Math.floor(deg / L);
+  }
+  prog() {
+    var P = [[0, 5, 3, 4], [0, 6, 5, 4], [0, 3, 5, 4], [0, 2, 5, 4]];
+    return P[this.bar % P.length];
+  }
+  setEnabled(on) {
+    this.enabled = on;
+    if (on) { this.startTimer(); } else { this.stopTimer(); this.releasePad(); }
+  }
+  startTimer() { if (this.timer) return; var self = this; this.nextTime = 0; this.timer = setInterval(function () { self.tick(); }, 25); }
+  stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
+  releasePad() { for (var i = 0; i < this.padHeld.length; i++) this.engine.noteOff(this.padHeld[i]); this.padHeld = []; }
+  tick() {
+    if (!this.enabled || !this.engine.ctx) return;
+    var ctx = this.engine.ctx;
+    if (this.nextTime < ctx.currentTime - 0.05) this.nextTime = ctx.currentTime + 0.05;
+    var stepDur = (60 / this.bpm) / 4;
+    while (this.nextTime < ctx.currentTime + 0.12) {
+      this.playStep(this.stepPos, this.nextTime, stepDur);
+      this.stepPos = (this.stepPos + 1) % 16;
+      if (this.stepPos === 0) this.bar++;
+      this.nextTime += stepDur;
+    }
+  }
+  playStep(i, t, stepDur) {
+    var root = this.prog()[Math.floor(this.bar % 4)];
+    var drive = this.complexity;
+    /* BASS: rolling 16ths on chord root (psytrance) */
+    var bassPat = euclid(16, drive > 0.4 ? 16 : 8);
+    if (bassPat[i]) {
+      var bn = this.deg2note(root, 0);
+      var vel = (i % 4 === 0) ? 0.95 : 0.7;
+      this.engine.noteOnAt(bn, vel, t);
+      this.engine.noteOffAt(bn, t + stepDur * 0.9);
+    }
+    /* LEAD: euclidean + scale-walk */
+    var leadPat = euclid(16, Math.round(2 + drive * 6));
+    if (leadPat[i] && this.rnd() < drive) {
+      this.leadDeg += (this.rnd() < 0.5 ? 1 : (this.rnd() < 0.3 ? 2 : -1));
+      if (this.leadDeg > 7) this.leadDeg -= 7; if (this.leadDeg < 0) this.leadDeg += 7;
+      var ln = this.deg2note(root + this.leadDeg, 2);
+      this.engine.noteOnAt(ln, 0.6, t);
+      this.engine.noteOffAt(ln, t + stepDur * (this.rnd() < 0.3 ? 3 : 1.5));
+    }
+    /* PAD: chord on bar start */
+    if (i === 0) {
+      this.releasePad();
+      var tones = [root, root + 2, root + 4];
+      for (var k = 0; k < 3; k++) { var pn = this.deg2note(tones[k], 1); this.engine.noteOnAt(pn, 0.35, t); this.padHeld.push(pn); }
+    }
+    /* AUTONOMOUS MACRO MANAGEMENT: filter sweep + space over bars */
+    if (i === 0) {
+      var ph = (this.bar % 8) / 8;
+      var cut = 600 + Math.sin(ph * Math.PI * 2) * 0.5 * 3000 + 2200;
+      this.engine.set('cutoff', Math.max(200, Math.min(8000, cut)));
+      this.engine.set('reverb', Math.round(25 + Math.sin(ph * Math.PI) * 20));
+    }
+  }
+}
+
+Psy.Conductor = Conductor;
 
 </script>
 <script>
@@ -3912,12 +4013,32 @@ $('bPower').addEventListener('click', function () {
     fill();
   }
 
+  function buildConductor() {
+    var s = document.createElement('div'); s.className = 'section conductor-section';
+    s.innerHTML = '<div class="stitle" style="--c:#9fe8a8">CONDUCTOR \u00B7 AI</div>';
+    var row = document.createElement('div'); row.className = 'krow';
+    var on = document.createElement('button'); on.className = 'stb'; on.textContent = 'AUTOPILOT OFF';
+    var cond = window.__cond || (window.__cond = new Psy.Conductor(engine));
+    on.addEventListener('click', function(){ cond.setEnabled(!cond.enabled); on.textContent = cond.enabled ? 'AUTOPILOT ON' : 'AUTOPILOT OFF'; on.classList.toggle('on', cond.enabled); });
+    row.appendChild(on);
+    var ks = document.createElement('select'); ks.className='msel'; ks.id='condKey'; ks.name='condKey';
+    for (var n=40;n<=52;n++){ var o=document.createElement('option'); o.value=n; o.textContent=noteName(n); ks.appendChild(o); }
+    ks.value = 45; ks.addEventListener('change', function(){ cond.key = +ks.value; });
+    row.appendChild(ks);
+    var ss = document.createElement('select'); ss.className='msel'; ss.id='condScale'; ss.name='condScale';
+    ['minor','phrygian','harmonic','dorian','major'].forEach(function(x){ var o=document.createElement('option'); o.value=x; o.textContent=x.toUpperCase(); ss.appendChild(o); });
+    ss.addEventListener('change', function(){ cond.scale = ss.value; });
+    row.appendChild(ss);
+    new Psy.Knob(row, { label:'COMPLEX', color:'#9fe8a8', min:0, max:100, def:60, fmt:function(v){return Math.round(v)+'%';}, onChange:function(v){ cond.complexity=v/100; } });
+    s.appendChild(row); $('sections').appendChild(s);
+  }
   safeBuild('macros', buildMacros);
   safeBuild('tabs', buildTabs);
   safeBuild('sections', buildSections);
   safeBuild('matrix', buildModMatrix);
   safeBuild('arp', buildArpPanel);
   safeBuild('seq2', buildSeqPanel2);
+  safeBuild('conductor', buildConductor);
   safeBuild('wavetable', buildWavetableLab);
   safeBuild('morph', buildMorph);
   safeBuild('presetmenu', buildPresetMenu);
