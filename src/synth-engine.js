@@ -212,8 +212,12 @@ class SynthEngine {
       o.frequency.value = f; o.detune.value = (u - (un - 1) / 2) * det;
       o.connect(flt); o.start(t); oscs.push(o);
     }
+    const lfoDepth = this._fin(p.lfoDepth, 0);
+    let lfo = null;
+    if (lfoDepth > 0) { lfo = this.ctx.createOscillator(); lfo.frequency.value = this._fin(p.lfoRate, 5);
+      const lg = this.ctx.createGain(); lg.gain.value = (lfoDepth / 100) * 2500; lfo.connect(lg); lg.connect(flt.frequency); lfo.start(t); }
     flt.connect(g); g.connect(this.fxInput || this.master);
-    this.fbVoices[note] = { osc: oscs, g: g, rel: rel };
+    this.fbVoices[note] = { osc: oscs, g: g, rel: rel, lfo: lfo };
   }
   fbNoteOff(note) {
     if (!this.fbVoices) return; const v = this.fbVoices[note]; if (!v) return;
@@ -221,6 +225,7 @@ class SynthEngine {
     v.g.gain.cancelScheduledValues(t); v.g.gain.setValueAtTime(v.g.gain.value, t);
     v.g.gain.linearRampToValueAtTime(0.0001, t + (v.rel || 0.2));
     for (const o of v.osc) o.stop(t + (v.rel || 0.2) + 0.05);
+    if (v.lfo) v.lfo.stop(t + (v.rel || 0.2) + 0.05);
     delete this.fbVoices[note];
   }
   latencyMs() {
