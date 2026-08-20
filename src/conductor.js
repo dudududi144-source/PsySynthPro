@@ -68,12 +68,14 @@ class Conductor {
     this.drums = { ctx: ctx, noise: nb };
   }
   kick(t) {
+    if (!isFinite(t)) return;
     var c = this.drums.ctx; var o = c.createOscillator(); var g = c.createGain();
     o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
     g.gain.setValueAtTime(0.9, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
     o.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.3);
   }
   hat(t, open) {
+    if (!isFinite(t)) return;
     var c = this.drums.ctx; var s = c.createBufferSource(); s.buffer = this.drums.noise;
     var f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000;
     var g = c.createGain(); g.gain.setValueAtTime(open ? 0.3 : 0.22, t); g.gain.exponentialRampToValueAtTime(0.001, t + (open ? 0.25 : 0.05));
