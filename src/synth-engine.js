@@ -155,21 +155,21 @@ class SynthEngine {
 
   set(key, value) {
     this.params[key] = value;
-    if (key === 'delay' && this.delSend) this.delSend.gain.value = (value / 100) * 0.55;
-    else if (key === 'reverb' && this.revSend) this.revSend.gain.value = (value / 100) * 0.85;
+    if (key === 'delay' && this.delSend) this.delSend.gain.value = (this._fin(value,22) / 100) * 0.55;
+    else if (key === 'reverb' && this.revSend) this.revSend.gain.value = (this._fin(value,35) / 100) * 0.85;
       if (this.distSend) this.distSend.gain.value = (this._fin(this.params.fxDist,0) / 100) * 0.6;
       if (this.chSend) this.chSend.gain.value = (this._fin(this.params.fxChorus,0) / 100) * 0.5;
       if (this.crSend) this.crSend.gain.value = (this._fin(this.params.fxCrush,0) / 100) * 0.5;
       if (this.chLfo) this.chLfo.frequency.value = this._fin(this.params.chRate,0.8);
-    else if (key === 'master' && this.master) this.master.gain.value = value / 100;
+    else if (key === 'master' && this.master) this.master.gain.value = this._fin(value,80) / 100;
     else this.sendParams();
   }
   setAll(obj) {
     Object.assign(this.params, PsySynth.DEFAULT);
     Object.assign(this.params, obj);
-    if (this.delSend) this.delSend.gain.value = (this.params.delay / 100) * 0.55;
-    if (this.revSend) this.revSend.gain.value = (this.params.reverb / 100) * 0.85;
-    if (this.master) this.master.gain.value = this.params.master / 100;
+    if (this.delSend) this.delSend.gain.value = (this._fin(this.params.delay,22) / 100) * 0.55;
+    if (this.revSend) this.revSend.gain.value = (this._fin(this.params.reverb,35) / 100) * 0.85;
+    if (this.master) this.master.gain.value = this._fin(this.params.master,80) / 100;
     this.sendParams();
   }
   noteOn(note, vel) { if (this.fallbackMode) { if (this.ctx) this.fbNoteOn(note, vel); return; } if (this.node) this.node.port.postMessage({ type: 'noteOn', note: note, vel: vel }); }
