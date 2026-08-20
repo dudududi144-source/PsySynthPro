@@ -117,7 +117,11 @@ class SynthEngine {
       self.glue = self.ctx.createWaveShaper();
       const gc = new Float32Array(256); for (let i=0;i<256;i++){ const x=i/127.5-1; gc[i]=Math.tanh(x*1.15)/Math.tanh(1.15); }
       self.glue.curve = gc; self.glue.oversample = '2x';
-      self.master.connect(self.glue); self.glue.connect(self.limiter);
+      self.sat = self.ctx.createWaveShaper();
+      const sc = new Float32Array(256);
+      for (let i = 0; i < 256; i++) { const x = i / 127.5 - 1; sc[i] = Math.tanh(x * 1.6) / Math.tanh(1.6); }
+      self.sat.curve = sc; self.sat.oversample = '2x';
+      self.master.connect(self.sat); self.sat.connect(self.glue); self.glue.connect(self.limiter);
       self.limiter.connect(self.analyser);
       self.analyser.connect(self.ctx.destination);
 
