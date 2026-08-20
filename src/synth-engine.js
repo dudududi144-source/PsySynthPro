@@ -24,7 +24,7 @@ class SynthEngine {
     let load;
     if (self.ctx.audioWorklet) {
       const blobUrl = URL.createObjectURL(new Blob([WORKLET_SRC], { type: 'application/javascript' }));
-      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js?v=1040').catch(function () { return self.ctx.audioWorklet.addModule(blobUrl); });
+      load = self.ctx.audioWorklet.addModule(blobUrl);
     } else {
       self.fallbackMode = true; self.node = null; load = Promise.resolve();
     }
