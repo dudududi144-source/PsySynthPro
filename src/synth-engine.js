@@ -69,7 +69,7 @@ class SynthEngine {
       self.revSend = self.ctx.createGain();
       self.revSend.gain.value = (self._fin(self.params.reverb, 35) / 100) * 0.85;
       self.conv = self.ctx.createConvolver();
-      self.conv.buffer = self.makeIR(2.6, 3.1);
+      self.conv.buffer = self.makeIR((window.matchMedia && window.matchMedia('(max-width:700px)').matches) ? 1.2 : 2.6, 3.1);
       self.fxInput.connect(self.revSend);
       self.revSend.connect(self.conv);
       self.conv.connect(self.master);
