@@ -920,3 +920,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 @media (min-width:701px){
   .chassis { padding: 20px 24px 24px; }
 }
+
+/* ══════════ PERFORM MODE (Play-View) ══════════ */
+.macros-section { position: relative; }
+.macros-section .stb { position: absolute; top: 12px; right: 12px; }
+body.perform #sections .section:not(.macros-section) { display: none; }
+body.perform .wavetable, body.perform .morph { display: none; }
