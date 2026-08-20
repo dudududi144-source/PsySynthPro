@@ -835,3 +835,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   .sq2.play { box-shadow: none; outline: 2px solid #7ff3ff; }
   * { -webkit-tap-highlight-color: transparent; }
 }
+
+/* ══════════ ULTRA LITE (mobile) ══════════ */
+@media (max-width:700px){
+  .chassis { background: #14161c; }
+  .oled { box-shadow: none; }
+  .tbtn { box-shadow: none; }
+  .seq2 { box-shadow: none; }
+  .pmenu .msel, .stb { box-shadow: none; }
+}
