@@ -160,7 +160,6 @@ var Psy = (window.PsySynth = window.PsySynth || {});
 { type: 'cycle', key: 'lfo2Wave', label: 'WAVE', options: [0,1], display: function (v) { return v===1?'SQR':'SIN'; } },
       { type: 'knob', key: 'lfo2Rate', label: 'RATE', min: 0.1, max: 20, step: 0.1, def: 5, fmt: function (v) { return v.toFixed(1)+'Hz'; } }
       ]},
-    { title: 'FREE MOD MATRIX', color: '#fbbf24', items: modSlotItems() },
     { title: 'FX RACK', color: '#ff6b6b', items: [
       { type: 'knob', key: 'fxDist', label: 'DIST', min: 0, max: 100, def: 0, fmt: fmtPct },
       { type: 'knob', key: 'fxChorus', label: 'CHORUS', min: 0, max: 100, def: 0, fmt: fmtPct },
