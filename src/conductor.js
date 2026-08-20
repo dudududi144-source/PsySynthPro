@@ -59,10 +59,37 @@ class Conductor {
       this.nextTime += stepDur;
     }
   }
+  /* DRUMS: kick + hats (main-thread one-shots, cheap) */
+  ensureDrums() {
+    if (this.drums || !this.engine.ctx) return;
+    var ctx = this.engine.ctx;
+    var nb = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
+    var d = nb.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    this.drums = { ctx: ctx, noise: nb };
+  }
+  kick(t) {
+    var c = this.drums.ctx; var o = c.createOscillator(); var g = c.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+    g.gain.setValueAtTime(0.9, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    o.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.3);
+  }
+  hat(t, open) {
+    var c = this.drums.ctx; var s = c.createBufferSource(); s.buffer = this.drums.noise;
+    var f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000;
+    var g = c.createGain(); g.gain.setValueAtTime(open ? 0.3 : 0.22, t); g.gain.exponentialRampToValueAtTime(0.001, t + (open ? 0.25 : 0.05));
+    s.connect(f); f.connect(g); g.connect(this.engine.master || this.engine.fxInput); s.start(t); s.stop(t + 0.3);
+  }
   playStep(i, t, stepDur) {
     var PH = [[0, 5, 3, 4], [0, 6, 5, 4], [0, 3, 5, 4], [0, 2, 5, 4]];
     var root = PH[Math.floor(this.bar / 2) % PH.length][this.bar % 4];
     var drive = this.complexity;
+    /* DRUMS */
+    this.ensureDrums();
+    if (this.drums) {
+      if (i % 4 === 0) this.kick(t);
+      if (i % 4 === 2) this.hat(t, false);
+      if (i === 14 && drive > 0.6) this.hat(t, true);
+    }
     /* BASS: rolling 16ths on chord root (psytrance) */
     var bassPat = euclid(16, drive > 0.85 ? 16 : (drive > 0.55 ? 8 : 4));
     if (bassPat[i]) {
