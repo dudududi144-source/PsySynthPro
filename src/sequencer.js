@@ -21,6 +21,8 @@ class Sequencer {
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
     this.root = 45; /* A1 default rolling-bass root when nothing held */
     this.swing = 0; /* 0..60 % swing on offbeats */
+    this.drums = { k: [], s: [], h: [] };
+    for (let di = 0; di < SEQ_LEN; di++) { this.drums.k.push(di % 4 === 0); this.drums.s.push(di === 4 || di === 12); this.drums.h.push(di % 2 === 0); }
     this.human = 0; /* 0..100 % humanize: micro timing+velocity life */
   }
   setEnabled(on) {
@@ -38,6 +40,7 @@ class Sequencer {
   startTimer() { if (this.timer) return; const s = this; this.timer = setInterval(function () { s.tick(); }, 25); }
   stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
   toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
+  toggleDrum(lane, i) { this.drums[lane][i] = !this.drums[lane][i]; return this.drums[lane][i]; }
   setStep(i, patch) { Object.assign(this.steps[i], patch); }
   noteOn(note, vel) {
     if (!this.enabled) { this.engine.noteOn(note, vel); return; }
@@ -72,6 +75,13 @@ class Sequencer {
     while (this.nextTime < ctx.currentTime + 0.12) {
       const i = this.stepPos;
       const st = this.steps[i];
+      const tStep = this.nextTime + ((i % 2 === 1) ? (this.swing / 100) * stepDur * 0.5 : 0);
+      var C = window.__cond;
+      if (C && C.drumsOn) {
+        if (this.drums.k[i] && typeof C.kick === 'function') C.kick(tStep);
+        if (this.drums.s[i] && typeof C.snare === 'function') C.snare(tStep);
+        if (this.drums.h[i] && typeof C.hat === 'function') C.hat(tStep, false);
+      }
       const prev = this.steps[(i + SEQ_LEN - 1) % SEQ_LEN];
       const src = this.held.length ? this.held : [{ note: this.root, vel: 0.85 }];
       if (st.on && src.length) {
