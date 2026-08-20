@@ -22,7 +22,7 @@ class Sequencer {
     this.root = 45; /* A1 default rolling-bass root when nothing held */
     this.swing = 0; /* 0..60 % swing on offbeats */
     this.drums = { k: [], s: [], h: [] };
-    for (let di = 0; di < SEQ_LEN; di++) { this.drums.k.push(di % 4 === 0); this.drums.s.push(di === 4 || di === 12); this.drums.h.push(di % 2 === 0); }
+    for (let di = 0; di < SEQ_LEN; di++) { this.drums.k.push(di % 4 === 0); this.drums.s.push(di === 4 || di === 12); this.drums.h.push(true); }
     this.human = 0; /* 0..100 % humanize: micro timing+velocity life */
     this.dmix = { k: 0.9, s: 0.7, h: 0.5 };
     this.dmute = { k: false, s: false, h: false };
@@ -47,13 +47,14 @@ class Sequencer {
   _renderDrums() { if (this._rd || !this.engine.ctx) return; const ctx = this.engine.ctx; const sr = ctx.sampleRate;
     const mk = function (len, fn) { const n = Math.floor(sr * len); const b = ctx.createBuffer(1, n, sr); const dd = b.getChannelData(0); for (let i = 0; i < n; i++) dd[i] = fn(i / sr); return b; };
     this._rd = {
-      k: mk(0.3, function (t) { return Math.sin(2 * Math.PI * (40 * t + 110 * 0.03 * (1 - Math.exp(-t / 0.02)))) * Math.exp(-t / 0.1); }),
+      k: mk(0.32, function (t) { var click = (Math.random() * 2 - 1) * Math.exp(-t / 0.004) * 0.6; var body = Math.sin(2 * Math.PI * (42 * t + 120 * 0.035 * (1 - Math.exp(-t / 0.018)))) * Math.exp(-t / 0.11); return click + body; }),
       s: mk(0.2, function (t) { return (Math.random() * 2 - 1) * 0.7 * Math.exp(-t / 0.06) + Math.sin(2 * Math.PI * 180 * t) * 0.3 * Math.exp(-t / 0.05); }),
       hc: mk(0.06, function (t) { return (Math.random() * 2 - 1) * Math.exp(-t / 0.02); }),
       ho: mk(0.3, function (t) { return (Math.random() * 2 - 1) * Math.exp(-t / 0.12); })
     }; }
   _play(buf, t, lvl) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = buf; const g = ctx.createGain(); g.gain.value = lvl; src.connect(g); g.connect(this._dbus); src.start(t); }
-  kick(t) { if (this.dmute.k) return; this.ensureDrumBus(); this._renderDrums(); if (this._rd) this._play(this._rd.k, t, this.dmix.k); }
+  kick(t) { if (this.dmute.k) return; this.ensureDrumBus(); this._renderDrums(); if (this._rd) this._play(this._rd.k, t, this.dmix.k);
+    var fx = this.engine.fxInput; if (fx && fx.gain) { fx.gain.cancelScheduledValues(t); fx.gain.setValueAtTime(0.45, t); fx.gain.setTargetAtTime(1.0, t + 0.03, 0.11); } }
   snare(t) { if (this.dmute.s) return; this.ensureDrumBus(); this._renderDrums(); if (this._rd) this._play(this._rd.s, t, this.dmix.s); }
   hat(t, open) { if (this.dmute.h) return; this.ensureDrumBus(); this._renderDrums(); if (this._rd) this._play(open ? this._rd.ho : this._rd.hc, t, this.dmix.h); }
 
@@ -125,7 +126,7 @@ class Sequencer {
       try { if (this.drums) {
         if (this.drums.k[i]) this.kick(tStep);
         if (this.drums.s[i]) this.snare(tStep);
-        if (this.drums.h[i]) this.hat(tStep, false);
+        if (this.drums.h[i]) this.hat(tStep, (i % 2 === 1));
       } } catch (e) {}
       const prev = this.steps[(i + SEQ_LEN - 1) % SEQ_LEN];
       const src = this.held.length ? this.held : [{ note: this.root, vel: 0.85 }];
