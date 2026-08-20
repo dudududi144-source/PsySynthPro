@@ -27,7 +27,7 @@ class SynthProcessor extends AudioWorkletProcessor {
       fxDist: 0, fxChorus: 0, fxCrush: 0, chRate: 0.8,
     };
     this.voices = [];
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
       this.voices.push({
         active: false, note: -1, vel: 0, age: 0, bend: 0, baseFreq: 440, bendMul: 1,
         phase: 0, modPhase: 0, mod2Phase: 0, mod3Phase: 0, mod4Phase: 0, mod5Phase: 0, mod6Phase: 0, subPhase: 0, triInt: 0,
@@ -239,7 +239,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     const fDC = 1 - Math.exp(-1 / (Math.max(10, p.fDecay) / 1000 * sr));
     const fRC = 1 - Math.exp(-1 / (Math.max(30, p.fRelease) / 1000 * sr));
     const sus = p.sustain / 100;
-    const un = Math.min(7, Math.max(1, Math.round(p.unison)));
+    const un = Math.min(5, Math.max(1, Math.round(p.unison)));
     const lfoInc = p.lfoRate / sr;
     const lfo2Inc = p.lfo2Rate / sr;
     const TWO_PI = 6.28318530718;
