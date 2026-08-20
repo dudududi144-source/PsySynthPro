@@ -753,6 +753,15 @@ function saveUserPreset(name) {
 function clearPresetOn() {
     document.querySelectorAll('.preset').forEach(function (x) { x.classList.remove('on'); });
   }
+function pushHistory() { paramHistory.push(snapshotParams()); if (paramHistory.length > 32) paramHistory.shift(); }
+function pushRecent(name) {
+    let r = getRecents().filter(function (x) { return x !== name; });
+    r.unshift(name);
+    r = r.slice(0, 6);
+    try { localStorage.setItem('psy.recents', JSON.stringify(r)); } catch (e) {}
+  }
+
+  /* render recently-used presets into the bottom recents row */
   function safeBuild(name, fn) { try { fn(); } catch (e) { if (window.__psyShow) window.__psyShow('BUILD ' + name + ': ' + e.message); } }
 function buildKeyboard() {
     const kb = $('kb');
