@@ -292,11 +292,10 @@ class SynthProcessor extends AudioWorkletProcessor {
         v.fAmp += (fT - v.fAmp) * fC;
         const fEnvNorm = v.fAmp;
         let mCut=0, mPit=0, mAmp=0, mFm=0, mRes=0;
-        const srcs=[0,lfoVal,lfo2Val,envNorm,fEnvNorm,(v.vel-0.5)*2];
         for (let mi=0; mi<8; mi++) {
           const ms=p['m'+mi+'s'], ma=p['m'+mi+'a']/100, md=p['m'+mi+'d'];
           if (!ms || !ma || !md) continue;
-          const mv = srcs[ms]*ma;
+          const mv = (ms===1?lfoVal:ms===2?lfo2Val:ms===3?envNorm:ms===4?fEnvNorm:ms===5?(v.vel-0.5)*2:0)*ma;
           if (md===1) mCut += mv*4000;
           else if (md===2) mPit += mv*12;
           else if (md===3) mAmp += mv;
