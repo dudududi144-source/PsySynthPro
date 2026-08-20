@@ -926,3 +926,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .macros-section .stb { position: absolute; top: 12px; right: 12px; }
 body.perform #sections .section:not(.macros-section) { display: none; }
 body.perform .wavetable, body.perform .morph { display: none; }
+
+.outmeter-wrap{position:relative;width:8px;height:54px;background:#0a0f14;border:1px solid #232932;border-radius:3px;overflow:hidden;margin-left:8px;}
+#outmeter{position:absolute;bottom:0;left:0;right:0;height:0%;background:linear-gradient(to top,#2dd4bf,#fbbf24 70%,#f87171 90%);transition:height .06s linear;}
+.oled{display:flex;align-items:center;}
