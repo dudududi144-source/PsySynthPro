@@ -647,6 +647,7 @@ const LAYOUT = [
     row.appendChild(dr);
     s.appendChild(row); $('sections').appendChild(s);
   }
+  function safeBuild(name, fn) { try { fn(); } catch (e) { if (window.__psyShow) window.__psyShow('BUILD ' + name + ': ' + e.message); } }
   safeBuild('macros', buildMacros);
   safeBuild('tabs', buildTabs);
   safeBuild('sections', buildSections);
