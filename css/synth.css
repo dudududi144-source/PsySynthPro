@@ -951,3 +951,12 @@ body.perform .wavetable, body.perform .morph { display: none; }
   .oled{min-width:0;flex:1 1 100%;}
   #scope{width:100%;}
 }
+
+/* CONTINUOUS MOBILE: flow, no boxy dead space */
+@media (max-width:700px){
+  .section{background:transparent !important;border:none !important;border-bottom:1px solid #232936 !important;border-radius:0 !important;box-shadow:none !important;margin:0 !important;}
+  .sections{background:transparent;gap:0;padding:0 8px;}
+  .krow{gap:8px 10px;}
+  .mod-matrix{gap:6px;}
+  .stitle{margin-bottom:8px;}
+}
