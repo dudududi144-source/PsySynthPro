@@ -83,14 +83,16 @@ class Conductor {
       sd[n] = sat(((Math.random() * 2 - 1) * Math.exp(-t * 22) + Math.sin(2 * Math.PI * 180 * t) * Math.exp(-t * 30) * 0.5) * taps); }
     this.drums = { ctx: c, kick: kb, hatC: hatBuf(0.07, 90), hatO: hatBuf(0.3, 26), snare: sb };
   }
-  playBuf(buf, t, g, dest) {
+  playBuf(buf, t, g, dest, pan) {
     var c = this.drums.ctx; var s = c.createBufferSource(); s.buffer = buf;
     var gn = c.createGain(); gn.gain.value = g;
-    s.connect(gn); gn.connect(dest || this.engine.master || this.engine.fxInput); s.start(t);
+    var out = gn;
+    if (pan && c.createStereoPanner) { var sp = c.createStereoPanner(); sp.pan.value = pan; gn.connect(sp); out = sp; }
+    s.connect(gn); out.connect(dest || this.engine.master || this.engine.fxInput); s.start(t);
   }
   kick(t) { if (!isFinite(t)) return; this.playBuf(this.drums.kick, t, 1.0);
     var fx = this.engine.fxInput; if (fx) { fx.gain.cancelScheduledValues(t); fx.gain.setValueAtTime(0.55, t); fx.gain.setTargetAtTime(1.0, t + 0.02, 0.12); } }
-  hat(t, open) { if (isFinite(t)) this.playBuf(open ? this.drums.hatO : this.drums.hatC, t, open ? 0.3 : 0.24); }
+  hat(t, open) { if (isFinite(t)) { this.hatPan = -(this.hatPan || 0.25); this.playBuf(open ? this.drums.hatO : this.drums.hatC, t, open ? 0.3 : 0.24, null, this.hatPan); } }
   snare(t) { if (isFinite(t)) this.playBuf(this.drums.snare, t, 0.5); }
   playStep(i, t, stepDur) {
     var PH = [[0, 5, 3, 4], [0, 6, 5, 4], [0, 3, 5, 4], [0, 2, 5, 4]];
@@ -109,7 +111,7 @@ class Conductor {
     var bassPat = euclid(16, drive > 0.85 ? 16 : (drive > 0.55 ? 8 : 4));
     if (ARR !== 'break' && bassPat[i]) {
       var bn = this.deg2note(root, 0);
-      var vel = (i % 4 === 0) ? 0.95 : 0.7;
+      var vel = ((i % 4 === 0) ? 0.95 : 0.7) * (0.92 + this.rnd() * 0.12);
       this.engine.noteOnAt(bn, vel, t);
       this.engine.noteOffAt(bn, t + stepDur * 0.9);
     }
