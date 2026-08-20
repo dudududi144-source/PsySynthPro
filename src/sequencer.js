@@ -28,7 +28,14 @@ class Sequencer {
   setEnabled(on) { this.enabled = on; if (on) { this.stepPos = 0; this.notePtr = 0; if (this.engine.ctx) this.nextTime = this.engine.ctx.currentTime + 0.08; this.startTimer(); } else { this.stopTimer(); if (!this.hold) this.held = []; if (this.lastNote >= 0) { this.engine.noteOff(this.lastNote); this.lastNote = -1; } } }
   startTimer() { if (this.timer) return; const s = this; this.timer = setInterval(function () { s.tick(); }, 25); }
   stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
-  toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
+  get len() { return this.steps.length; }
+  setLen(n) { n = (n === 32) ? 32 : 16; while (this.steps.length < n) this.steps.push({ on: false, vel: 0.75, tr: 0, len: 75, tie: false, rat: 1 });
+    for (const L of ['k','s','hc','ho','sh']) { while (this.drums[L].length < n) this.drums[L].push(false); }
+    this.steps.length = n; for (const L of ['k','s','hc','ho','sh']) this.drums[L].length = n; this.stepPos = this.stepPos % n; }
+  double() { const half = Math.floor(this.steps.length / 2); for (let i = half; i < this.steps.length; i++) { this.steps[i] = Object.assign({}, this.steps[i - half]); for (const L of ['k','s','hc','ho','sh']) this.drums[L][i] = this.drums[L][i - half]; } }
+  saveSlot(i) { try { const bank = JSON.parse(localStorage.getItem('psy.seq.v1') || '[]'); bank[i] = { steps: this.steps, drums: this.drums }; localStorage.setItem('psy.seq.v1', JSON.stringify(bank)); } catch (e) {} }
+  loadSlot(i) { try { const bank = JSON.parse(localStorage.getItem('psy.seq.v1') || '[]'); if (bank[i]) { this.steps = bank[i].steps; this.drums = bank[i].drums; } } catch (e) {} }
+    toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
   setStep(i, p) { Object.assign(this.steps[i], p); }
   toggleDrum(lane, i) { this.drums[lane][i] = !this.drums[lane][i]; return this.drums[lane][i]; }
   noteOn(n, v) { if (!this.enabled) { this.engine.noteOn(n, v); return; } if (!this.held.some(h => h.note === n)) { this.held.push({ note: n, vel: v || 0.8 }); this.held.sort((a, b) => a.note - b.note); } }
@@ -112,7 +119,7 @@ class Sequencer {
           this.lastNote = st.tie ? note : -1;
           if (this.onStep) this.onStep(i, note);
         } else { this.lastNote = -1; if (this.onStep) this.onStep(i, -1); }
-        this.stepPos = (i + 1) % SEQ_LEN;
+        this.stepPos = (i + 1) % this.steps.length;
         if (this.stepPos === 0) this.barCount++;
         this.nextTime += stepDur;
       }
