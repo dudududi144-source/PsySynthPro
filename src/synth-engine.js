@@ -160,7 +160,7 @@ class SynthEngine {
     return buf;
   }
 
-  sendParams() { if (this.node) this.node.port.postMessage({ type: 'params', values: this.params }); }
+  sendParams(values) { if (this.node) this.node.port.postMessage({ type: 'params', values: values || this.params }); }
   setWavetable(table) { if (this.node) this.node.port.postMessage({ type: 'wavetable', table: table }); }
 
   set(key, value) {
@@ -172,7 +172,7 @@ class SynthEngine {
       if (this.crSend) this.crSend.gain.value = (this._fin(this.params.fxCrush,0) / 100) * 0.5;
       if (this.chLfo) this.chLfo.frequency.value = this._fin(this.params.chRate,0.8);
     else if (key === 'master' && this.master) this.master.gain.value = this._fin(value,80) / 100;
-    else this.sendParams();
+    else { var __o = {}; __o[key] = value; this.sendParams(__o); }
   }
   setAll(obj) {
     Object.assign(this.params, PsySynth.DEFAULT);
