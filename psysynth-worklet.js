@@ -239,7 +239,7 @@ class SynthProcessor extends AudioWorkletProcessor {
     const fDC = 1 - Math.exp(-1 / (Math.max(10, p.fDecay) / 1000 * sr));
     const fRC = 1 - Math.exp(-1 / (Math.max(30, p.fRelease) / 1000 * sr));
     const sus = p.sustain / 100;
-    const un = Math.min(5, Math.max(1, Math.round(p.unison)));
+    const un = Math.min(p.mobile ? 3 : 5, Math.max(1, Math.round(p.unison)));
     const lfoInc = p.lfoRate / sr;
     const lfo2Inc = p.lfo2Rate / sr;
     const TWO_PI = 6.28318530718;
@@ -319,9 +319,9 @@ class SynthProcessor extends AudioWorkletProcessor {
         if (fmA !== 0) { v.modPhase += (fB * p.fmRatio) / sr; if (v.modPhase >= 1) v.modPhase -= 1; fmSum += Math.sin(TWO_PI * v.modPhase) * fmA * fB * 2; }
         if (p.fm2Depth > 0) { v.mod2Phase += (fB * p.fm2Ratio) / sr; if (v.mod2Phase >= 1) v.mod2Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod2Phase) * (p.fm2Depth / 100) * fB * 2; }
         if (p.fm3Depth > 0) { v.mod3Phase += (fB * p.fm3Ratio) / sr; if (v.mod3Phase >= 1) v.mod3Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod3Phase) * (p.fm3Depth / 100) * fB * 2; }
-        if (p.fm4Depth > 0) { v.mod4Phase += (fB * p.fm4Ratio) / sr; if (v.mod4Phase >= 1) v.mod4Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod4Phase) * (p.fm4Depth / 100) * fB * 2; }
-        if (p.fm5Depth > 0) { v.mod5Phase += (fB * p.fm5Ratio) / sr; if (v.mod5Phase >= 1) v.mod5Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod5Phase) * (p.fm5Depth / 100) * fB * 2; }
-        if (p.fm6Depth > 0) { v.mod6Phase += (fB * p.fm6Ratio) / sr; if (v.mod6Phase >= 1) v.mod6Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod6Phase) * (p.fm6Depth / 100) * fB * 2; }
+        if (p.fm4Depth > 0 && !p.mobile) { v.mod4Phase += (fB * p.fm4Ratio) / sr; if (v.mod4Phase >= 1) v.mod4Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod4Phase) * (p.fm4Depth / 100) * fB * 2; }
+        if (p.fm5Depth > 0 && !p.mobile) { v.mod5Phase += (fB * p.fm5Ratio) / sr; if (v.mod5Phase >= 1) v.mod5Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod5Phase) * (p.fm5Depth / 100) * fB * 2; }
+        if (p.fm6Depth > 0 && !p.mobile) { v.mod6Phase += (fB * p.fm6Ratio) / sr; if (v.mod6Phase >= 1) v.mod6Phase -= 1; fmSum += Math.sin(TWO_PI * v.mod6Phase) * (p.fm6Depth / 100) * fB * 2; }
         v.driftPh += v.driftRate / sr; if (v.driftPh >= 1) v.driftPh -= 1;
         const drift = 1 + Math.sin(6.28318530718 * v.driftPh) * 0.0015;
         for (let u = 0; u < un; u++) {
