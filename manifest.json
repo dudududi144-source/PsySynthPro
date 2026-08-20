@@ -1,7 +1,7 @@
 {
   "name": "PsySynthPro",
   "short_name": "PsySynthPro",
-  "description": "Real DSP synthesizer - PolyBLEP, wavetable, ZDF SVF, FM, MIDI/MPE",
+  "description": "Real DSP synthesizer - PolyBLEP, wavetable, ZDF SVF + ladder filters, FM, stereo width, analog drift, MIDI, AI conductor, offline PWA",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -9,7 +9,17 @@
   "background_color": "#08090c",
   "theme_color": "#12141a",
   "icons": [
-    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
   ]
 }
