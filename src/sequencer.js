@@ -21,7 +21,7 @@ class Sequencer {
     }
     this.dmix = { k: 1.0, s: 0.7, hc: 0.45, ho: 0.5, sh: 0.35 };
     this.dmute = { k: false, s: false, hc: false, ho: false, sh: false };
-    this.offbass = true;
+    this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true;
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
     this.root = 45; this.swing = 0; this.human = 0; this.barCount = 0;
   }
@@ -59,7 +59,9 @@ class Sequencer {
       s: mk(0.22, function (t) { return ((Math.random()*2-1)*0.7*Math.exp(-t/0.07) + Math.sin(2*Math.PI*190*t)*0.35*Math.exp(-t/0.05)); }),
       hc: mk(0.05, function (t) { return (Math.random()*2-1)*Math.exp(-t/0.015); }),
       ho: mk(0.3, function (t) { return (Math.random()*2-1)*Math.exp(-t/0.13); }),
-      sh: mk(0.09, function (t) { return (Math.random()*2-1)*Math.exp(-t/0.03)*Math.sin(2*Math.PI*40*t+1); })
+      sh: mk(0.09, function (t) { return (Math.random()*2-1)*Math.exp(-t/0.03)*Math.sin(2*Math.PI*40*t+1); }),
+      cr: mk(0.8, function (t) { return (Math.random()*2-1)*Math.exp(-t/0.35)*0.8; }),
+      rd: mk(0.25, function (t) { return ((Math.random()*2-1)*0.4+Math.sin(2*Math.PI*5200*t)*0.3)*Math.exp(-t/0.09); })
     }; }
   _play(buf, t, lvl) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = buf; const g = ctx.createGain(); g.gain.value = lvl; src.connect(g); g.connect(this._dbus); src.start(t); }
   hit(lane, t, open) { if (this.dmute[lane]) return; this.ensureDrumBus(); this._renderDrums(); if (!this._rd) return;
@@ -67,7 +69,9 @@ class Sequencer {
     else if (lane === 's') this._play(this._rd.s, t, this.dmix.s);
     else if (lane === 'hc') this._play(this._rd.hc, t, this.dmix.hc);
     else if (lane === 'ho') this._play(this._rd.ho, t, this.dmix.ho);
-    else if (lane === 'sh') this._play(this._rd.sh, t, this.dmix.sh); }
+    else if (lane === 'sh') this._play(this._rd.sh, t, this.dmix.sh);
+    else if (lane === 'cr') this._play(this._rd.cr, t, 0.6);
+    else if (lane === 'rd') this._play(this._rd.rd, t, 0.4); }
   _bass(t, f, vel) { const ctx = this.engine.ctx; const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(700, t); fl.frequency.exponentialRampToValueAtTime(120, t + 0.12); fl.Q.value = 6; const g = ctx.createGain(); g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14); o.connect(fl); fl.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.16); }
   tick() {
     if (!this.enabled || !this.engine.ctx) return;
@@ -82,6 +86,9 @@ class Sequencer {
         const tStep = this.nextTime + ((i % 2 === 1) ? (this.swing / 100) * stepDur * 0.5 : 0);
         // drums (lane-gated)
         try {
+          if (i === 0 && this.crashOn && this.barCount % 4 === 0) this.hit('cr', tStep);
+          if (this.fillOn && this.barCount % 4 === 3 && i >= 14) this._playSn(tStep, 0.3 + (i - 13) * 0.3);
+          if (this.ghostOn && i % 4 === 2 && !this.drums.s[i]) this._playSn(tStep, 0.18);
           if (this.drums.k[i]) this.hit('k', tStep);
           if (this.drums.s[i]) this.hit('s', tStep);
           if (this.drums.hc[i]) this.hit('hc', tStep);
