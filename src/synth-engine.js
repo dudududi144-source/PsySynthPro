@@ -494,7 +494,8 @@ class SynthEngine {
       self.conv = self.ctx.createConvolver();
       self.conv.buffer = self.makeIR((window.matchMedia && window.matchMedia('(max-width:700px)').matches) ? 1.2 : 2.6, 3.1);
       self.fxInput.connect(self.revSend);
-      self.revSend.connect(self.conv);
+      self.revHP = self.ctx.createBiquadFilter(); self.revHP.type = 'highpass'; self.revHP.frequency.value = 250;
+      self.revSend.connect(self.revHP); self.revHP.connect(self.conv);
       self.conv.connect(self.master);
 
       /* FX RACK: distortion / chorus / bitcrush as parallel sends */
@@ -542,7 +543,8 @@ class SynthEngine {
       const sc = new Float32Array(256);
       for (let i = 0; i < 256; i++) { const x = i / 127.5 - 1; sc[i] = Math.tanh(x * 1.6) / Math.tanh(1.6); }
       self.sat.curve = sc; self.sat.oversample = '2x';
-      self.master.connect(self.sat); self.sat.connect(self.glue); self.glue.connect(self.limiter);
+      self.dc = self.ctx.createBiquadFilter(); self.dc.type = 'highpass'; self.dc.frequency.value = 30;
+      self.master.connect(self.sat); self.sat.connect(self.dc); self.dc.connect(self.glue); self.glue.connect(self.limiter);
       self.limiter.connect(self.analyser);
       self.analyser.connect(self.ctx.destination);
 
