@@ -960,3 +960,15 @@ body.perform .wavetable, body.perform .morph { display: none; }
   .mod-matrix{gap:6px;}
   .stitle{margin-bottom:8px;}
 }
+
+/* SEQ PRO GRID */
+.seqgrid{display:grid;grid-template-columns:repeat(16,1fr);gap:4px;margin:8px 0;}
+.seqgrid.drum{grid-template-columns:auto repeat(16,1fr);align-items:center;}
+.seqgrid .dl{width:44px;font-size:8px;letter-spacing:1px;}
+.sqc{height:34px;border-radius:5px;border:1px solid #2a3140;background:#161b24;cursor:pointer;transition:all .08s;}
+.sqc.on{background:linear-gradient(180deg,#2dd4bf,#0f9e8e);border-color:#2dd4bf;box-shadow:0 0 8px rgba(45,212,191,.4);}
+.sqc.sel{outline:2px solid #7ff3ff;}
+.sqc.ph{box-shadow:0 0 0 2px #fff inset;}
+.sqc.d{height:22px;background:#141821;}
+.sqc.d.on{background:var(--dc,#2dd4bf);border-color:var(--dc,#2dd4bf);box-shadow:0 0 6px var(--dc,#2dd4bf);}
+@media (max-width:700px){ .seqgrid{grid-template-columns:repeat(8,1fr);} .seqgrid.drum{grid-template-columns:auto repeat(8,1fr);} .sqc{height:30px;} }
