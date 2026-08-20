@@ -941,12 +941,12 @@ body.perform .wavetable, body.perform .morph { display: none; }
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v10.1.0 · drums · 2026-08-20</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v10.1.1 · stable · 2026-08-20</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px"></div>
-<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/6</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v10.1.0 · drums · 2026-08-20 &bull; FULL TRACK (DRUMS)</span></div></div>
+<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/6</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v10.1.1 · stable · 2026-08-20 &bull; NON-FINITE FIXED</span></div></div>
 <div id="tapstart"><div class="big">PSYSYNTH PRO<br><span class="sub">TAP TO START</span></div></div>
 <script>(function(){var t=document.getElementById("tapstart");if(!t)return;t.addEventListener("pointerdown",function(){t.style.display="none";var b=document.getElementById("bPower");if(b)b.click();});if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}})();</script>
-<script>window.__psyBuild="v10.1.0 · drums · 2026-08-20";window.__psyErrs=0;window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};function __psyBump(msg){window.__psyErrs++;var b=document.getElementById("psyBadge");if(b){b.textContent="BUILD v10.1.0 · drums · 2026-08-20 · ERR "+window.__psyErrs;b.style.color="#ff7b72";b.style.borderColor="#f85149";}window.__psyShow("["+window.__psyErrs+"] "+msg);}window.addEventListener("error",function(e){__psyBump("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){__psyBump("ASYNC: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
+<script>window.__psyBuild="v10.1.1 · stable · 2026-08-20";window.__psyErrs=0;window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};function __psyBump(msg){window.__psyErrs++;var b=document.getElementById("psyBadge");if(b){b.textContent="BUILD v10.1.1 · stable · 2026-08-20 · ERR "+window.__psyErrs;b.style.color="#ff7b72";b.style.borderColor="#f85149";}window.__psyShow("["+window.__psyErrs+"] "+msg);}window.addEventListener("error",function(e){__psyBump("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){__psyBump("ASYNC: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
 <script>
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
@@ -1461,21 +1461,21 @@ class SynthEngine {
 
   set(key, value) {
     this.params[key] = value;
-    if (key === 'delay' && this.delSend) this.delSend.gain.value = (value / 100) * 0.55;
-    else if (key === 'reverb' && this.revSend) this.revSend.gain.value = (value / 100) * 0.85;
+    if (key === 'delay' && this.delSend) this.delSend.gain.value = (this._fin(value,22) / 100) * 0.55;
+    else if (key === 'reverb' && this.revSend) this.revSend.gain.value = (this._fin(value,35) / 100) * 0.85;
       if (this.distSend) this.distSend.gain.value = (this._fin(this.params.fxDist,0) / 100) * 0.6;
       if (this.chSend) this.chSend.gain.value = (this._fin(this.params.fxChorus,0) / 100) * 0.5;
       if (this.crSend) this.crSend.gain.value = (this._fin(this.params.fxCrush,0) / 100) * 0.5;
       if (this.chLfo) this.chLfo.frequency.value = this._fin(this.params.chRate,0.8);
-    else if (key === 'master' && this.master) this.master.gain.value = value / 100;
+    else if (key === 'master' && this.master) this.master.gain.value = this._fin(value,80) / 100;
     else this.sendParams();
   }
   setAll(obj) {
     Object.assign(this.params, PsySynth.DEFAULT);
     Object.assign(this.params, obj);
-    if (this.delSend) this.delSend.gain.value = (this.params.delay / 100) * 0.55;
-    if (this.revSend) this.revSend.gain.value = (this.params.reverb / 100) * 0.85;
-    if (this.master) this.master.gain.value = this.params.master / 100;
+    if (this.delSend) this.delSend.gain.value = (this._fin(this.params.delay,22) / 100) * 0.55;
+    if (this.revSend) this.revSend.gain.value = (this._fin(this.params.reverb,35) / 100) * 0.85;
+    if (this.master) this.master.gain.value = this._fin(this.params.master,80) / 100;
     this.sendParams();
   }
   noteOn(note, vel) { if (this.fallbackMode) { if (this.ctx) this.fbNoteOn(note, vel); return; } if (this.node) this.node.port.postMessage({ type: 'noteOn', note: note, vel: vel }); }
@@ -2038,12 +2038,14 @@ class Conductor {
     this.drums = { ctx: ctx, noise: nb };
   }
   kick(t) {
+    if (!isFinite(t)) return;
     var c = this.drums.ctx; var o = c.createOscillator(); var g = c.createGain();
     o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
     g.gain.setValueAtTime(0.9, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
     o.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.3);
   }
   hat(t, open) {
+    if (!isFinite(t)) return;
     var c = this.drums.ctx; var s = c.createBufferSource(); s.buffer = this.drums.noise;
     var f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000;
     var g = c.createGain(); g.gain.setValueAtTime(open ? 0.3 : 0.22, t); g.gain.exponentialRampToValueAtTime(0.001, t + (open ? 0.25 : 0.05));
