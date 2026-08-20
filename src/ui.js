@@ -1289,6 +1289,10 @@ $('bPower').addEventListener('click', function () {
       c.addEventListener('click', function () { seq.toggleDrum(L[0], i); paint(); }); row.appendChild(c); drumCells.push({ el: c, lane: L[0], i: i }); })(i); }
     s.appendChild(row);
   });
+  [['fillOn','FILL'],['ghostOn','GHOST'],['crashOn','CRASH']].forEach(function (T) {
+    var tb = document.createElement('button'); tb.className = 'stb on'; tb.textContent = T[1];
+    tb.addEventListener('click', function () { seq[T[0]] = !seq[T[0]]; tb.classList.toggle('on', seq[T[0]]); });
+    tr.appendChild(tb); });
   var ob = document.createElement('button'); ob.className = 'stb on'; ob.textContent = 'OFFBASS';
   ob.addEventListener('click', function () { seq.offbass = !seq.offbass; ob.classList.toggle('on', seq.offbass); });
   var mx = document.createElement('div'); mx.className = 'krow';
