@@ -197,7 +197,7 @@ class SynthEngine {
     const rel = Math.max(0.03, this._fin(p.release, 200) / 1000);
     const sus = Math.max(0.05, Math.min(1, this._fin(p.sustain, 80) / 100));
     const f = 440 * Math.pow(2, (note - 69) / 12);
-    const flt = this.ctx.createBiquadFilter(); flt.type = 'lowpass';
+    const flt = this.ctx.createBiquadFilter(); flt.type = ['lowpass','highpass','bandpass','lowpass'][(this._fin(p.filterType,0)|0)] || 'lowpass';
     const cut = this._fin(p.cutoff, 2600); flt.Q.value = this._fin(p.res, 2);
     flt.frequency.setValueAtTime(cut + (this._fin(p.fEnvAmt, 0) / 100) * 4000, t);
     flt.frequency.setTargetAtTime(cut, t, Math.max(0.01, this._fin(p.fDecay, 300) / 1000));
@@ -216,8 +216,15 @@ class SynthEngine {
     let lfo = null;
     if (lfoDepth > 0) { lfo = this.ctx.createOscillator(); lfo.frequency.value = this._fin(p.lfoRate, 5);
       const lg = this.ctx.createGain(); lg.gain.value = (lfoDepth / 100) * 2500; lfo.connect(lg); lg.connect(flt.frequency); lfo.start(t); }
+    const fmDepth = this._fin(p.fmDepth, 0);
+    let mod = null;
+    if (fmDepth > 0) { mod = this.ctx.createOscillator(); mod.frequency.value = f * (this._fin(p.fmRatio, 2) || 2);
+      const mg = this.ctx.createGain(); mg.gain.value = (fmDepth / 100) * f * 3; mod.connect(mg); mg.connect(oscs[0].frequency); mod.start(t); }
+    const lfo2Depth = this._fin(p.lfo2Depth, 0); let lfo2 = null;
+    if (lfo2Depth > 0) { lfo2 = this.ctx.createOscillator(); lfo2.frequency.value = this._fin(p.lfo2Rate, 5);
+      const l2g = this.ctx.createGain(); l2g.gain.value = (lfo2Depth / 100) * 40; lfo2.connect(l2g); l2g.connect(oscs[0].detune); lfo2.start(t); }
     flt.connect(g); g.connect(this.fxInput || this.master);
-    this.fbVoices[note] = { osc: oscs, g: g, rel: rel, lfo: lfo };
+    this.fbVoices[note] = { osc: oscs, g: g, rel: rel, lfo: lfo, mod: mod, lfo2: lfo2 };
   }
   fbNoteOff(note) {
     if (!this.fbVoices) return; const v = this.fbVoices[note]; if (!v) return;
@@ -226,6 +233,8 @@ class SynthEngine {
     v.g.gain.linearRampToValueAtTime(0.0001, t + (v.rel || 0.2));
     for (const o of v.osc) o.stop(t + (v.rel || 0.2) + 0.05);
     if (v.lfo) v.lfo.stop(t + (v.rel || 0.2) + 0.05);
+    if (v.mod) v.mod.stop(t + (v.rel || 0.2) + 0.05);
+    if (v.lfo2) v.lfo2.stop(t + (v.rel || 0.2) + 0.05);
     delete this.fbVoices[note];
   }
   latencyMs() {
