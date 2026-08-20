@@ -192,21 +192,35 @@ class SynthEngine {
   fbNoteOn(note, vel) {
     if (!this.fbVoices) this.fbVoices = {};
     if (this.fbVoices[note]) this.fbNoteOff(note);
-    const t = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator(); osc.type = ['sawtooth','square','triangle','sine','sawtooth'][(this.params.wave|0)] || 'sawtooth';
-    osc.frequency.value = 440 * Math.pow(2, (note - 69) / 12);
+    const t = this.ctx.currentTime, p = this.params;
+    const atk = Math.max(0.002, this._fin(p.attack, 10) / 1000);
+    const rel = Math.max(0.03, this._fin(p.release, 200) / 1000);
+    const sus = Math.max(0.05, Math.min(1, this._fin(p.sustain, 80) / 100));
+    const f = 440 * Math.pow(2, (note - 69) / 12);
     const flt = this.ctx.createBiquadFilter(); flt.type = 'lowpass';
-    flt.frequency.value = this._fin(this.params.cutoff, 2600); flt.Q.value = this._fin(this.params.res, 2);
+    const cut = this._fin(p.cutoff, 2600); flt.Q.value = this._fin(p.res, 2);
+    flt.frequency.setValueAtTime(cut + (this._fin(p.fEnvAmt, 0) / 100) * 4000, t);
+    flt.frequency.setTargetAtTime(cut, t, Math.max(0.01, this._fin(p.fDecay, 300) / 1000));
     const g = this.ctx.createGain();
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel || 0.8, t + 0.01);
-    osc.connect(flt); flt.connect(g); g.connect(this.fxInput || this.master);
-    osc.start(t); this.fbVoices[note] = { osc: osc, g: g };
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel || 0.8, t + atk);
+    g.gain.setTargetAtTime((vel || 0.8) * sus, t + atk, 0.1);
+    const oscs = [];
+    const un = (this._fin(p.unison, 2) | 0);
+    const det = this._fin(p.detune, 8);
+    for (let u = 0; u < Math.max(1, Math.min(3, un)); u++) {
+      const o = this.ctx.createOscillator(); o.type = ['sawtooth','square','triangle','sine','sawtooth'][(p.wave|0)] || 'sawtooth';
+      o.frequency.value = f; o.detune.value = (u - (un - 1) / 2) * det;
+      o.connect(flt); o.start(t); oscs.push(o);
+    }
+    flt.connect(g); g.connect(this.fxInput || this.master);
+    this.fbVoices[note] = { osc: oscs, g: g, rel: rel };
   }
   fbNoteOff(note) {
     if (!this.fbVoices) return; const v = this.fbVoices[note]; if (!v) return;
     const t = this.ctx.currentTime;
     v.g.gain.cancelScheduledValues(t); v.g.gain.setValueAtTime(v.g.gain.value, t);
-    v.g.gain.linearRampToValueAtTime(0.0001, t + 0.2); v.osc.stop(t + 0.25);
+    v.g.gain.linearRampToValueAtTime(0.0001, t + (v.rel || 0.2));
+    for (const o of v.osc) o.stop(t + (v.rel || 0.2) + 0.05);
     delete this.fbVoices[note];
   }
   latencyMs() {
