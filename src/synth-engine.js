@@ -139,9 +139,9 @@ class SynthProcessor extends AudioWorkletProcessor {
     let v = this.voices.find(x => x.note === note && x.active && x.stage !== 4);
     if (!v) v = this.voices.find(x => !x.active);
     if (!v) {
-      let oldest = this.voices[0];
-      for (const x of this.voices) if (x.age > oldest.age) oldest = x;
-      v = oldest;
+      let best = this.voices[0];
+      for (const x of this.voices) if (x.amp < best.amp || (x.amp === best.amp && x.age > best.age)) best = x;
+      v = best;
     }
     for (const x of this.voices) if (x !== v) x.age++;
     v.active = true; v.note = note; v.vel = vel; v.age = 0; v.bend = 0;
