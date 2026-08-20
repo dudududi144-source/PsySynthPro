@@ -682,6 +682,77 @@ function scopeLoop() {
     var s2 = 0; for (var i = 0; i < 1024; i += 8) { var v = (updMeter._td[i] - 128) / 128; s2 += v * v; }
     var el = document.getElementById('outmeter'); if (el) el.style.height = Math.min(100, Math.sqrt(s2 / 128) * 220) + '%';
   }
+function saveBank(bank) {
+    try { localStorage.setItem(BANK_KEY, JSON.stringify(bank)); } catch (e) {}
+  }
+function loadPreset(i) {
+    if (typeof i === 'string') { const idx = NAMES.indexOf(i); if (idx < 0) { if (Psy.PRESETS[i]) { pushHistory(); engine.setAll(Psy.PRESETS[i]); syncUI(); $('oName').textContent = i; } return; } i = idx; }
+    pIdx = (i + NAMES.length) % NAMES.length;
+    const name = NAMES[pIdx];
+    pushHistory();
+    engine.setAll(Psy.PRESETS[name]);
+    syncUI();
+    $('oName').textContent = name;
+    clearPresetOn();
+    const btns = document.querySelectorAll('.preset.factory');
+    if (btns[pIdx]) btns[pIdx].classList.add('on');
+  }
+
+function loadBank() {
+    try { return JSON.parse(localStorage.getItem(BANK_KEY) || '{}'); } catch (e) { return {}; }
+  }
+function noteOn(n, vel) {
+    if (!engine.ready) return;
+    if (lastNotes.indexOf(n) < 0) { lastNotes.push(n); if (lastNotes.length > 8) lastNotes.shift(); }
+    noteRouter.noteOn(n, vel === undefined ? 0.8 : vel);
+    const k = document.querySelector('[data-n="' + n + '"]');
+    if (k) k.classList.add('on');
+  }
+function noteOff(n) {
+    if (!engine.ready) return;
+    noteRouter.noteOff(n);
+    const k = document.querySelector('[data-n="' + n + '"]');
+    if (k) k.classList.remove('on');
+  }
+
+function getRecents() {
+    try { return JSON.parse(localStorage.getItem('psy.recents') || '[]'); } catch (e) { return []; }
+  }
+function noteName(n) {
+    const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[n % 12] + (Math.floor(n / 12) - 1);
+  }
+function updateOctLabel() {
+    const lbl = $('octLabel');
+    if (lbl) lbl.textContent = noteName(48 + octShift * 12) + ' \u2013 ' + noteName(72 + octShift * 12) + '  [Z/X]';
+  }
+function loadUserPreset(name) {
+    const patch = Psy.PresetStore.get(name);
+    if (!patch) return;
+    engine.setAll(patch);
+    syncUI();
+    $('oName').textContent = name;
+    pushRecent(name);
+  }
+
+function applyOctave() {
+    document.querySelectorAll('#kb .key').forEach(function (k) {
+      const base = parseInt(k.dataset.base, 10);
+      k.dataset.n = String(base + octShift * 12);
+      k.title = noteName(base + octShift * 12);
+    });
+    updateOctLabel();
+  }
+function saveUserPreset(name) {
+    const snap = {}; for (const k in engine.params) snap[k] = engine.params[k];
+    Psy.PRESETS[name] = snap;
+    if (NAMES.indexOf(name) < 0) NAMES.push(name);
+    $('oName').textContent = name;
+    return true;
+  }
+function clearPresetOn() {
+    document.querySelectorAll('.preset').forEach(function (x) { x.classList.remove('on'); });
+  }
   function safeBuild(name, fn) { try { fn(); } catch (e) { if (window.__psyShow) window.__psyShow('BUILD ' + name + ': ' + e.message); } }
 function buildKeyboard() {
     const kb = $('kb');
