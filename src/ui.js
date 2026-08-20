@@ -291,7 +291,7 @@ const LAYOUT = [
 
     const selA = document.createElement('select');
     const selB = document.createElement('select');
-    selA.className = 'msel'; selB.className = 'msel';
+    selA.className = 'msel'; selA.id='morphA'; selA.name='morphA'; selB.className = 'msel'; selB.id='morphB'; selB.name='morphB';
     NAMES.forEach(function (n, i) {
       selA.appendChild(new Option(n, i));
       selB.appendChild(new Option(n, i));
@@ -776,7 +776,7 @@ const LAYOUT = [
     });
     wrap.appendChild(catRow);
     const searchIn = document.createElement('input');
-    searchIn.type = 'text';
+    searchIn.type = 'text'; searchIn.id='wtsearch'; searchIn.name='wtsearch';
     searchIn.className = 'psearch';
     searchIn.placeholder = 'SEARCH PRESETS...';
     searchIn.setAttribute('aria-label', 'Search presets');
