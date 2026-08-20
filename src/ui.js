@@ -619,6 +619,7 @@ const LAYOUT = [
   }
 
   function buildConductor() {
+    if (!Psy.Conductor) { return; } /* graceful: never fatal if conductor missing */
     var s = document.createElement('div'); s.className = 'section conductor-section';
     s.innerHTML = '<div class="stitle" style="--c:#9fe8a8">CONDUCTOR \u00B7 AI</div>';
     var row = document.createElement('div'); row.className = 'krow';
