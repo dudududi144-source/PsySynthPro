@@ -870,4 +870,6 @@ function buildTabs() {
   try { loadPreset(0); } catch (err) { /* preset load non-fatal */ }
   window.__psyUiReady = true;
   scopeLoop();
-})();
+})();  var pageVisible = !document.hidden;
+  document.addEventListener('visibilitychange', function(){ pageVisible = !document.hidden; });
+
