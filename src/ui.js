@@ -641,6 +641,7 @@ const LAYOUT = [
     var mu = document.createElement('button'); mu.className='stb'; mu.textContent='MUTATE';
     mu.addEventListener('click', function(){ cond.mutate(); });
     row.appendChild(mu);
+    new Psy.Knob(row, { label:'TEMPO', color:'#9fe8a8', min:90, max:170, def:141, fmt:function(v){return Math.round(v)+' BPM';}, onChange:function(v){ cond.bpm=v; if (typeof seq!=='undefined'&&seq) seq.bpm=v; if (typeof arp!=='undefined'&&arp) arp.bpm=v; } });
     var dr = document.createElement('button'); dr.className='stb on'; dr.textContent='DRUMS ON';
     dr.addEventListener('click', function(){ cond.drumsOn=!cond.drumsOn; dr.textContent=cond.drumsOn?'DRUMS ON':'DRUMS OFF'; dr.classList.toggle('on',cond.drumsOn); });
     row.appendChild(dr);
