@@ -941,12 +941,12 @@ body.perform .wavetable, body.perform .morph { display: none; }
 </style>
 </head>
 <body>
-<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v10.0.1 · conductor-fix · 2026-08-20</div>
+<div id="psyBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:rgba(8,12,18,.93);border:1px solid #2a3444;color:#7ff3ff;font-family:monospace;font-size:10px;padding:5px 10px;border-radius:6px">BUILD v10.0.2 · perf3 · 2026-08-20</div>
 <div id="psyErrStrip" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#7a1420;color:#ffd7d7;font-family:monospace;font-size:11px;padding:7px 14px"></div>
-<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/6</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v10.0.1 · conductor-fix · 2026-08-20 &bull; CONDUCTOR TUNED</span></div></div>
+<div class="chassis"><div class="cheek l"></div><div class="cheek r"></div><div class="topbar"><div class="oled"><div class="pname" id="oName">PSYSYNTH PRO</div><canvas id="scope" width="520" height="54"></canvas><div class="meta" id="oMeta">AUDIO-WORKLET<br>TAP TO START</div></div><button id="bPower" class="tbtn power">&#9211; POWER</button><button id="bPrev" class="tbtn">&#9664;</button><button id="bNext" class="tbtn">&#9654;</button><button id="bRec" class="tbtn rec">&#9679; REC</button><button id="bMidi" class="tbtn midi">&#9836; MIDI</button><button id="bPanic" class="tbtn panic">PANIC</button></div><div id="seqtop"></div><div class="prow" id="presets"></div><div class="midi-row"><div class="midi-strip" id="midiStrip">MIDI &#9675; tap to start</div><div class="midi-event" id="midiEvent"></div><div class="perf-hud" id="perfHud">VOICES 0/6</div></div><div class="sections" id="sections"></div><div class="kb" id="kb"></div><div class="brand">PSYSYNTH PRO<span>BUILD v10.0.2 · perf3 · 2026-08-20 &bull; MOBILE PERF PROFILE</span></div></div>
 <div id="tapstart"><div class="big">PSYSYNTH PRO<br><span class="sub">TAP TO START</span></div></div>
 <script>(function(){var t=document.getElementById("tapstart");if(!t)return;t.addEventListener("pointerdown",function(){t.style.display="none";var b=document.getElementById("bPower");if(b)b.click();});if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}})();</script>
-<script>window.__psyBuild="v10.0.1 · conductor-fix · 2026-08-20";window.__psyErrs=0;window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};function __psyBump(msg){window.__psyErrs++;var b=document.getElementById("psyBadge");if(b){b.textContent="BUILD v10.0.1 · conductor-fix · 2026-08-20 · ERR "+window.__psyErrs;b.style.color="#ff7b72";b.style.borderColor="#f85149";}window.__psyShow("["+window.__psyErrs+"] "+msg);}window.addEventListener("error",function(e){__psyBump("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){__psyBump("ASYNC: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
+<script>window.__psyBuild="v10.0.2 · perf3 · 2026-08-20";window.__psyErrs=0;window.__psyShow=function(t){var e=document.getElementById("psyErrStrip");if(e){e.style.display="block";e.textContent=t;}};function __psyBump(msg){window.__psyErrs++;var b=document.getElementById("psyBadge");if(b){b.textContent="BUILD v10.0.2 · perf3 · 2026-08-20 · ERR "+window.__psyErrs;b.style.color="#ff7b72";b.style.borderColor="#f85149";}window.__psyShow("["+window.__psyErrs+"] "+msg);}window.addEventListener("error",function(e){__psyBump("JS ERROR: "+(e.message||"unknown"));});window.addEventListener("unhandledrejection",function(e){__psyBump("ASYNC: "+(e.reason&&e.reason.message?e.reason.message:e.reason));});</script>
 <script>
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
@@ -1329,7 +1329,7 @@ class SynthEngine {
     const self = this;
     let load;
     if (self.ctx.audioWorklet) {
-      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js?v=992');
+      load = self.ctx.audioWorklet.addModule('psysynth-worklet.js?v=1002');
     } else {
       self.fallbackMode = true; self.node = null; load = Promise.resolve();
     }
@@ -1349,6 +1349,7 @@ class SynthEngine {
         }
       };
 
+      self.params.mobile = (window.matchMedia && window.matchMedia('(max-width:700px)').matches) ? 1 : 0;
       self.fxInput = self.ctx.createGain();
       if (self.node) self.node.connect(self.fxInput);
 
@@ -2033,7 +2034,7 @@ class Conductor {
     var root = PH[Math.floor(this.bar / 2) % PH.length][this.bar % 4];
     var drive = this.complexity;
     /* BASS: rolling 16ths on chord root (psytrance) */
-    var bassPat = euclid(16, drive > 0.7 ? 16 : (drive > 0.4 ? 8 : 4));
+    var bassPat = euclid(16, drive > 0.85 ? 16 : (drive > 0.55 ? 8 : 4));
     if (bassPat[i]) {
       var bn = this.deg2note(root, 0);
       var vel = (i % 4 === 0) ? 0.95 : 0.7;
@@ -2042,7 +2043,7 @@ class Conductor {
     }
     /* LEAD: euclidean + scale-walk */
     var leadPat = euclid(16, Math.round(2 + drive * 6));
-    if (leadPat[i] && this.rnd() < drive) {
+    if (leadPat[i] && this.rnd() < drive * 0.7) {
       this.leadDeg += (this.rnd() < 0.5 ? 1 : (this.rnd() < 0.3 ? 2 : -1));
       if (this.leadDeg > 7) this.leadDeg -= 7; if (this.leadDeg < 0) this.leadDeg += 7;
       var ln = this.deg2note(root + this.leadDeg, 2);
@@ -2050,7 +2051,7 @@ class Conductor {
       this.engine.noteOffAt(ln, t + stepDur * (this.rnd() < 0.3 ? 3 : 1.5));
     }
     /* PAD: chord on bar start */
-    if (i === 0) {
+    if (i === 0 && (this.bar % 2 === 0)) {
       this.releasePad();
       var tones = [root, root + 4];
       for (var k = 0; k < 3; k++) { var pn = this.deg2note(tones[k], 1); this.engine.noteOnAt(pn, 0.35, t); this.padHeld.push(pn); }
