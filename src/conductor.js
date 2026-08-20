@@ -9,7 +9,7 @@ class Conductor {
   arrange(){var b=this.bar%9;if(b<2)return 'intro';if(b===8)return 'break';return 'full';}
   mutate(){this.reseed(Math.floor(Math.random()*2147483646)+1);this.progOffset=(this.progOffset+1)%4;this.leadDeg=0;}
   fillNext(){this.wantFill=true;}
-  setEnabled(on){this.enabled=on;if(on)this.startTimer();else{this.stopTimer();this.releasePad();}}
+  setEnabled(on){this.enabled=on;if(on)this.startTimer();else{this.stopTimer();this.releasePad();if(this.engine&&this.engine.panic)this.engine.panic();}}
   startTimer(){if(this.timer)return;var s=this;this.nextTime=0;this.timer=setInterval(function(){s.tick();},25);}
   stopTimer(){if(this.timer){clearInterval(this.timer);this.timer=null;}}
   releasePad(){for(var i=0;i<this.padHeld.length;i++)this.engine.noteOff(this.padHeld[i]);this.padHeld=[];}
