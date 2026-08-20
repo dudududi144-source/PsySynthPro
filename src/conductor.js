@@ -25,7 +25,7 @@ class Conductor {
   hat(t,o){this.playBuf(o?this.drums.hatO:this.drums.hatC,t,o?0.3:0.24,0.25);}
   snare(t){this.playBuf(this.drums.snare,t,0.5,-0.15);}
   tick(){if(!this.enabled||!this.engine.ctx)return;var ctx=this.engine.ctx;if(this.nextTime<ctx.currentTime-0.05)this.nextTime=ctx.currentTime+0.05;var sd=(60/this.bpm)/4;while(this.nextTime<ctx.currentTime+0.12){this.playStep(this.stepPos,this.nextTime,sd);this.stepPos=(this.stepPos+1)%16;if(this.stepPos===0)this.bar++;this.nextTime+=sd;}}
-  playStep(i,t,sd){var PH=[[0,5,3,4],[0,6,5,4],[0,3,5,4],[0,2,5,4]];var root=PH[(Math.floor(this.bar/2)+this.progOffset)%PH.length][this.bar%4];var dr=this.complexity;var ARR=this.arrange();this.ensureDrums();
+  playStep(i,t,sd){var PH=[[0,5,3,4],[0,6,5,4],[0,3,5,4],[0,2,5,4]];var root=PH[(Math.floor(this.bar/2)+this.progOffset)%PH.length][this.bar%4];var dr=this.complexity;var _ab = this.bar % 9; var ARR = _ab < 2 ? 'intro' : (_ab === 8 ? 'break' : 'full');this.ensureDrums();
     if(this.drumsOn&&this.drums&&ARR==='full'){if(i%4===0)this.kick(t);if(i%4===2)this.hat(t,false);if(i===4||i===12)this.snare(t);if(i===14&&dr>0.6)this.hat(t,true);}
     if((ARR==='break'||this.wantFill)&&i>=12&&this.drums&&this.drumsOn)this.hat(t,i===15);
     if(i===15)this.wantFill=false;
