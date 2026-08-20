@@ -598,9 +598,11 @@ const LAYOUT = [
     s.appendChild(row);
     $('sections').appendChild(s);
 
+    let lastPlay = -1;
     seq.onStep = function (pos, note) {
-      for (let i = 0; i < seqBtns.length; i++) seqBtns[i].classList.remove('playing');
-      if (seqBtns[pos]) seqBtns[pos].classList.add('playing');
+      if (lastPlay >= 0 && seqBtns[lastPlay]) seqBtns[lastPlay].classList.remove('playing');
+      lastPlay = (note >= 0) ? pos : -1;
+      if (lastPlay >= 0 && seqBtns[lastPlay]) seqBtns[lastPlay].classList.add('playing');
       if (note >= 0) {
         const k = document.querySelector('[data-n="' + note + '"]');
         if (k) {
