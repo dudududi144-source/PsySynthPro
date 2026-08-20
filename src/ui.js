@@ -762,6 +762,15 @@ function pushRecent(name) {
   }
 
   /* render recently-used presets into the bottom recents row */
+  const BANK_KEY = 'psysynth.userPresets.v1';
+  const TABMAP = {"POLYBLEP OSC": "SYNTH", "FM OPERATOR": "SYNTH", "ZDF SVF": "SYNTH", "ENVELOPES": "SYNTH", "LFO 1+2": "MOD", "FREE MOD MATRIX": "MOD", "PERFORMANCE MACROS": "MOD", "FX RACK": "FX", "SPACE FX": "FX", "ARPEGGIATOR": "PERF", "STEP SEQ": "PERF", "WAVETABLE LAB": "PERF", "PRESET MORPH": "PERF"};
+  const bpm = seq.enabled ? seq.bpm : (arp.enabled ? arp.bpm : 120);
+  const btn = document.createElement('button');
+  const count = window.prompt ? parseInt(window.prompt('How many variations? (1-32)', '8'), 10) : 8;
+  let octShift = 0;
+  let pIdx = 0;
+  let paramHistory = [];
+  const tb = document.createElement('button');
   function safeBuild(name, fn) { try { fn(); } catch (e) { if (window.__psyShow) window.__psyShow('BUILD ' + name + ': ' + e.message); } }
 function buildKeyboard() {
     const kb = $('kb');
