@@ -1123,113 +1123,58 @@ $('bPower').addEventListener('click', function () {
 
   /* ── MINIMAL STEP SEQ (top, smart editor) ─────────────────────── */
   function buildSeqPanel2() {
-    const host = document.getElementById('seqtop') || document.getElementById('sections');
-    const s = document.createElement('div');
-    s.className = 'section seq2';
-    const stepBtns = [];
-    let sel = 0;
-    function stepper(label, get, set, min, max, stepv, fmt) {
-      const w = document.createElement('div'); w.className = 'stp';
-      const dec = document.createElement('button'); dec.className = 'stb'; dec.textContent = '-';
-      const t = document.createElement('span'); t.className = 'stl'; t.textContent = label;
-      const v = document.createElement('span'); v.className = 'stv';
-      const inc = document.createElement('button'); inc.className = 'stb'; inc.textContent = '+';
-      function upd() { v.textContent = fmt(get()); }
-      dec.addEventListener('click', function () { set(Math.max(min, get() - stepv)); upd(); });
-      inc.addEventListener('click', function () { set(Math.min(max, get() + stepv)); upd(); });
-      w.appendChild(dec); w.appendChild(t); w.appendChild(v); w.appendChild(inc);
-      w._upd = upd; return w;
-    }
-    const ed = document.createElement('div'); ed.className = 'seq2-ed';
-    const wRoot = stepper('ROOT', function(){return seq.root;}, function(x){seq.root=x;}, 24, 60, 1, function(x){return x;});
-    const wSwing = stepper('SWING', function(){return seq.swing;}, function(x){seq.swing=x;}, 0, 60, 5, function(x){return x+'%';});
-    const wHuman = stepper('HUMAN', function(){return seq.human;}, function(x){seq.human=x;}, 0, 100, 10, function(x){return x+'%';});
-    const wRat = stepper('RAT', function(){return seq.steps[sel].rat||1;}, function(x){seq.setStep(sel,{rat:x});}, 1, 4, 1, function(x){return 'x'+x;});
-    const wNote = stepper('NOTE', function(){return seq.steps[sel].tr;}, function(x){seq.setStep(sel,{tr:x});}, -12, 12, 1, function(x){return (x>0?'+':'')+x;});
-    const wVel = stepper('VEL', function(){return Math.round(seq.steps[sel].vel*100);}, function(x){seq.setStep(sel,{vel:x/100});}, 5, 100, 5, function(x){return x;});
-    const wLen = stepper('LEN', function(){return seq.steps[sel].len;}, function(x){seq.setStep(sel,{len:x});}, 10, 200, 10, function(x){return x+'%';});
-    const wTie = document.createElement('button'); wTie.className='stb tie'; wTie.textContent='TIE';
-    function updTie(){ wTie.classList.toggle('on', !!seq.steps[sel].tie); }
-    wTie.addEventListener('click', function(){ seq.setStep(sel,{tie:!seq.steps[sel].tie}); updTie(); refresh(); });
-    ed.appendChild(wRoot); ed.appendChild(wSwing); ed.appendChild(wHuman); ed.appendChild(wRat);
-    ed.appendChild(wNote); ed.appendChild(wVel); ed.appendChild(wLen); ed.appendChild(wTie);
-    const grid = document.createElement('div'); grid.className = 'seq2-grid';
-    function refresh() {
-      for (let i = 0; i < Psy.SEQ_LEN; i++) {
-        const st = seq.steps[i];
-        stepBtns[i].className = 'sq2' + (st.on ? ' on' : '') + (i === sel ? ' sel' : '') + (st.tie ? ' tie' : '');
-        stepBtns[i].style.opacity = st.on ? (0.45 + 0.55 * st.vel) : 0.25;
-      }
-      wRoot._upd(); wSwing._upd(); wHuman._upd(); wRat._upd(); wNote._upd(); wVel._upd(); wLen._upd(); updTie();
-    }
-    for (let i = 0; i < Psy.SEQ_LEN; i++) {
-      const b = document.createElement('button'); b.className = 'sq2';
-      b.addEventListener('click', function () { sel = i; seq.toggleStep(i); refresh(); });
-      grid.appendChild(b); stepBtns.push(b);
-    }
-    const tr = document.createElement('div'); tr.className = 'seq2-tr';
-    const snd = document.createElement('span'); snd.className='stl'; snd.textContent='SEQ→SYNTH';
-    const run = document.createElement('button'); run.className = 'stb run'; run.textContent = 'RUN';
-    function seqTryStart(n) {
-      if (engine.ready) { if (!seq.enabled) seq.setEnabled(true); run.classList.add('on'); }
-      else if (n > 0) setTimeout(function () { seqTryStart(n - 1); }, 200);
-    }
-    run.addEventListener('click', function () {
-      if (seq.enabled) { seq.setEnabled(false); run.classList.remove('on'); return; }
-      if (!engine.ready) { var pb = document.getElementById('bPower'); if (pb) pb.click(); }
-      seqTryStart(15);
-    });
-    const bpmD = document.createElement('span'); bpmD.className = 'stv';
-    const bpmDec = document.createElement('button'); bpmDec.className='stb'; bpmDec.textContent='-';
-    const bpmInc = document.createElement('button'); bpmInc.className='stb'; bpmInc.textContent='+';
-    function bpmU(){ bpmD.textContent = seq.bpm; }
-    bpmDec.addEventListener('click', function(){ seq.bpm=Math.max(60,seq.bpm-1); bpmU(); });
-    bpmInc.addEventListener('click', function(){ seq.bpm=Math.min(200,seq.bpm+1); bpmU(); });
-    const pat = document.createElement('select'); pat.className = 'msel'; pat.id='ppattern'; pat.name='ppattern';
-    Object.keys(Psy.SEQ_PATTERNS).forEach(function (k) { const o = document.createElement('option'); o.textContent = k; pat.appendChild(o); });
-    pat.addEventListener('change', function () { seq.loadPattern(pat.value); refresh(); });
-    const clr = document.createElement('button'); clr.className='stb'; clr.textContent='CLR';
-    clr.addEventListener('click', function(){ for(let i=0;i<Psy.SEQ_LEN;i++) seq.setStep(i,{on:false,tie:false,tr:0,len:70,vel:0.72,rat:1}); refresh(); });
-    /* TAP tempo */
-    let taps = [];
-    const tap = document.createElement('button'); tap.className='stb'; tap.textContent='TAP';
-    tap.addEventListener('click', function () {
-      const now = performance.now();
-      taps = taps.filter(function (t) { return now - t < 2500; });
-      taps.push(now);
-      if (taps.length >= 2) {
-        let sum = 0; for (let i = 1; i < taps.length; i++) sum += taps[i] - taps[i-1];
-        const avg = sum / (taps.length - 1);
-        seq.bpm = Math.max(60, Math.min(200, Math.round(60000 / avg)));
-        bpmU();
-      }
-    });
-    /* GEN: improv psy pattern generator */
-    const gen = document.createElement('button'); gen.className='stb'; gen.textContent='GEN';
-    gen.addEventListener('click', function () {
-      const scale = [0,0,0,3,5,7,10]; /* psy-ish movement */
-      for (let i = 0; i < Psy.SEQ_LEN; i++) {
-        const on = Math.random() < (i % 4 === 0 ? 0.95 : 0.6);
-        seq.setStep(i, {
-          on: on,
-          vel: (i % 4 === 0 ? 1 : 0.55 + Math.random() * 0.4),
-          tr: (Math.random() < 0.25 ? scale[Math.floor(Math.random() * scale.length)] * (Math.random()<0.5?-1:1) : 0),
-          len: 40 + Math.floor(Math.random() * 8) * 10,
-          tie: (Math.random() < 0.12),
-          rat: (Math.random() < 0.15 ? 2 : 1)
-        });
-      }
-      refresh();
-    });
-    tr.appendChild(snd); tr.appendChild(run); tr.appendChild(bpmDec); tr.appendChild(bpmD); tr.appendChild(bpmInc); tr.appendChild(pat); tr.appendChild(clr); tr.appendChild(tap); tr.appendChild(gen);
-    s.appendChild(tr); s.appendChild(grid); s.appendChild(ed);
-    seq.onStep = function (pos, note) {
-      for (let i = 0; i < Psy.SEQ_LEN; i++) stepBtns[i].classList.toggle('play', i === pos && note >= 0);
-    };
-    bpmU(); refresh();
-    host.appendChild(s);
+  var host = document.getElementById('seqtop') || document.getElementById('sections');
+  var s = document.createElement('div'); s.className = 'section seq2';
+  s.innerHTML = '<div class="stitle" style="--c:#2dd4bf">STEP SEQUENCER</div>';
+  var seq = window.__seq || (window.__seq = new Psy.Sequencer(engine));
+  var sel = 0; var cells = []; var drumCells = [];
+  var tr = document.createElement('div'); tr.className = 'krow';
+  var run = document.createElement('button'); run.className = 'stb'; run.textContent = 'RUN';
+  run.addEventListener('click', function () { seq.setEnabled(!seq.enabled); run.textContent = seq.enabled ? 'STOP' : 'RUN'; run.classList.toggle('on', seq.enabled); });
+  tr.appendChild(run);
+  var hold = document.createElement('button'); hold.className = 'stb'; hold.textContent = 'HOLD';
+  hold.addEventListener('click', function () { seq.hold = !seq.hold; hold.classList.toggle('on', seq.hold); });
+  tr.appendChild(hold);
+  var pat = document.createElement('select'); pat.className = 'msel'; pat.id = 'ppattern'; pat.name = 'ppattern';
+  Object.keys(Psy.SEQ_PATTERNS).forEach(function (n) { var o = document.createElement('option'); o.textContent = n; pat.appendChild(o); });
+  pat.addEventListener('change', function () { seq.loadPattern(pat.value); paint(); });
+  tr.appendChild(pat);
+  var clr = document.createElement('button'); clr.className = 'stb'; clr.textContent = 'CLEAR';
+  clr.addEventListener('click', function () { for (var i = 0; i < Psy.SEQ_LEN; i++) { seq.steps[i].on = false; seq.drums.k[i] = false; seq.drums.s[i] = false; seq.drums.h[i] = false; } paint(); });
+  tr.appendChild(clr);
+  var rnd = document.createElement('button'); rnd.className = 'stb'; rnd.textContent = 'RANDOM';
+  rnd.addEventListener('click', function () { for (var i = 0; i < Psy.SEQ_LEN; i++) { seq.steps[i].on = Math.random() < 0.5; seq.steps[i].vel = 0.5 + Math.random() * 0.5; seq.drums.k[i] = (i % 4 === 0) || Math.random() < 0.1; seq.drums.h[i] = Math.random() < 0.6; seq.drums.s[i] = (i === 4 || i === 12); } paint(); });
+  tr.appendChild(rnd);
+  s.appendChild(tr);
+  var kr = document.createElement('div'); kr.className = 'krow';
+  new Psy.Knob(kr, { label: 'SWING', color: '#2dd4bf', min: 0, max: 60, def: 0, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.swing = v; } });
+  new Psy.Knob(kr, { label: 'HUMAN', color: '#2dd4bf', min: 0, max: 100, def: 0, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.human = v; } });
+  new Psy.Knob(kr, { label: 'VEL', color: '#2dd4bf', min: 5, max: 100, def: 80, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.steps[sel].vel = v / 100; paint(); } });
+  new Psy.Knob(kr, { label: 'TR', color: '#2dd4bf', min: -12, max: 12, def: 0, fmt: function (v) { return (v > 0 ? '+' : '') + Math.round(v); }, onChange: function (v) { seq.steps[sel].tr = Math.round(v); } });
+  new Psy.Knob(kr, { label: 'GATE', color: '#2dd4bf', min: 10, max: 100, def: 70, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.steps[sel].len = v; } });
+  new Psy.Knob(kr, { label: 'RATCH', color: '#2dd4bf', min: 1, max: 4, def: 1, fmt: function (v) { return 'x' + Math.round(v); }, onChange: function (v) { seq.steps[sel].rat = Math.round(v); } });
+  s.appendChild(kr);
+  var ng = document.createElement('div'); ng.className = 'seqgrid';
+  for (var i = 0; i < Psy.SEQ_LEN; i++) { (function (i) { var c = document.createElement('button'); c.className = 'sqc';
+    c.addEventListener('click', function () { seq.toggleStep(i); sel = i; paint(); }); ng.appendChild(c); cells.push(c); })(i); }
+  s.appendChild(ng);
+  [['k', 'KICK', '#f87171'], ['s', 'SNARE', '#fbbf24'], ['h', 'HAT', '#7ff3ff']].forEach(function (L) {
+    var row = document.createElement('div'); row.className = 'seqgrid drum';
+    var lb = document.createElement('span'); lb.className = 'dl'; lb.textContent = L[1]; lb.style.color = L[2]; row.appendChild(lb);
+    for (var i = 0; i < Psy.SEQ_LEN; i++) { (function (i) { var c = document.createElement('button'); c.className = 'sqc d'; c.style.setProperty('--dc', L[2]);
+      c.addEventListener('click', function () { seq.toggleDrum(L[0], i); paint(); }); row.appendChild(c); drumCells.push({ el: c, lane: L[0], i: i }); })(i); }
+    s.appendChild(row);
+  });
+  function paint() {
+    for (var i = 0; i < Psy.SEQ_LEN; i++) { var st = seq.steps[i];
+      cells[i].classList.toggle('on', st.on); cells[i].classList.toggle('sel', i === sel);
+      cells[i].style.opacity = st.on ? (0.45 + st.vel * 0.55) : 1; }
+    drumCells.forEach(function (d) { d.el.classList.toggle('on', !!seq.drums[d.lane][d.i]); });
   }
-/* ── COMPACT PRESET MENU ──────────────────────────────────────── */
+  seq.onStep = function (i, note) { cells.forEach(function (c, k) { c.classList.toggle('ph', k === i); }); };
+  paint();
+  host.appendChild(s);
+}
   function buildPresetMenu() {
     const wrap = document.getElementById('presets');
     if (!wrap) return;
