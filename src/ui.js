@@ -1379,6 +1379,15 @@ $('bPower').addEventListener('click', function () {
     ss.addEventListener('change', function(){ cond.scale = ss.value; });
     row.appendChild(ss);
     new Psy.Knob(row, { label:'COMPLEX', color:'#9fe8a8', min:0, max:100, def:60, fmt:function(v){return Math.round(v)+'%';}, onChange:function(v){ cond.complexity=v/100; } });
+    var fb = document.createElement('button'); fb.className='stb'; fb.textContent='FILL';
+    fb.addEventListener('click', function(){ cond.fillNext(); });
+    row.appendChild(fb);
+    var mu = document.createElement('button'); mu.className='stb'; mu.textContent='MUTATE';
+    mu.addEventListener('click', function(){ cond.mutate(); });
+    row.appendChild(mu);
+    var dr = document.createElement('button'); dr.className='stb on'; dr.textContent='DRUMS ON';
+    dr.addEventListener('click', function(){ cond.drumsOn=!cond.drumsOn; dr.textContent=cond.drumsOn?'DRUMS ON':'DRUMS OFF'; dr.classList.toggle('on',cond.drumsOn); });
+    row.appendChild(dr);
     s.appendChild(row); $('sections').appendChild(s);
   }
   safeBuild('macros', buildMacros);
