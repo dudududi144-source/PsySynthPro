@@ -114,7 +114,10 @@ class SynthEngine {
       self.limiter.ratio.value = 12;
       self.limiter.attack.value = 0.003;
       self.limiter.release.value = 0.25;
-      self.master.connect(self.limiter);
+      self.glue = self.ctx.createWaveShaper();
+      const gc = new Float32Array(256); for (let i=0;i<256;i++){ const x=i/127.5-1; gc[i]=Math.tanh(x*1.15)/Math.tanh(1.15); }
+      self.glue.curve = gc; self.glue.oversample = '2x';
+      self.master.connect(self.glue); self.glue.connect(self.limiter);
       self.limiter.connect(self.analyser);
       self.analyser.connect(self.ctx.destination);
 
