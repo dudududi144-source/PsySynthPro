@@ -44,11 +44,36 @@ class Sequencer {
   toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
   ensureDrumBus() { if (!this.engine.ctx) return; if (this._dbus) return; this._dbus = this.engine.ctx.createGain(); this._dbus.gain.value = 1; this._dbus.connect(this.engine.master || this.engine.fxInput); }
   _noise() { const ctx = this.engine.ctx; if (!this._nb) { const b = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; this._nb = b; } return this._nb; }
-  kick(t) { if (this.dmute.k) return; this.ensureDrumBus(); const ctx = this.engine.ctx; const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.12); g.gain.setValueAtTime(this.dmix.k, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.28); o.connect(g); g.connect(this._dbus); o.start(t); o.stop(t + 0.3); }
-  snare(t) { if (this.dmute.s) return; this.ensureDrumBus(); const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = this._noise(); const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800; const g = ctx.createGain(); g.gain.setValueAtTime(this.dmix.s, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18); src.connect(f); f.connect(g); g.connect(this._dbus); src.start(t); src.stop(t + 0.2); }
-  hat(t, open) { if (this.dmute.h) return; this.ensureDrumBus(); const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = this._noise(); const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000; const g = ctx.createGain(); const dur = open ? 0.3 : 0.05; g.gain.setValueAtTime(this.dmix.h, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur); src.connect(f); f.connect(g); g.connect(this._dbus); src.start(t); src.stop(t + dur + 0.02); }
+  _renderDrums() { if (this._rd || !this.engine.ctx) return; const ctx = this.engine.ctx; const sr = ctx.sampleRate;
+    const mk = function (len, fn) { const n = Math.floor(sr * len); const b = ctx.createBuffer(1, n, sr); const dd = b.getChannelData(0); for (let i = 0; i < n; i++) dd[i] = fn(i / sr); return b; };
+    this._rd = {
+      k: mk(0.3, function (t) { return Math.sin(2 * Math.PI * (40 * t + 110 * 0.03 * (1 - Math.exp(-t / 0.02)))) * Math.exp(-t / 0.1); }),
+      s: mk(0.2, function (t) { return (Math.random() * 2 - 1) * 0.7 * Math.exp(-t / 0.06) + Math.sin(2 * Math.PI * 180 * t) * 0.3 * Math.exp(-t / 0.05); }),
+      hc: mk(0.06, function (t) { return (Math.random() * 2 - 1) * Math.exp(-t / 0.02); }),
+      ho: mk(0.3, function (t) { return (Math.random() * 2 - 1) * Math.exp(-t / 0.12); })
+    }; }
+  _play(buf, t, lvl) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = buf; const g = ctx.createGain(); g.gain.value = lvl; src.connect(g); g.connect(this._dbus); src.start(t); }
+  kick(t) { if (this.dmute.k) return; this.ensureDrumBus(); this._renderDrums(); if (this._rd) this._play(this._rd.k, t, this.dmix.k); }
+  snare(t) { if (this.dmute.s) return; this.ensureDrumBus(); this._renderDrums(); if (this._rd) this._play(this._rd.s, t, this.dmix.s); }
+  hat(t, open) { if (this.dmute.h) return; this.ensureDrumBus(); this._renderDrums(); if (this._rd) this._play(open ? this._rd.ho : this._rd.hc, t, this.dmix.h); }
+
+
     toggleDrum(lane, i) { this.drums[lane][i] = !this.drums[lane][i]; return this.drums[lane][i]; }
-  chords() {
+  style(name) {
+    const S = {
+      'PSY FULL-ON': { line: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], acc: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], k: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], s: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], h: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1], swing: 0 },
+      'DARK PROG': { line: [0,0,3,0,0,0,3,0,0,0,5,0,3,0,2,0], acc: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], k: [1,0,0,0,1,0,0,1,1,0,0,0,1,0,0,0], s: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1], h: [1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0], swing: 8 },
+      'HI-TECH': { line: [0,3,0,5,0,3,0,7,0,3,0,5,0,7,10,7], acc: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], k: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0], s: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], h: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], swing: 0 },
+      'GOA': { line: [0,0,7,0,5,0,3,0,0,0,7,0,5,0,3,2], acc: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], k: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], s: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], h: [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,1], swing: 12 }
+    };
+    const g = S[name]; if (!g) return;
+    for (let i = 0; i < SEQ_LEN; i++) {
+      this.steps[i].on = true; this.steps[i].tr = g.line[i]; this.steps[i].vel = g.acc[i] ? 1 : 0.7; this.steps[i].len = 75; this.steps[i].tie = false; this.steps[i].rat = (name === 'HI-TECH' && i % 2 === 1) ? 2 : 1;
+      this.drums.k[i] = !!g.k[i]; this.drums.s[i] = !!g.s[i]; this.drums.h[i] = !!g.h[i];
+    }
+    this.swing = g.swing;
+  }
+    chords() {
     const deg = [0,0,0,0, 3,3,3,3, 5,5,5,5, 7,7,3,3];
     for (let i = 0; i < SEQ_LEN; i++) { this.steps[i].on = (i % 4 === 0); this.steps[i].tr = deg[i]; this.steps[i].tie = false; this.steps[i].len = 60; this.steps[i].vel = (i % 8 === 0) ? 1 : 0.8; this.steps[i].rat = 1; }
   }
