@@ -297,6 +297,7 @@ class SynthProcessor extends AudioWorkletProcessor {
         v.fAmp += (fT - v.fAmp) * fC;
         const fEnvNorm = v.fAmp;
         let mCut=0, mPit=0, mAmp=0, mFm=0, mRes=0;
+        if (this.modActive) {
         for (let mi=0; mi<8; mi++) {
           const ms=p['m'+mi+'s'], ma=p['m'+mi+'a']/100, md=p['m'+mi+'d'];
           if (!ms || !ma || !md) continue;
@@ -306,6 +307,7 @@ class SynthProcessor extends AudioWorkletProcessor {
           else if (md===3) mAmp += mv;
           else if (md===4) mFm += mv;
           else if (md===5) mRes += mv*10;
+        }
         }
         let pitchExp = 0;
         if (p.lfoTarget === 1) pitchExp += (lfoVal * (p.lfoDepth / 100) * 80) / 1200;
