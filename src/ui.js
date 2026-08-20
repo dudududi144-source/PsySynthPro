@@ -1016,26 +1016,23 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     scopeLoop._f=(scopeLoop._f||0)+1; if (scopeLoop._f%2) return;
     const cv = $('scope'), c = cv.getContext('2d');
     const W = cv._w || cv.width, H = cv._h || cv.height;
-    c.fillStyle = 'rgba(2, 10, 15, 0.42)';
-    c.fillRect(0, 0, W, H);
-    if (!engine.ready) return;
-    const data = new Uint8Array(engine.analyser.fftSize);
-    engine.analyser.getByteTimeDomainData(data);
-    c.strokeStyle = '#86f7ff';
-    c.lineWidth = 1.6;
-    c.shadowColor = '#00e5ff';
-    c.shadowBlur = 7;
-    c.beginPath();
-    for (let i = 0; i < data.length; i += 4) {
-      const x = (i / data.length) * W;
-      const y = (data[i] / 255) * H;
-      if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+    if (!engine.analyser) return;
+    if (window.__psyViz === 'spec') {
+      const n = 48; if (!scopeLoop._fd || scopeLoop._fd.length !== engine.analyser.frequencyBinCount) scopeLoop._fd = new Uint8Array(engine.analyser.frequencyBinCount);
+      engine.analyser.getByteFrequencyData(scopeLoop._fd);
+      c.fillStyle = 'rgba(2,10,15,0.5)'; c.fillRect(0,0,W,H);
+      const bw = W / n;
+      for (let b=0;b<n;b++){ const v = scopeLoop._fd[Math.floor(Math.pow(b/n,1.6)*scopeLoop._fd.length*0.7)]/255; const h=v*H; c.fillStyle='hsl('+(185+v*60)+',90%,'+(40+v*30)+'%)'; c.fillRect(b*bw+1, H-h, bw-2, h); }
+    } else {
+      if (!scopeLoop._td) scopeLoop._td = new Uint8Array(1024);
+      engine.analyser.getByteTimeDomainData(scopeLoop._td);
+      c.fillStyle = 'rgba(2,10,15,0.42)'; c.fillRect(0,0,W,H);
+      c.strokeStyle = '#7ff3ff'; c.lineWidth = 1.4; c.beginPath();
+      for (let x=0;x<W;x++){ const v=(scopeLoop._td[Math.floor(x/W*1024)]-128)/128; const y=H/2+v*H*0.45; if(x===0)c.moveTo(x,y);else c.lineTo(x,y); }
+      c.stroke();
     }
-    c.stroke();
-    c.shadowBlur = 0;
   }
-
-  function updateMeta() {
+function updateMeta() {
     if (!engine.ready) return;
     $('oMeta').innerHTML =
       (engine.ctx.sampleRate / 1000).toFixed(0) + 'kHz WORKLET<br>' +
@@ -1070,7 +1067,8 @@ $('bPower').addEventListener('click', function () {
           window.__midi = midi;
         }
       } catch (e) { window.__psyShow('MIDI: ' + e.message); }
-      try { updateMeta(); } catch (e) { window.__psyShow('META: ' + e.message); }
+      var om = $('oMeta'); if (om) om.addEventListener('click', function(){ window.__psyViz = (window.__psyViz==='spec')?'wave':'spec'; });
+    try { updateMeta(); } catch (e) { window.__psyShow('META: ' + e.message); }
       try { syncUI(); } catch (e) { window.__psyShow('SYNC: ' + e.message); }
     }).catch(function (err) {
       $('oMeta').innerHTML = 'AUDIO ERROR';
