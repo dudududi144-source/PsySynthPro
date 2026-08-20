@@ -59,35 +59,39 @@ class Conductor {
       this.nextTime += stepDur;
     }
   }
-  /* DRUMS: pre-rendered buffers (zero per-hit DSP/GC) */
+  /* PREMIUM DRUMS: layered, saturated, baked to buffers (zero per-hit DSP) */
   ensureDrums() {
     if (this.drums || !this.engine.ctx) return;
     var c = this.engine.ctx, sr = c.sampleRate;
-    var kl = Math.floor(sr * 0.3), kb = c.createBuffer(1, kl, sr), kd = kb.getChannelData(0);
-    var ph = 0; for (var n = 0; n < kl; n++) { var t = n / sr; var f = 150 * Math.pow(45 / 150, Math.min(1, t / 0.12)); ph += 2 * Math.PI * f / sr; kd[n] = Math.sin(ph) * Math.exp(-t * 14); }
-    var hl = Math.floor(sr * 0.12), hb = c.createBuffer(1, hl, sr), hd = hb.getChannelData(0), prev = 0;
-    for (var n = 0; n < hl; n++) { var t = n / sr; var x = Math.random() * 2 - 1; hd[n] = (x - prev) * Math.exp(-t * 60); prev = x; }
-    this.drums = { ctx: c, kick: kb, hat: hb };
+    var sat = function (x) { return Math.tanh(x * 1.4) * 0.85; };
+    /* KICK: sub sine w/ pitch env + click transient, saturated */
+    var kl = Math.floor(sr * 0.5), kb = c.createBuffer(1, kl, sr), kd = kb.getChannelData(0), ph = 0;
+    for (var n = 0; n < kl; n++) { var t = n / sr;
+      var f = 40 + 160 * Math.exp(-t * 34); ph += 2 * Math.PI * f / sr;
+      var body = Math.sin(ph) * Math.exp(-t * 7);
+      var click = (Math.random() * 2 - 1) * Math.exp(-t * 300) * 0.5;
+      kd[n] = sat(body * 1.3 + click); }
+    /* HAT: differentiated noise, fast decay + slight metallic ring */
+    function hatBuf(dur, dec) { var hl = Math.floor(sr * dur), hb = c.createBuffer(1, hl, sr), hd = hb.getChannelData(0), pv = 0;
+      for (var n = 0; n < hl; n++) { var t = n / sr; var x = Math.random() * 2 - 1;
+        hd[n] = (x - pv) * Math.exp(-t * dec) + Math.sin(2 * Math.PI * 6000 * t) * Math.exp(-t * dec * 1.4) * 0.15; pv = x; }
+      return hb; }
+    /* SNARE/CLAP: noise body + 180Hz tone, 3-tap clap envelope */
+    var sl = Math.floor(sr * 0.25), sb = c.createBuffer(1, sl, sr), sd = sb.getChannelData(0);
+    for (var n = 0; n < sl; n++) { var t = n / sr;
+      var taps = (t < 0.01 ? 1 : (t < 0.02 ? 0.7 : (t < 0.03 ? 0.5 : 0.35)));
+      sd[n] = sat(((Math.random() * 2 - 1) * Math.exp(-t * 22) + Math.sin(2 * Math.PI * 180 * t) * Math.exp(-t * 30) * 0.5) * taps); }
+    this.drums = { ctx: c, kick: kb, hatC: hatBuf(0.07, 90), hatO: hatBuf(0.3, 26), snare: sb };
   }
-  playBuf(buf, t, g) {
+  playBuf(buf, t, g, dest) {
     var c = this.drums.ctx; var s = c.createBufferSource(); s.buffer = buf;
     var gn = c.createGain(); gn.gain.value = g;
-    s.connect(gn); gn.connect(this.engine.master || this.engine.fxInput); s.start(t);
+    s.connect(gn); gn.connect(dest || this.engine.master || this.engine.fxInput); s.start(t);
   }
-  kick(t) { if (isFinite(t)) this.playBuf(this.drums.kick, t, 0.9); }
-  hat(t, open) { if (isFinite(t)) this.playBuf(this.drums.hat, t, open ? 0.3 : 0.22); }
-  mutate() {
-    this.reseed(Math.floor(Math.random() * 2147483646) + 1);
-    this.progOffset = ((this.progOffset || 0) + 1) % 4;
-    this.leadDeg = 0;
-  }
-  fillNext() { this.wantFill = true; }
-  arrange() {
-    var b = this.bar % 9;
-    if (b < 2) return 'intro';
-    if (b === 8) return 'break';
-    return 'full';
-  }
+  kick(t) { if (!isFinite(t)) return; this.playBuf(this.drums.kick, t, 1.0);
+    var fx = this.engine.fxInput; if (fx) { fx.gain.cancelScheduledValues(t); fx.gain.setValueAtTime(0.55, t); fx.gain.setTargetAtTime(1.0, t + 0.02, 0.12); } }
+  hat(t, open) { if (isFinite(t)) this.playBuf(open ? this.drums.hatO : this.drums.hatC, t, open ? 0.3 : 0.24); }
+  snare(t) { if (isFinite(t)) this.playBuf(this.drums.snare, t, 0.5); }
   playStep(i, t, stepDur) {
     var PH = [[0, 5, 3, 4], [0, 6, 5, 4], [0, 3, 5, 4], [0, 2, 5, 4]];
     var root = PH[(Math.floor(this.bar / 2) + (this.progOffset || 0)) % PH.length][this.bar % 4];
@@ -98,6 +102,7 @@ class Conductor {
     if (this.drumsOn && this.drums && ARR === 'full') {
       if (i % 4 === 0) this.kick(t);
       if (i % 4 === 2) this.hat(t, false);
+      if (i === 4 || i === 12) this.snare(t);
       if (i === 14 && drive > 0.6) this.hat(t, true);
     }
     /* BASS: rolling 16ths on chord root (psytrance) */
