@@ -973,6 +973,7 @@ const LABEL = { 48: 'C3', 50: 'D3', 52: 'E3', 53: 'F3', 55: 'G3', 57: 'A3', 59: 
     if (lbl) lbl.textContent = noteName(48 + octShift * 12) + ' \u2013 ' + noteName(72 + octShift * 12) + '  [Z/X]';
   }
   function applyOctave() {
+    window.__octShift = octShift;
     document.querySelectorAll('#kb .key').forEach(function (k) {
       const base = parseInt(k.dataset.base, 10);
       k.dataset.n = String(base + octShift * 12);
