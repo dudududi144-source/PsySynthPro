@@ -1362,12 +1362,32 @@ $('bPower').addEventListener('click', function () {
     fill();
   }
 
+  function buildConductor() {
+    var s = document.createElement('div'); s.className = 'section conductor-section';
+    s.innerHTML = '<div class="stitle" style="--c:#9fe8a8">CONDUCTOR \u00B7 AI</div>';
+    var row = document.createElement('div'); row.className = 'krow';
+    var on = document.createElement('button'); on.className = 'stb'; on.textContent = 'AUTOPILOT OFF';
+    var cond = window.__cond || (window.__cond = new Psy.Conductor(engine));
+    on.addEventListener('click', function(){ cond.setEnabled(!cond.enabled); on.textContent = cond.enabled ? 'AUTOPILOT ON' : 'AUTOPILOT OFF'; on.classList.toggle('on', cond.enabled); });
+    row.appendChild(on);
+    var ks = document.createElement('select'); ks.className='msel'; ks.id='condKey'; ks.name='condKey';
+    for (var n=40;n<=52;n++){ var o=document.createElement('option'); o.value=n; o.textContent=noteName(n); ks.appendChild(o); }
+    ks.value = 45; ks.addEventListener('change', function(){ cond.key = +ks.value; });
+    row.appendChild(ks);
+    var ss = document.createElement('select'); ss.className='msel'; ss.id='condScale'; ss.name='condScale';
+    ['minor','phrygian','harmonic','dorian','major'].forEach(function(x){ var o=document.createElement('option'); o.value=x; o.textContent=x.toUpperCase(); ss.appendChild(o); });
+    ss.addEventListener('change', function(){ cond.scale = ss.value; });
+    row.appendChild(ss);
+    new Psy.Knob(row, { label:'COMPLEX', color:'#9fe8a8', min:0, max:100, def:60, fmt:function(v){return Math.round(v)+'%';}, onChange:function(v){ cond.complexity=v/100; } });
+    s.appendChild(row); $('sections').appendChild(s);
+  }
   safeBuild('macros', buildMacros);
   safeBuild('tabs', buildTabs);
   safeBuild('sections', buildSections);
   safeBuild('matrix', buildModMatrix);
   safeBuild('arp', buildArpPanel);
   safeBuild('seq2', buildSeqPanel2);
+  safeBuild('conductor', buildConductor);
   safeBuild('wavetable', buildWavetableLab);
   safeBuild('morph', buildMorph);
   safeBuild('presetmenu', buildPresetMenu);
