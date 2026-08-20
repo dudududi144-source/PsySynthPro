@@ -766,7 +766,7 @@ function pushRecent(name) {
   const TABMAP = {"POLYBLEP OSC": "SYNTH", "FM OPERATOR": "SYNTH", "ZDF SVF": "SYNTH", "ENVELOPES": "SYNTH", "LFO 1+2": "MOD", "FREE MOD MATRIX": "MOD", "PERFORMANCE MACROS": "MOD", "FX RACK": "FX", "SPACE FX": "FX", "ARPEGGIATOR": "PERF", "STEP SEQ": "PERF", "WAVETABLE LAB": "PERF", "PRESET MORPH": "PERF"};
   const bpm = seq.enabled ? seq.bpm : (arp.enabled ? arp.bpm : 120);
   const btn = document.createElement('button');
-  const count = window.prompt ? parseInt(window.prompt('How many variations? (1-32)', '8'), 10) : 8;
+  const count = 8;
   let octShift = 0;
   let pIdx = 0;
   let paramHistory = [];
