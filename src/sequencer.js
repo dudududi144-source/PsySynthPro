@@ -80,9 +80,6 @@ class Sequencer {
         const i = this.stepPos;
         const st = this.steps[i];
         const tStep = this.nextTime + ((i % 2 === 1) ? (this.swing / 100) * stepDur * 0.5 : 0);
-        try {
-          this.hit('k', tStep); if (this.drums.k[i]) {}
-        } catch (e) {}
         // drums (lane-gated)
         try {
           if (this.drums.k[i]) this.hit('k', tStep);
