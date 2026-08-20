@@ -1262,6 +1262,10 @@ $('bPower').addEventListener('click', function () {
   var mel = document.createElement('button'); mel.className = 'stb'; mel.textContent = 'MELODIC';
   mel.addEventListener('click', function () { seq.melodic(); paint(); });
   tr.appendChild(mel);
+  var sty = document.createElement('select'); sty.className = 'msel'; sty.id = 'pstyle'; sty.name = 'pstyle';
+  ['PSY FULL-ON', 'DARK PROG', 'HI-TECH', 'GOA'].forEach(function (n) { var o = document.createElement('option'); o.textContent = n; sty.appendChild(o); });
+  sty.addEventListener('change', function () { seq.style(sty.value); paint(); });
+  tr.appendChild(sty);
   var chd = document.createElement('button'); chd.className = 'stb'; chd.textContent = 'CHORD';
   chd.addEventListener('click', function () { seq.chords(); paint(); });
   tr.appendChild(chd);
