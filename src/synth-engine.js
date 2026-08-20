@@ -199,7 +199,7 @@ class SynthEngine {
     const f = 440 * Math.pow(2, (note - 69) / 12);
     const flt = this.ctx.createBiquadFilter(); flt.type = ['lowpass','highpass','bandpass','lowpass'][(this._fin(p.filterType,0)|0)] || 'lowpass';
     const cut = this._fin(p.cutoff, 2600); flt.Q.value = this._fin(p.res, 2);
-    flt.frequency.setValueAtTime(cut + (this._fin(p.fEnvAmt, 0) / 100) * 4000, t);
+    flt.frequency.setValueAtTime(cut + ((this._fin(p.fEnvAmt, 0) + this._fin(p.modEC, 0)) / 100) * 4000, t);
     flt.frequency.setTargetAtTime(cut, t, Math.max(0.01, this._fin(p.fDecay, 300) / 1000));
     const g = this.ctx.createGain();
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vel || 0.8, t + atk);
@@ -215,7 +215,7 @@ class SynthEngine {
     const lfoDepth = this._fin(p.lfoDepth, 0);
     let lfo = null;
     if (lfoDepth > 0) { lfo = this.ctx.createOscillator(); lfo.frequency.value = this._fin(p.lfoRate, 5);
-      const lg = this.ctx.createGain(); lg.gain.value = (lfoDepth / 100) * 2500; lfo.connect(lg); lg.connect(flt.frequency); lfo.start(t); }
+      const lg = this.ctx.createGain(); lg.gain.value = ((lfoDepth + this._fin(p.modLC, 0)) / 100) * 2500; lfo.connect(lg); lg.connect(flt.frequency); lfo.start(t); }
     const fmDepth = this._fin(p.fmDepth, 0);
     let mod = null;
     if (fmDepth > 0) { mod = this.ctx.createOscillator(); mod.frequency.value = f * (this._fin(p.fmRatio, 2) || 2);
