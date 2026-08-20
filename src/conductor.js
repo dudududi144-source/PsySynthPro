@@ -81,20 +81,27 @@ class Conductor {
     var g = c.createGain(); g.gain.setValueAtTime(open ? 0.3 : 0.22, t); g.gain.exponentialRampToValueAtTime(0.001, t + (open ? 0.25 : 0.05));
     s.connect(f); f.connect(g); g.connect(this.engine.master || this.engine.fxInput); s.start(t); s.stop(t + 0.3);
   }
+  arrange() {
+    var b = this.bar % 9;
+    if (b < 2) return 'intro';
+    if (b === 8) return 'break';
+    return 'full';
+  }
   playStep(i, t, stepDur) {
     var PH = [[0, 5, 3, 4], [0, 6, 5, 4], [0, 3, 5, 4], [0, 2, 5, 4]];
     var root = PH[Math.floor(this.bar / 2) % PH.length][this.bar % 4];
     var drive = this.complexity;
+    var ARR = this.arrange();
     /* DRUMS */
     this.ensureDrums();
-    if (this.drums) {
+    if (this.drums && ARR === 'full') {
       if (i % 4 === 0) this.kick(t);
       if (i % 4 === 2) this.hat(t, false);
       if (i === 14 && drive > 0.6) this.hat(t, true);
     }
     /* BASS: rolling 16ths on chord root (psytrance) */
     var bassPat = euclid(16, drive > 0.85 ? 16 : (drive > 0.55 ? 8 : 4));
-    if (bassPat[i]) {
+    if (ARR !== 'break' && bassPat[i]) {
       var bn = this.deg2note(root, 0);
       var vel = (i % 4 === 0) ? 0.95 : 0.7;
       this.engine.noteOnAt(bn, vel, t);
@@ -102,7 +109,8 @@ class Conductor {
     }
     /* LEAD: euclidean + scale-walk */
     var leadPat = euclid(16, Math.round(2 + drive * 6));
-    if (leadPat[i] && this.rnd() < drive * 0.7) {
+    if (ARR === 'break' && i >= 12 && this.drums) this.hat(t, i === 15);
+    if (ARR !== 'intro' && leadPat[i] && this.rnd() < drive * 0.7) {
       this.leadDeg += (this.rnd() < 0.5 ? 1 : (this.rnd() < 0.3 ? 2 : -1));
       if (this.leadDeg > 7) this.leadDeg -= 7; if (this.leadDeg < 0) this.leadDeg += 7;
       var ln = this.deg2note(root + this.leadDeg, 2);
