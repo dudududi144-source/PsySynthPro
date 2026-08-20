@@ -1270,6 +1270,20 @@ $('bPower').addEventListener('click', function () {
   var chd = document.createElement('button'); chd.className = 'stb'; chd.textContent = 'CHORD';
   chd.addEventListener('click', function () { seq.chords(); paint(); });
   tr.appendChild(chd);
+  var slotSel = 0;
+  var ln = document.createElement('button'); ln.className = 'stb'; ln.textContent = '16';
+  ln.addEventListener('click', function () { seq.setLen(seq.steps.length === 16 ? 32 : 16); ln.textContent = String(seq.steps.length); buildGrid(); paint(); });
+  tr.appendChild(ln);
+  var db = document.createElement('button'); db.className = 'stb'; db.textContent = 'DOUBLE';
+  db.addEventListener('click', function () { seq.setLen(32); ln.textContent = '32'; seq.double(); buildGrid(); paint(); });
+  tr.appendChild(db);
+  var sl = document.createElement('select'); sl.className = 'msel'; sl.id = 'pslot'; sl.name = 'pslot';
+  [1, 2, 3, 4].forEach(function (n) { var o = document.createElement('option'); o.value = n - 1; o.textContent = 'SLOT ' + n; sl.appendChild(o); });
+  sl.addEventListener('change', function () { slotSel = +sl.value; }); tr.appendChild(sl);
+  var sv = document.createElement('button'); sv.className = 'stb'; sv.textContent = 'SAVE';
+  sv.addEventListener('click', function () { seq.saveSlot(slotSel); }); tr.appendChild(sv);
+  var ld = document.createElement('button'); ld.className = 'stb'; ld.textContent = 'LOAD';
+  ld.addEventListener('click', function () { seq.loadSlot(slotSel); buildGrid(); paint(); }); tr.appendChild(ld);
   s.appendChild(tr);
   var kr = document.createElement('div'); kr.className = 'krow';
   new Psy.Knob(kr, { label: 'SWING', color: '#2dd4bf', min: 0, max: 60, def: 0, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.swing = v; } });
@@ -1280,8 +1294,11 @@ $('bPower').addEventListener('click', function () {
   new Psy.Knob(kr, { label: 'RATCH', color: '#2dd4bf', min: 1, max: 4, def: 1, fmt: function (v) { return 'x' + Math.round(v); }, onChange: function (v) { seq.steps[sel].rat = Math.round(v); } });
   s.appendChild(kr);
   var ng = document.createElement('div'); ng.className = 'seqgrid';
-  for (var i = 0; i < Psy.SEQ_LEN; i++) { (function (i) { var c = document.createElement('button'); c.className = 'sqc';
-    c.addEventListener('click', function () { seq.toggleStep(i); sel = i; paint(); }); ng.appendChild(c); cells.push(c); })(i); }
+  function buildGrid() { ng.innerHTML = ''; cells.length = 0;
+    for (var i = 0; i < seq.steps.length; i++) { (function (i) { var c = document.createElement('button'); c.className = 'sqc';
+      c.addEventListener('click', function () { var st = seq.steps[i]; if (!st.on) { st.on = true; st.vel = 1; } else if (st.vel > 0.9) st.vel = 0.75; else if (st.vel > 0.6) st.vel = 0.5; else st.on = false; sel = i; paint(); });
+      ng.appendChild(c); cells.push(c); })(i); } }
+  buildGrid();
   s.appendChild(ng);
   [['k', 'KICK', '#f87171'], ['s', 'SNARE', '#fbbf24'], ['hc', 'HAT', '#7ff3ff'], ['ho', 'OPEN', '#a78bfa'], ['sh', 'SHAKER', '#9fe8a8']].forEach(function (L) {
     var row = document.createElement('div'); row.className = 'seqgrid drum';
