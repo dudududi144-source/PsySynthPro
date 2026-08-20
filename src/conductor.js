@@ -24,7 +24,10 @@ class Conductor {
   kick(t){this.playBuf(this.drums.kick,t,1.0,0);var fx=this.engine.fxInput;if(fx){fx.gain.cancelScheduledValues(t);fx.gain.setTargetAtTime(0.55,t,0.004);fx.gain.setTargetAtTime(1.0,t+0.02,0.12);}}
   hat(t,o){this.playBuf(o?this.drums.hatO:this.drums.hatC,t,o?0.3:0.24,0.25);}
   snare(t){this.playBuf(this.drums.snare,t,0.5,-0.15);}
-  tick(){if(!this.enabled||!this.engine.ctx)return;var ctx=this.engine.ctx;if(this.nextTime<ctx.currentTime-0.05)this.nextTime=ctx.currentTime+0.05;var sd=(60/this.bpm)/4;while(this.nextTime<ctx.currentTime+0.12){this.playStep(this.stepPos,this.nextTime,sd);this.stepPos=(this.stepPos+1)%16;if(this.stepPos===0)this.bar++;this.nextTime+=sd;}}
+  tick(){if(!this.enabled||!this.engine.ctx)return;var ctx=this.engine.ctx;if(this.nextTime<ctx.currentTime-0.05)this.nextTime=ctx.currentTime+0.05;var sd=(60/this.bpm)/4;while(this.nextTime<ctx.currentTime+0.12){this.  setLive(k,v){this.engine.set(k,v);var R=(window.Psy&&Psy.REG)||{};if(R[k])R[k].set(v,true);}
+  automate(ARR){var tgt=ARR==='full'?0.9:(ARR==='intro'?0.4:0.15);this.energy=(this.energy==null)?tgt:this.energy+(tgt-this.energy)*0.35;var e=Math.min(1,this.energy*(0.5+this.complexity*0.6));
+    this.setLive('cutoff',Math.round(300+e*6500));this.setLive('res',Math.round(2+e*8));this.setLive('reverb',Math.round(20+(1-e)*25));this.setLive('delay',Math.round(15+e*25));this.setLive('fmDepth',Math.round(e*45));this.setLive('lfoDepth',Math.round(e*60));}
+playStep(this.stepPos,this.nextTime,sd);this.stepPos=(this.stepPos+1)%16;if(this.stepPos===0)this.bar++;this.nextTime+=sd;}}
   playStep(i,t,sd){var PH=[[0,5,3,4],[0,6,5,4],[0,3,5,4],[0,2,5,4]];var root=PH[(Math.floor(this.bar/2)+this.progOffset)%PH.length][this.bar%4];var dr=this.complexity;var _ab = this.bar % 9; var ARR = _ab < 2 ? 'intro' : (_ab === 8 ? 'break' : 'full');this.ensureDrums();
     if(this.drumsOn&&this.drums&&ARR==='full'){if(i%4===0)this.kick(t);if(i%4===2)this.hat(t,false);if(i===4||i===12)this.snare(t);if(i===14&&dr>0.6)this.hat(t,true);}
     if((ARR==='break'||this.wantFill)&&i>=12&&this.drums&&this.drumsOn)this.hat(t,i===15);
@@ -34,6 +37,6 @@ class Conductor {
     var lp=euclid(16,Math.round(2+dr*6));
     if(ARR!=='intro'&&lp[i]&&this.rnd()<dr*0.7){this.leadDeg+=(this.rnd()<0.5?1:(this.rnd()<0.3?2:-1));if(this.leadDeg>7)this.leadDeg-=7;if(this.leadDeg<0)this.leadDeg+=7;var ln=this.deg2note(root+this.leadDeg,2);this.engine.noteOnAt(ln,0.6,t);this.engine.noteOffAt(ln,t+sd*(this.rnd()<0.3?3:1.5));}
     if(i===0&&(this.bar%2===0)){this.releasePad();var to=[root,root+4];for(var k=0;k<to.length;k++){var pn=this.deg2note(to[k],1);this.engine.noteOnAt(pn,0.35,t);this.padHeld.push(pn);}}
-    if(i===0){var ph=(this.bar%8)/8;this.engine.set('cutoff',Math.max(200,Math.min(8000,600+Math.sin(ph*6.283)*1500+2200)));this.engine.set('reverb',Math.round(25+Math.sin(ph*3.1416)*20));}}
+    if(i===0){this.automate(ARR);}}
 }
 Psy.Conductor = Conductor;
