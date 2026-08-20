@@ -68,6 +68,7 @@ class SynthProcessor extends AudioWorkletProcessor {
   onMessage(m) {
     if (m.type === 'params') {
       Object.assign(this.p, m.values);
+      this.modActive = !!(this.p.m0a||this.p.m1a||this.p.m2a||this.p.m3a||this.p.m4a||this.p.m5a||this.p.m6a||this.p.m7a);
       const p = this.p;
       const cl = (v,lo,hi,fb)=> (typeof v==='number'&&isFinite(v))? Math.max(lo,Math.min(hi,v)) : fb;
       p.cutoff = cl(p.cutoff,40,16000,2600);
@@ -292,7 +293,7 @@ class SynthProcessor extends AudioWorkletProcessor {
         v.fAmp += (fT - v.fAmp) * fC;
         const fEnvNorm = v.fAmp;
         let mCut=0, mPit=0, mAmp=0, mFm=0, mRes=0;
-        for (let mi=0; mi<8; mi++) {
+        if (this.modActive) for (let mi=0; mi<8; mi++) {
           const ms=p['m'+mi+'s'], ma=p['m'+mi+'a']/100, md=p['m'+mi+'d'];
           if (!ms || !ma || !md) continue;
           const mv = (ms===1?lfoVal:ms===2?lfo2Val:ms===3?envNorm:ms===4?fEnvNorm:ms===5?(v.vel-0.5)*2:0)*ma;
