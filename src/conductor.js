@@ -21,7 +21,7 @@ class Conductor {
     for(var n=0;n<sl;n++){var t=n/sr;var tp=(t<0.01?1:(t<0.02?0.7:(t<0.03?0.5:0.35)));sd[n]=sat(((Math.random()*2-1)*Math.exp(-t*22)+Math.sin(2*Math.PI*180*t)*Math.exp(-t*30)*0.5)*tp);}
     this.drums={ctx:c,kick:kb,hatC:hb(0.07,90),hatO:hb(0.3,26),snare:sb};}
   playBuf(buf,t,g,pan){if(!isFinite(t))return;var c=this.drums.ctx,s=c.createBufferSource();s.buffer=buf;var gn=c.createGain();gn.gain.value=g;var o=gn;if(pan&&c.createStereoPanner){var p=c.createStereoPanner();p.pan.value=pan;gn.connect(p);o=p;}s.connect(gn);o.connect(this.engine.master||this.engine.fxInput);s.start(t);}
-  kick(t){this.playBuf(this.drums.kick,t,1.0,0);var fx=this.engine.fxInput;if(fx){fx.gain.cancelScheduledValues(t);fx.gain.setValueAtTime(0.55,t);fx.gain.setTargetAtTime(1.0,t+0.02,0.12);}}
+  kick(t){this.playBuf(this.drums.kick,t,1.0,0);var fx=this.engine.fxInput;if(fx){fx.gain.cancelScheduledValues(t);fx.gain.setTargetAtTime(0.55,t,0.004);fx.gain.setTargetAtTime(1.0,t+0.02,0.12);}}
   hat(t,o){this.playBuf(o?this.drums.hatO:this.drums.hatC,t,o?0.3:0.24,0.25);}
   snare(t){this.playBuf(this.drums.snare,t,0.5,-0.15);}
   tick(){if(!this.enabled||!this.engine.ctx)return;var ctx=this.engine.ctx;if(this.nextTime<ctx.currentTime-0.05)this.nextTime=ctx.currentTime+0.05;var sd=(60/this.bpm)/4;while(this.nextTime<ctx.currentTime+0.12){this.playStep(this.stepPos,this.nextTime,sd);this.stepPos=(this.stepPos+1)%16;if(this.stepPos===0)this.bar++;this.nextTime+=sd;}}
