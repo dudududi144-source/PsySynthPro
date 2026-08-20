@@ -76,6 +76,12 @@ class Conductor {
   }
   kick(t) { if (isFinite(t)) this.playBuf(this.drums.kick, t, 0.9); }
   hat(t, open) { if (isFinite(t)) this.playBuf(this.drums.hat, t, open ? 0.3 : 0.22); }
+  arrange() {
+    var b = this.bar % 9;
+    if (b < 2) return 'intro';
+    if (b === 8) return 'break';
+    return 'full';
+  }
   playStep(i, t, stepDur) {
     var PH = [[0, 5, 3, 4], [0, 6, 5, 4], [0, 3, 5, 4], [0, 2, 5, 4]];
     var root = PH[Math.floor(this.bar / 2) % PH.length][this.bar % 4];
