@@ -941,6 +941,9 @@ function buildTabs() {
 
 
   /* ── MINIMAL STEP SEQ (top, smart editor) ─────────────────────── */
+  function ensurePower(){ try { if (window.engine && !engine.ready) { var b = $('bPower'); if (b) b.click(); } } catch(e){} }
+  document.addEventListener('pointerdown', ensurePower, true);
+  document.addEventListener('keydown', ensurePower, true);
   safeBuild('macros', buildMacros);
   safeBuild('tabs', buildTabs);
   safeBuild('sections', buildSections);
