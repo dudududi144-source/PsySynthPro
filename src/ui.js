@@ -1285,6 +1285,15 @@ $('bPower').addEventListener('click', function () {
       c.addEventListener('click', function () { seq.toggleDrum(L[0], i); paint(); }); row.appendChild(c); drumCells.push({ el: c, lane: L[0], i: i }); })(i); }
     s.appendChild(row);
   });
+  var mx = document.createElement('div'); mx.className = 'krow';
+  new Psy.Knob(mx, { label: 'KICK', color: '#f87171', min: 0, max: 100, def: 90, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dmix.k = v / 100; } });
+  new Psy.Knob(mx, { label: 'SNARE', color: '#fbbf24', min: 0, max: 100, def: 70, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dmix.s = v / 100; } });
+  new Psy.Knob(mx, { label: 'HAT', color: '#7ff3ff', min: 0, max: 100, def: 50, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dmix.h = v / 100; } });
+  [['k', 'K'], ['s', 'S'], ['h', 'H']].forEach(function (M) {
+    var mb = document.createElement('button'); mb.className = 'stb on'; mb.textContent = M[1];
+    mb.addEventListener('click', function () { seq.dmute[M[0]] = !seq.dmute[M[0]]; mb.classList.toggle('on', !seq.dmute[M[0]]); });
+    mx.appendChild(mb); });
+  s.appendChild(mx);
   function paint() {
     for (var i = 0; i < Psy.SEQ_LEN; i++) { var st = seq.steps[i];
       cells[i].classList.toggle('on', st.on); cells[i].classList.toggle('sel', i === sel);
