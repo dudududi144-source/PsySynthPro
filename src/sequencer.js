@@ -41,6 +41,15 @@ class Sequencer {
   stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
   toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
   toggleDrum(lane, i) { this.drums[lane][i] = !this.drums[lane][i]; return this.drums[lane][i]; }
+  melodic() {
+    const line = [0,0,3,0, 5,0,3,0, 0,0,7,5, 3,0,2,0];
+    for (let i = 0; i < SEQ_LEN; i++) {
+      this.steps[i].on = true; this.steps[i].tr = line[i];
+      this.steps[i].tie = (line[i] === line[(i+1)%SEQ_LEN]);
+      this.steps[i].len = (i % 4 === 3) ? 95 : 80; this.steps[i].vel = (i % 4 === 0) ? 1 : 0.75; this.steps[i].rat = 1;
+    }
+  }
+
   setStep(i, patch) { Object.assign(this.steps[i], patch); }
   noteOn(note, vel) {
     if (!this.enabled) { this.engine.noteOn(note, vel); return; }
@@ -77,7 +86,7 @@ class Sequencer {
       const st = this.steps[i];
       const tStep = this.nextTime + ((i % 2 === 1) ? (this.swing / 100) * stepDur * 0.5 : 0);
       var C = window.__cond;
-      if (C && C.drumsOn) {
+      if (this.drums && C && C.drumsOn) {
         if (this.drums.k[i] && typeof C.kick === 'function') C.kick(tStep);
         if (this.drums.s[i] && typeof C.snare === 'function') C.snare(tStep);
         if (this.drums.h[i] && typeof C.hat === 'function') C.hat(tStep, false);
