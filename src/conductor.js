@@ -26,7 +26,7 @@ class Conductor {
     this.bpm = 141; this.complexity = 0.6;
     this.stepPos = 0; this.bar = 0; this.nextTime = 0;
     this.timer = null; this.padHeld = [];
-    this.leadDeg = 0; this.seed = 1;
+    this.leadDeg = 0; this.seed = 1; this.drumsOn = true; this.progOffset = 0; this.wantFill = false;
   }
   rnd() { this.seed = (this.seed * 16807) % 2147483647; return (this.seed - 1) / 2147483646; }
   reseed(s) { this.seed = (s || 12345) % 2147483646 + 1; }
@@ -76,6 +76,12 @@ class Conductor {
   }
   kick(t) { if (isFinite(t)) this.playBuf(this.drums.kick, t, 0.9); }
   hat(t, open) { if (isFinite(t)) this.playBuf(this.drums.hat, t, open ? 0.3 : 0.22); }
+  mutate() {
+    this.reseed(Math.floor(Math.random() * 2147483646) + 1);
+    this.progOffset = ((this.progOffset || 0) + 1) % 4;
+    this.leadDeg = 0;
+  }
+  fillNext() { this.wantFill = true; }
   arrange() {
     var b = this.bar % 9;
     if (b < 2) return 'intro';
@@ -84,12 +90,12 @@ class Conductor {
   }
   playStep(i, t, stepDur) {
     var PH = [[0, 5, 3, 4], [0, 6, 5, 4], [0, 3, 5, 4], [0, 2, 5, 4]];
-    var root = PH[Math.floor(this.bar / 2) % PH.length][this.bar % 4];
+    var root = PH[(Math.floor(this.bar / 2) + (this.progOffset || 0)) % PH.length][this.bar % 4];
     var drive = this.complexity;
     var ARR = this.arrange();
     /* DRUMS */
     this.ensureDrums();
-    if (this.drums && ARR === 'full') {
+    if (this.drumsOn && this.drums && ARR === 'full') {
       if (i % 4 === 0) this.kick(t);
       if (i % 4 === 2) this.hat(t, false);
       if (i === 14 && drive > 0.6) this.hat(t, true);
@@ -105,6 +111,8 @@ class Conductor {
     /* LEAD: euclidean + scale-walk */
     var leadPat = euclid(16, Math.round(2 + drive * 6));
     if (ARR === 'break' && i >= 12 && this.drums) this.hat(t, i === 15);
+    if (this.wantFill && i >= 12 && this.drums) this.hat(t, i === 15);
+    if (i === 15) this.wantFill = false;
     if (ARR !== 'intro' && leadPat[i] && this.rnd() < drive * 0.7) {
       this.leadDeg += (this.rnd() < 0.5 ? 1 : (this.rnd() < 0.3 ? 2 : -1));
       if (this.leadDeg > 7) this.leadDeg -= 7; if (this.leadDeg < 0) this.leadDeg += 7;
