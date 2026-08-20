@@ -68,7 +68,7 @@ class SynthProcessor extends AudioWorkletProcessor {
   onMessage(m) {
     if (m.type === 'params') {
       Object.assign(this.p, m.values);
-      this.modActive = !!(this.p.m0a||this.p.m1a||this.p.m2a||this.p.m3a||this.p.m4a||this.p.m5a||this.p.m6a||this.p.m7a);
+      this.modActive = !!(this.p.modLC||this.p.modLP||this.p.modLA||this.p.modLF||this.p.modLR||this.p.modEC||this.p.modEP||this.p.modEA||this.p.modEF||this.p.modER||this.p.modVC||this.p.modVP||this.p.modVA||this.p.modVF||this.p.modVR);
       const p = this.p;
       const cl = (v,lo,hi,fb)=> (typeof v==='number'&&isFinite(v))? Math.max(lo,Math.min(hi,v)) : fb;
       p.cutoff = cl(p.cutoff,40,16000,2600);
@@ -293,15 +293,13 @@ class SynthProcessor extends AudioWorkletProcessor {
         v.fAmp += (fT - v.fAmp) * fC;
         const fEnvNorm = v.fAmp;
         let mCut=0, mPit=0, mAmp=0, mFm=0, mRes=0;
-        if (this.modActive) for (let mi=0; mi<8; mi++) {
-          const ms=p['m'+mi+'s'], ma=p['m'+mi+'a']/100, md=p['m'+mi+'d'];
-          if (!ms || !ma || !md) continue;
-          const mv = (ms===1?lfoVal:ms===2?lfo2Val:ms===3?envNorm:ms===4?fEnvNorm:ms===5?(v.vel-0.5)*2:0)*ma;
-          if (md===1) mCut += mv*4000;
-          else if (md===2) mPit += mv*12;
-          else if (md===3) mAmp += mv;
-          else if (md===4) mFm += mv;
-          else if (md===5) mRes += mv*10;
+        if (this.modActive) {
+          const velN=(v.vel-0.5)*2;
+          mCut = ((p.modLC||0)*lfoVal + (p.modEC||0)*envNorm + (p.modVC||0)*velN)/100*4000;
+          mPit = ((p.modLP||0)*lfoVal + (p.modEP||0)*envNorm + (p.modVP||0)*velN)/100*12;
+          mAmp = ((p.modLA||0)*lfoVal + (p.modEA||0)*envNorm + (p.modVA||0)*velN)/100;
+          mFm  = ((p.modLF||0)*lfoVal + (p.modEF||0)*envNorm + (p.modVF||0)*velN)/100;
+          mRes = ((p.modLR||0)*lfoVal + (p.modER||0)*envNorm + (p.modVR||0)*velN)/100*10;
         }
         let pitchExp = 0;
         if (p.lfoTarget === 1) pitchExp += (lfoVal * (p.lfoDepth / 100) * 80) / 1200;
