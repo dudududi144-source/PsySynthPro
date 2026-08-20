@@ -64,7 +64,7 @@ class Conductor {
     var root = PH[Math.floor(this.bar / 2) % PH.length][this.bar % 4];
     var drive = this.complexity;
     /* BASS: rolling 16ths on chord root (psytrance) */
-    var bassPat = euclid(16, drive > 0.7 ? 16 : (drive > 0.4 ? 8 : 4));
+    var bassPat = euclid(16, drive > 0.85 ? 16 : (drive > 0.55 ? 8 : 4));
     if (bassPat[i]) {
       var bn = this.deg2note(root, 0);
       var vel = (i % 4 === 0) ? 0.95 : 0.7;
@@ -73,7 +73,7 @@ class Conductor {
     }
     /* LEAD: euclidean + scale-walk */
     var leadPat = euclid(16, Math.round(2 + drive * 6));
-    if (leadPat[i] && this.rnd() < drive) {
+    if (leadPat[i] && this.rnd() < drive * 0.7) {
       this.leadDeg += (this.rnd() < 0.5 ? 1 : (this.rnd() < 0.3 ? 2 : -1));
       if (this.leadDeg > 7) this.leadDeg -= 7; if (this.leadDeg < 0) this.leadDeg += 7;
       var ln = this.deg2note(root + this.leadDeg, 2);
@@ -81,7 +81,7 @@ class Conductor {
       this.engine.noteOffAt(ln, t + stepDur * (this.rnd() < 0.3 ? 3 : 1.5));
     }
     /* PAD: chord on bar start */
-    if (i === 0) {
+    if (i === 0 && (this.bar % 2 === 0)) {
       this.releasePad();
       var tones = [root, root + 4];
       for (var k = 0; k < 3; k++) { var pn = this.deg2note(tones[k], 1); this.engine.noteOnAt(pn, 0.35, t); this.padHeld.push(pn); }
