@@ -1244,7 +1244,7 @@ $('bPower').addEventListener('click', function () {
   var sel = 0; var cells = []; var drumCells = [];
   var tr = document.createElement('div'); tr.className = 'krow';
   var run = document.createElement('button'); run.className = 'stb'; run.textContent = 'RUN';
-  run.addEventListener('click', function () { seq.setEnabled(!seq.enabled); run.textContent = seq.enabled ? 'STOP' : 'RUN'; run.classList.toggle('on', seq.enabled); });
+  run.addEventListener('click', function () { if (window.engine && !engine.ready) { var pb = document.getElementById('bPower'); if (pb) pb.click(); } seq.setEnabled(!seq.enabled); run.textContent = seq.enabled ? 'STOP' : 'RUN'; run.classList.toggle('on', seq.enabled); });
   tr.appendChild(run);
   var hold = document.createElement('button'); hold.className = 'stb'; hold.textContent = 'HOLD';
   hold.addEventListener('click', function () { seq.hold = !seq.hold; hold.classList.toggle('on', seq.hold); });
@@ -1262,6 +1262,9 @@ $('bPower').addEventListener('click', function () {
   var mel = document.createElement('button'); mel.className = 'stb'; mel.textContent = 'MELODIC';
   mel.addEventListener('click', function () { seq.melodic(); paint(); });
   tr.appendChild(mel);
+  var chd = document.createElement('button'); chd.className = 'stb'; chd.textContent = 'CHORD';
+  chd.addEventListener('click', function () { seq.chords(); paint(); });
+  tr.appendChild(chd);
   s.appendChild(tr);
   var kr = document.createElement('div'); kr.className = 'krow';
   new Psy.Knob(kr, { label: 'SWING', color: '#2dd4bf', min: 0, max: 60, def: 0, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.swing = v; } });
