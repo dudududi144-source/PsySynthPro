@@ -1260,7 +1260,7 @@ $('bPower').addEventListener('click', function () {
     function bpmU(){ bpmD.textContent = seq.bpm; }
     bpmDec.addEventListener('click', function(){ seq.bpm=Math.max(60,seq.bpm-1); bpmU(); });
     bpmInc.addEventListener('click', function(){ seq.bpm=Math.min(200,seq.bpm+1); bpmU(); });
-    const pat = document.createElement('select'); pat.className = 'msel';
+    const pat = document.createElement('select'); pat.className = 'msel'; pat.id='ppattern'; pat.name='ppattern';
     Object.keys(Psy.SEQ_PATTERNS).forEach(function (k) { const o = document.createElement('option'); o.textContent = k; pat.appendChild(o); });
     pat.addEventListener('change', function () { seq.loadPattern(pat.value); refresh(); });
     const clr = document.createElement('button'); clr.className='stb'; clr.textContent='CLR';
@@ -1310,9 +1310,9 @@ $('bPower').addEventListener('click', function () {
     if (!wrap) return;
     wrap.innerHTML = '';
     wrap.className = 'pmenu';
-    const cat = document.createElement('select'); cat.className = 'msel';
+    const cat = document.createElement('select'); cat.className = 'msel'; cat.id='pcat'; cat.name='pcat';
     ['ALL','BASS','LEAD','PAD','ARP','FX','WT','USER','PRO'].forEach(function (c) { const o = document.createElement('option'); o.textContent = c; cat.appendChild(o); });
-    const sel = document.createElement('select'); sel.className = 'msel big';
+    const sel = document.createElement('select'); sel.className = 'msel big'; sel.id='ppreset'; sel.name='ppreset';
     function fill(term) {
       sel.innerHTML = '';
       const names = Object.keys(Psy.PRESETS).filter(function (n) {
