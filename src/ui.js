@@ -230,7 +230,8 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       s.innerHTML = '<div class="stitle" style="--c:' + sec.color + '">' + sec.title + '</div>';
       const row = document.createElement('div');
       row.className = 'krow';
-      sec.items.forEach(function (it) {
+      var TIPS={cutoff:'תדר חיתוך הפילטר - בהירות',res:'רזוננס - שריקה ליד ה-cutoff',attack:'זמן התקפה - כניסה רכה/חדה',release:'זמן שחרור - זנב הצליל',fmDepth:'עומק FM - מתכתיות/פעמונים',lfoDepth:'עומק LFO - ויברטו/וואה',unison:'מספר קולות - עובי',detune:'סטיית כיוון בין קולות',reverb:'הדהוד - מרחב',delay:'הד - חזרות',sub:'תת-באס - עומק נמוך'};
+      sec.items.forEach(function (it) { if (TIPS[it.key]) it.title = TIPS[it.key];
         it.color = sec.color;
         it.value = engine.params[it.key];
         it.onChange = function (v) { engine.set(it.key, v); };
