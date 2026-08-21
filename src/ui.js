@@ -1494,7 +1494,7 @@ $('bPower').addEventListener('click', function () {
         g.strokeStyle = '#22d3ee'; g.lineWidth = 2; g.beginPath();
         for (var i = 0; i < w; i++) { var f = 20 * Math.pow(1000, i / w); var r = f / fc; var m;
           if (ty === 1) m = Math.sqrt(r * r * r * r / (1 + r * r * r * r + (1 / Math.max(0.5, q)) * r * r));
-          else if (ty === 2) m = (r / Math.max(0.5, q)) / Math.sqrt(1 + Math.pow(r - 1 / r, 2) * 1 + r * r * r * r / (q * q) * 0 );
+          else if (ty === 2) { var rq = r / Math.max(0.5, q); m = rq / Math.sqrt(Math.pow(1 - r * r, 2) + rq * rq); }
           else m = 1 / Math.sqrt(1 + r * r * r * r + (1 / Math.max(0.5, q) - 1) * r * r);
           m = Math.max(0.02, Math.min(1.4, m * (1 + (q - 0.7) * 0.4 * Math.exp(-Math.pow(Math.log(r) * 2.2, 2)))));
           var y = h - 6 - (Math.min(1, m) * (h - 14)); if (i === 0) g.moveTo(i, y); else g.lineTo(i, y); }
