@@ -27,7 +27,7 @@ class Sequencer {
     this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true; this.songOn = false; this.songSlot = 0; this.onPatternChanged = null;
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
     this.noteStep = 0; this.drumStep = 0; this.noteTime = null; this.drumTime = null; this.poly = false;
-    this.root = 45; this.swing = 0; this.human = 0; this.strum = 0.012; this.barCount = 0;
+    this.root = 45; this.swing = 0; this.human = 0; this.strum = 0.012; this.legato = false; this.humanDrum = 0; this.barCount = 0;
   }
   setEnabled(on) { this.enabled = on; if (on) { this.stepPos = 0; this.notePtr = 0; if (this.engine.ctx) this.nextTime = this.engine.ctx.currentTime + 0.08; this.startTimer(); } else { this.stopTimer(); if (!this.hold) this.held = []; if (this.lastNote >= 0) { this.engine.noteOff(this.lastNote); this.lastNote = -1; } } }
   startTimer() { if (this.timer) return; const s = this; this.timer = setInterval(function () { s.tick(); }, 25); }
@@ -122,6 +122,7 @@ class Sequencer {
     else if (lane === 'rd') this._play(this._rd.rd, t, 0.4); }
   _bass(t, f, vel) { const ctx = this.engine.ctx; const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(700, t); fl.frequency.exponentialRampToValueAtTime(120, t + 0.12); fl.Q.value = 6; const g = ctx.createGain(); g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14); o.connect(fl); fl.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.16); }
   fireDrum(i, t, dur, oct) {
+    const dh = (this.humanDrum || 0) / 100; if (dh > 0) t = t + SEQ_GT[i % 16] * dh * dur * 0.3;
     try {
       if (i === 0 && this.crashOn && this.barCount % 4 === 0) this.hit('cr', t);
       if (this.fillOn && this.barCount % 4 === 3 && i >= 14) this._playSn(t, 0.3 + (i - 13) * 0.3);
@@ -142,7 +143,7 @@ class Sequencer {
       const base = src[this.notePtr % src.length].note; this.notePtr++;
       const note = base + this.snap(st.tr | 0) + oct;
       let vel = Math.max(0.05, Math.min(1, st.vel));
-      const gateSec = Math.max(0.03, dur * ((st.len == null ? 75 : st.len) / 100));
+      const gateSec = this.legato ? Math.max(0.03, dur * 0.98) : Math.max(0.03, dur * ((st.len == null ? 75 : st.len) / 100));
       const hum = (this.human || 0) / 100; const gi = i % 16;
       const jt = tStep + SEQ_GT[gi] * hum * dur * 0.5;
       vel = Math.max(0.05, Math.min(1, vel * (1 + SEQ_GV[gi] * hum)));
