@@ -1267,6 +1267,9 @@ $('bPower').addEventListener('click', function () {
   var av = document.createElement('button'); av.className = 'stb'; av.textContent = 'AI VAR';
   av.addEventListener('click', function () { seq.mutateSeq(); buildGrid(); paint(); });
   tr.appendChild(av);
+  var dv = document.createElement('select'); dv.className = 'msel'; dv.id = 'pdiv'; dv.name = 'pdiv';
+  ['1/4', '1/8', '1/16', '1/32', '1/8T', '1/16T'].forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n; dv.appendChild(o); });
+  dv.value = '1/16'; dv.addEventListener('change', function () { seq.setDiv(dv.value); }); tr.appendChild(dv);
   var sty = document.createElement('select'); sty.className = 'msel'; sty.id = 'pstyle'; sty.name = 'pstyle';
   ['PSY FULL-ON', 'DARK PROG', 'HI-TECH', 'GOA'].forEach(function (n) { var o = document.createElement('option'); o.textContent = n; sty.appendChild(o); });
   sty.addEventListener('change', function () { seq.style(sty.value); paint(); });
