@@ -60,7 +60,12 @@ class Sequencer {
   toggleDrum(lane, i) { this.drums[lane][i] = !this.drums[lane][i]; return this.drums[lane][i]; }
   noteOn(n, v) { if (!this.enabled) { this.engine.noteOn(n, v); return; } if (!this.held.some(h => h.note === n)) { this.held.push({ note: n, vel: v || 0.8 }); this.held.sort((a, b) => a.note - b.note); } }
   noteOff(n) { if (!this.enabled) { this.engine.noteOff(n); return; } if (this.hold) return; this.held = this.held.filter(h => h.note !== n); }
-  panic() { this.held = []; }
+  suspend(on) { if (on) { this.stopTimer(); } else if (this.enabled) { if (this.engine.ctx) this.nextTime = this.engine.ctx.currentTime + 0.08; this.startTimer(); } }
+  toJSON() { return { steps: this.steps, drums: this.drums, div: this.div, scaleName: this.scaleName, bpm: this.bpm }; }
+  fromJSON(o) { if (!o) return; if (o.steps) this.steps = o.steps; if (o.drums) this.drums = o.drums; if (o.div) this.div = o.div; if (o.scaleName) this.scaleName = o.scaleName; if (o.bpm) this.bpm = o.bpm; }
+  autosave() { try { localStorage.setItem('psy.seq.auto', JSON.stringify(this.toJSON())); } catch (e) {} }
+  autorestore() { try { this.fromJSON(JSON.parse(localStorage.getItem('psy.seq.auto') || 'null')); } catch (e) {} }
+    panic() { this.held = []; }
   loadPattern(name) { const p = Psy.SEQ_PATTERNS[name]; if (!p) return false; for (let i = 0; i < SEQ_LEN; i++) { this.steps[i].on = p.g[i] === 1; this.steps[i].vel = p.a[i] === 1 ? 1 : 0.72; this.steps[i].tie = false; this.steps[i].tr = 0; this.steps[i].len = 75; this.steps[i].rat = 1; } return true; }
   melodic() { const l = [0,0,3,0,5,0,3,0,0,0,7,5,3,0,2,0]; for (let i = 0; i < SEQ_LEN; i++) { this.steps[i].on = true; this.steps[i].tr = l[i]; this.steps[i].tie = (l[i] === l[(i+1)%SEQ_LEN]); this.steps[i].len = (i%4===3)?95:80; this.steps[i].vel = (i%4===0)?1:0.75; this.steps[i].rat = 1; } }
   chords() { const d = [0,0,0,0,3,3,3,3,5,5,5,5,7,7,3,3]; for (let i = 0; i < SEQ_LEN; i++) { this.steps[i].on = (i%4===0); this.steps[i].tr = d[i]; this.steps[i].tie = false; this.steps[i].len = 60; this.steps[i].vel = (i%8===0)?1:0.8; this.steps[i].rat = 1; } }
