@@ -1591,6 +1591,10 @@ $('bPower').addEventListener('click', function () {
     var dr=document.createElement('button'); dr.className='stb on'; dr.textContent='DRUMS ON'; dr.addEventListener('click',function(){cond.drumsOn=!cond.drumsOn; dr.textContent=cond.drumsOn?'DRUMS ON':'DRUMS OFF'; dr.classList.toggle('on',cond.drumsOn);}); row.appendChild(dr);
     var ws=document.createElement('button'); ws.className='stb'; ws.textContent='AI→SEQ'; ws.addEventListener('click',function(){ if(cond.writeSeq&&cond.writeSeq()){ ws.classList.add('on'); setTimeout(function(){ws.classList.remove('on');},400);} }); row.appendChild(ws);
   var fw=document.createElement('button'); fw.className='stb on'; fw.textContent='FOLLOW'; fw.addEventListener('click',function(){ cond.follow=(cond.follow===false)?true:false; fw.classList.toggle('on',cond.follow!==false); }); row.appendChild(fw);
+  var pg=document.createElement('select'); pg.className='msel'; pg.id='pprog'; pg.name='pprog';
+  ['AUTO','I-V-vi-IV','I-vi-IV-V','i-VI-III-VII','i-VII-VI-VII','I-IV-vi-V','ii-V-I-vi'].forEach(function(n,idx){var o=document.createElement('option');o.value=String(idx);o.textContent=n;pg.appendChild(o);});
+  pg.addEventListener('change',function(){ cond.setProg(pg.value==='0'?null:(parseInt(pg.value,10)-1)); }); row.appendChild(pg);
+
     s.appendChild(row); $('sections').appendChild(s);
   }
   Psy.REG = REG;
