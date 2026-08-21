@@ -1422,6 +1422,7 @@ $('bPower').addEventListener('click', function () {
     var fb=document.createElement('button'); fb.className='stb'; fb.textContent='FILL'; fb.addEventListener('click',function(){cond.fillNext();}); row.appendChild(fb);
     var mu=document.createElement('button'); mu.className='stb'; mu.textContent='MUTATE'; mu.addEventListener('click',function(){cond.mutate();}); row.appendChild(mu);
     var dr=document.createElement('button'); dr.className='stb on'; dr.textContent='DRUMS ON'; dr.addEventListener('click',function(){cond.drumsOn=!cond.drumsOn; dr.textContent=cond.drumsOn?'DRUMS ON':'DRUMS OFF'; dr.classList.toggle('on',cond.drumsOn);}); row.appendChild(dr);
+    var fw=document.createElement('button'); fw.className='stb on'; fw.textContent='FOLLOW'; fw.addEventListener('click',function(){ cond.follow=(cond.follow===false)?true:false; fw.classList.toggle('on',cond.follow!==false); }); row.appendChild(fw);
     s.appendChild(row); $('sections').appendChild(s);
   }
   Psy.REG = REG;
