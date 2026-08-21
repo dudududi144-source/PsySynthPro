@@ -26,6 +26,7 @@ class Sequencer {
     this.dmute = { k: false, s: false, hc: false, ho: false, sh: false };
     this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true; this.songOn = false; this.songSlot = 0; this.onPatternChanged = null;
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
+    this.noteStep = 0; this.drumStep = 0; this.noteTime = null; this.drumTime = null; this.poly = false;
     this.root = 45; this.swing = 0; this.human = 0; this.barCount = 0;
   }
   setEnabled(on) { this.enabled = on; if (on) { this.stepPos = 0; this.notePtr = 0; if (this.engine.ctx) this.nextTime = this.engine.ctx.currentTime + 0.08; this.startTimer(); } else { this.stopTimer(); if (!this.hold) this.held = []; if (this.lastNote >= 0) { this.engine.noteOff(this.lastNote); this.lastNote = -1; } } }
