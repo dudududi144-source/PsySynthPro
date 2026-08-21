@@ -11,7 +11,8 @@ class Conductor {
   mutate(){this.reseed(Math.floor(Math.random()*2147483646)+1);this.progOffset=(this.progOffset+1)%4;this.leadDeg=0;}
   fillNext(){this.wantFill=true;}
   setFollow(on){this.follow=on;}
-  chordName(note) { var N = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']; var pc = ((note % 12) + 12) % 12;
+  setProg(i) { this.progLock = (i == null || i < 0) ? null : (i | 0); }
+    chordName(note) { var N = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']; var pc = ((note % 12) + 12) % 12;
     var sc = (window.__seq && __seq.scale) ? __seq.scale() : [0,2,3,5,7,8,10]; var q = (sc[3] === 5 || sc[2] === 3 || sc[2] === 4) ? (sc[2] <= 4 && sc[3] >= 5 ? 'm' : 'm') : 'm';
     var minor = (sc[2] === 1 || sc[2] === 2 || sc[2] === 3); return N[pc] + (minor ? 'm' : ''); }
 
@@ -42,7 +43,7 @@ class Conductor {
     setLive(k,v){this.engine.set(k,v);var R=(window.Psy&&Psy.REG)||{};if(R[k])R[k].set(v,true);}
   automate(ARR){var tgt=ARR==='full'?0.9:(ARR==='intro'?0.4:0.15);this.energy=(this.energy==null)?tgt:this.energy+(tgt-this.energy)*0.35;var e=Math.min(1,this.energy*(0.5+this.complexity*0.6));
     this.setLive('cutoff',Math.round(300+e*6500));this.setLive('res',Math.round(2+e*8));this.setLive('reverb',Math.round(20+(1-e)*25));this.setLive('delay',Math.round(15+e*25));this.setLive('fmDepth',Math.round(e*45));this.setLive('lfoDepth',Math.round(e*60));}
-playStep(i,t,sd){var PH=CONDUCTOR_PH;var root=PH[(Math.floor(this.bar/2)+this.progOffset)%PH.length][this.bar%4];
+playStep(i,t,sd){var PH=CONDUCTOR_PH;var row=(this.progLock!=null)?PH[this.progLock%PH.length]:PH[(Math.floor(this.bar/2)+this.progOffset)%PH.length];var root=row[this.bar%4];
     var SQ=window.__seq; var seqOn=!!(SQ&&SQ.enabled); var rootNote=this.deg2note(root,0); this.curRoot=rootNote;
     if(i===0){ var el=document.getElementById('chordRead'); if(el) el.textContent=this.chordName(rootNote); }var dr=this.complexity;var _ab = this.bar % 9; var ARR = _ab < 2 ? 'intro' : (_ab === 8 ? 'break' : 'full');this.ensureDrums();
     if(this.drumsOn&&!seqOn&&this.drums&&ARR==='full'){if(i%4===0)this.kick(t);if(i%4===2)this.hat(t,false);if(i===4||i===12)this.snare(t);if(i===14&&dr>0.6)this.hat(t,true);}
