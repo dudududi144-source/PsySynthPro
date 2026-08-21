@@ -13,7 +13,7 @@ class Sequencer {
     this.scaleName = 'minor';
     this.glide = false; this.lastNote = -1; this.selected = -1;
     this.steps = [];
-    for (let i = 0; i < SEQ_LEN; i++) this.steps.push({ on: i % 2 === 0, vel: (i % 4 === 0 ? 1 : 0.75), tr: 0, len: 75, tie: false, rat: 1, prob: 100 });
+    for (let i = 0; i < SEQ_LEN; i++) this.steps.push({ on: i % 2 === 0, vel: (i % 4 === 0 ? 1 : 0.75), tr: 0, len: 75, tie: false, rat: 1, prob: 100, chord: false });
     this.drums = { k: [], s: [], hc: [], ho: [], sh: [] };
     for (let i = 0; i < SEQ_LEN; i++) {
       this.drums.k.push(i % 4 === 0);
@@ -143,6 +143,9 @@ class Sequencer {
           const jt = tStep + SEQ_GT[gi] * hum * stepDur * 0.5;
           vel = Math.max(0.05, Math.min(1, vel * (1 + SEQ_GV[gi] * hum)));
           const rat = Math.max(1, Math.min(4, st.rat || 1));
+          if (st.chord) { const sc = this.scale(); const c1 = note + sc[2], c2 = note + sc[4];
+            this.engine.noteOnAt(c1, vel * 0.7, jt); this.engine.noteOnAt(c2, vel * 0.6, jt);
+            if (!st.tie) { this.engine.noteOffAt(c1, jt + gateSec); this.engine.noteOffAt(c2, jt + gateSec); } }
           if (rat === 1) { this.engine.noteOnAt(note, vel, jt); if (!st.tie) this.engine.noteOffAt(note, jt + gateSec); }
           else { const sub = stepDur / rat; for (let r = 0; r < rat; r++) { this.engine.noteOnAt(note, vel, jt + r * sub); this.engine.noteOffAt(note, jt + r * sub + Math.min(gateSec, sub * 0.9)); } }
           this.lastNote = st.tie ? note : -1;
