@@ -163,6 +163,7 @@ class SynthEngine {
   sendParams(values) { if (this.node) this.node.port.postMessage({ type: 'params', values: values || this.params }); }
   setWavetable(table) { if (this.node) this.node.port.postMessage({ type: 'wavetable', table: table }); }
 
+  setLoudness(v) { if (this.limiter) { const k = (v == null ? 50 : v) / 100; this.limiter.threshold.value = -2 - k * 10; this.limiter.ratio.value = 8 + k * 8; } }
   set(key, value) {
     this.params[key] = value;
     if (key === 'delay' && this.delSend) this.delSend.gain.value = (this._fin(value,22) / 100) * 0.55;
