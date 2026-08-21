@@ -1264,6 +1264,9 @@ $('bPower').addEventListener('click', function () {
   var mel = document.createElement('button'); mel.className = 'stb'; mel.textContent = 'MELODIC';
   mel.addEventListener('click', function () { seq.melodic(); paint(); });
   tr.appendChild(mel);
+  var av = document.createElement('button'); av.className = 'stb'; av.textContent = 'AI VAR';
+  av.addEventListener('click', function () { seq.mutateSeq(); buildGrid(); paint(); });
+  tr.appendChild(av);
   var sty = document.createElement('select'); sty.className = 'msel'; sty.id = 'pstyle'; sty.name = 'pstyle';
   ['PSY FULL-ON', 'DARK PROG', 'HI-TECH', 'GOA'].forEach(function (n) { var o = document.createElement('option'); o.textContent = n; sty.appendChild(o); });
   sty.addEventListener('change', function () { seq.style(sty.value); paint(); });
@@ -1296,6 +1299,7 @@ $('bPower').addEventListener('click', function () {
   new Psy.Knob(kr, { label: 'TR', color: '#2dd4bf', min: -12, max: 12, def: 0, fmt: function (v) { return (v > 0 ? '+' : '') + Math.round(v); }, onChange: function (v) { seq.steps[sel].tr = Math.round(v); } });
   new Psy.Knob(kr, { label: 'GATE', color: '#2dd4bf', min: 10, max: 100, def: 70, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.steps[sel].len = v; } });
   new Psy.Knob(kr, { label: 'RATCH', color: '#2dd4bf', min: 1, max: 4, def: 1, fmt: function (v) { return 'x' + Math.round(v); }, onChange: function (v) { seq.steps[sel].rat = Math.round(v); } });
+  new Psy.Knob(kr, { label: 'PROB', color: '#2dd4bf', min: 10, max: 100, def: 100, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.steps[sel].prob = Math.round(v); } });
   s.appendChild(kr);
   var painting = false, paintOn = true;
   document.addEventListener('pointerup', function () { painting = false; });
