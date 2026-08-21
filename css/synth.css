@@ -979,3 +979,12 @@ body.perform .wavetable, body.perform .morph { display: none; }
 
 .preset.factory{border-color:#3a4356;color:#9fb0c8;}
 .conductor-section{border:1px solid #24402c;}
+
+/* NO-DEAD-SPACE: fill widths, pack grid (mobile+desktop) */
+.krow{justify-content:space-between;}
+.mod-matrix{width:100%;box-sizing:border-box;grid-template-columns:auto repeat(5,1fr);}
+@media (max-width:700px){
+  .sections{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:#232932;}
+  .section{width:auto !important;min-width:0;background:#14171c;}
+  .krow{gap:8px 10px;}
+}
