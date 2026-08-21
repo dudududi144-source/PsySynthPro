@@ -1643,6 +1643,24 @@ $('bPower').addEventListener('click', function () {
       pad.addEventListener('pointermove', function (e) { if (down) mv(e); }); pad.addEventListener('pointerup', function () { down = false; });
       morph.appendChild(pad); }
   }
+  function buildHelp() {
+    var btn = document.createElement('button'); btn.textContent = '?'; btn.style.cssText = 'position:fixed;bottom:14px;left:14px;z-index:9998;width:44px;height:44px;border-radius:50%;background:#22d3ee;color:#04222b;font-weight:bold;font-size:20px;border:none;box-shadow:0 4px 14px rgba(34,211,238,.4);';
+    var box = document.createElement('div'); box.style.cssText = 'display:none;position:fixed;inset:10px;z-index:9999;background:rgba(10,14,20,.97);border:1px solid #2a3444;border-radius:12px;padding:18px;overflow:auto;font-family:monospace;font-size:12px;line-height:1.7;color:#cfe8ff;';
+    box.innerHTML = '<b style="color:#22d3ee;font-size:15px">PSYSYNTH PRO - GUIDE</b><br>' +
+      '<b>SYNTH</b>: 47 knobs - OSC/FM/WT/SVF+MORPH/ENV/LFO/MOD-MATRIX/FX<br>' +
+      '<b>SEQ</b>: RUN - TAP tempo - DEMO - POLY 3:2 - LEGATO - CHD - REC SEQ - AUTOVAR<br>' +
+      '  divisions 1/4..1/32+T - VEL curves - PROB - RATCH - STRUM - swing x2 - humanize<br>' +
+      '  MIXER: level/mute/tune/width/shape/punch per drum - sidechain pump<br>' +
+      '<b>KEYS</b>: 9 scales - root - FOLLOW(AI) - chord readout - progression select<br>' +
+      '<b>AI</b>: AUTOPILOT - AI-VAR - AI-SEQ(writes grid) - risers/drops arrangement<br>' +
+      '<b>IO</b>: IMPORT/EXPORT MIDI - EXPORT WAV/PROJ - REC audio - sampler(samples/ folder)<br>' +
+      '<b>VIEW</b>: PRO/SIMPLE - drag paint - velocity bars<br>' +
+      '<button id=helpClose style="margin-top:10px;padding:8px 16px">CLOSE</button>';
+    document.body.appendChild(btn); document.body.appendChild(box);
+    btn.addEventListener('click', function () { box.style.display = 'block'; });
+    box.addEventListener('click', function (e) { if (e.target && e.target.id === 'helpClose') box.style.display = 'none'; });
+  }
+  safeBuild('help', buildHelp);
   safeBuild('extras', buildExtras);
   safeBuild('canvases', setupCanvases);
   safeBuild('keyboard', buildKeyboard);
