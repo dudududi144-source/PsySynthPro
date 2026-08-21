@@ -1284,6 +1284,9 @@ $('bPower').addEventListener('click', function () {
   sv.addEventListener('click', function () { seq.saveSlot(slotSel); }); tr.appendChild(sv);
   var ld = document.createElement('button'); ld.className = 'stb'; ld.textContent = 'LOAD';
   ld.addEventListener('click', function () { seq.loadSlot(slotSel); buildGrid(); paint(); }); tr.appendChild(ld);
+  var sg = document.createElement('button'); sg.className = 'stb'; sg.textContent = 'SONG';
+  sg.addEventListener('click', function () { seq.songOn = !seq.songOn; sg.classList.toggle('on', seq.songOn); }); tr.appendChild(sg);
+  seq.onPatternChanged = function () { buildGrid(); paint(); };
   s.appendChild(tr);
   var kr = document.createElement('div'); kr.className = 'krow';
   new Psy.Knob(kr, { label: 'SWING', color: '#2dd4bf', min: 0, max: 60, def: 0, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.swing = v; } });
@@ -1293,10 +1296,14 @@ $('bPower').addEventListener('click', function () {
   new Psy.Knob(kr, { label: 'GATE', color: '#2dd4bf', min: 10, max: 100, def: 70, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.steps[sel].len = v; } });
   new Psy.Knob(kr, { label: 'RATCH', color: '#2dd4bf', min: 1, max: 4, def: 1, fmt: function (v) { return 'x' + Math.round(v); }, onChange: function (v) { seq.steps[sel].rat = Math.round(v); } });
   s.appendChild(kr);
+  var painting = false, paintOn = true;
+  document.addEventListener('pointerup', function () { painting = false; });
   var ng = document.createElement('div'); ng.className = 'seqgrid';
   function buildGrid() { ng.innerHTML = ''; cells.length = 0;
     for (var i = 0; i < seq.steps.length; i++) { (function (i) { var c = document.createElement('button'); c.className = 'sqc';
       c.addEventListener('click', function () { var st = seq.steps[i]; if (!st.on) { st.on = true; st.vel = 1; } else if (st.vel > 0.9) st.vel = 0.75; else if (st.vel > 0.6) st.vel = 0.5; else st.on = false; sel = i; paint(); });
+      c.addEventListener('pointerdown', function (e) { painting = true; paintOn = !seq.steps[i].on; try { c.releasePointerCapture(e.pointerId); } catch (err) {} });
+      c.addEventListener('pointerover', function () { if (painting) { seq.steps[i].on = paintOn; sel = i; paint(); } });
       ng.appendChild(c); cells.push(c); })(i); } }
   buildGrid();
   s.appendChild(ng);
