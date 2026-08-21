@@ -1268,7 +1268,7 @@ $('bPower').addEventListener('click', function () {
   ex.addEventListener('click', function () {
     var ev = []; var sd = (60 / seq.bpm) * (seq.div || 0.25); var N = seq.steps.length;
     for (var i = 0; i < N; i++) { var t = i * sd; var st = seq.steps[i];
-      if (st.on) { var n = seq.root + (st.tr | 0); var g = Math.max(0.03, sd * ((st.len == null ? 75 : st.len) / 100)); ev.push({ on: true, note: n, vel: Math.round(st.vel * 100), t: t }); ev.push({ on: false, note: n, vel: 0, t: t + g }); }
+      if (st.on) { var n = seq.root + (st.tr | 0); var g = Math.max(0.03, sd * ((st.len == null ? 75 : st.len) / 100)); ev.push({ on: true, note: n, vel: Math.max(1, Math.min(127, Math.round(st.vel * 127))), t: t }); ev.push({ on: false, note: n, vel: 0, t: t + g }); }
       if (seq.drums.k[i]) { ev.push({ on: true, note: 36, vel: 100, t: t }); ev.push({ on: false, note: 36, vel: 0, t: t + 0.1 }); }
       if (seq.drums.s[i]) { ev.push({ on: true, note: 38, vel: 90, t: t }); ev.push({ on: false, note: 38, vel: 0, t: t + 0.1 }); }
       if (seq.drums.hc[i]) { ev.push({ on: true, note: 42, vel: 70, t: t }); ev.push({ on: false, note: 42, vel: 0, t: t + 0.05 }); }
