@@ -9,6 +9,7 @@ class Conductor {
   arrange(){var b=this.bar%9;if(b<2)return 'intro';if(b===8)return 'break';return 'full';}
   mutate(){this.reseed(Math.floor(Math.random()*2147483646)+1);this.progOffset=(this.progOffset+1)%4;this.leadDeg=0;}
   fillNext(){this.wantFill=true;}
+  setFollow(on){this.follow=on;}
   setEnabled(on){this.enabled=on;if(on)this.startTimer();else{this.stopTimer();this.releasePad();if(this.engine&&this.engine.panic)this.engine.panic();}}
   startTimer(){if(this.timer)return;var s=this;this.nextTime=0;this.timer=setInterval(function(){s.tick();},25);}
   stopTimer(){if(this.timer){clearInterval(this.timer);this.timer=null;}}
@@ -28,12 +29,14 @@ class Conductor {
     setLive(k,v){this.engine.set(k,v);var R=(window.Psy&&Psy.REG)||{};if(R[k])R[k].set(v,true);}
   automate(ARR){var tgt=ARR==='full'?0.9:(ARR==='intro'?0.4:0.15);this.energy=(this.energy==null)?tgt:this.energy+(tgt-this.energy)*0.35;var e=Math.min(1,this.energy*(0.5+this.complexity*0.6));
     this.setLive('cutoff',Math.round(300+e*6500));this.setLive('res',Math.round(2+e*8));this.setLive('reverb',Math.round(20+(1-e)*25));this.setLive('delay',Math.round(15+e*25));this.setLive('fmDepth',Math.round(e*45));this.setLive('lfoDepth',Math.round(e*60));}
-playStep(i,t,sd){var PH=[[0,5,3,4],[0,6,5,4],[0,3,5,4],[0,2,5,4]];var root=PH[(Math.floor(this.bar/2)+this.progOffset)%PH.length][this.bar%4];var dr=this.complexity;var _ab = this.bar % 9; var ARR = _ab < 2 ? 'intro' : (_ab === 8 ? 'break' : 'full');this.ensureDrums();
-    if(this.drumsOn&&this.drums&&ARR==='full'){if(i%4===0)this.kick(t);if(i%4===2)this.hat(t,false);if(i===4||i===12)this.snare(t);if(i===14&&dr>0.6)this.hat(t,true);}
-    if((ARR==='break'||this.wantFill)&&i>=12&&this.drums&&this.drumsOn)this.hat(t,i===15);
+playStep(i,t,sd){var PH=[[0,5,3,4],[0,6,5,4],[0,3,5,4],[0,2,5,4]];var root=PH[(Math.floor(this.bar/2)+this.progOffset)%PH.length][this.bar%4];
+    var SQ=window.__seq; var seqOn=!!(SQ&&SQ.enabled); var rootNote=this.deg2note(root,0); this.curRoot=rootNote;
+    if(seqOn&&this.follow!==false&&SQ)SQ.root=rootNote;var dr=this.complexity;var _ab = this.bar % 9; var ARR = _ab < 2 ? 'intro' : (_ab === 8 ? 'break' : 'full');this.ensureDrums();
+    if(this.drumsOn&&!seqOn&&this.drums&&ARR==='full'){if(i%4===0)this.kick(t);if(i%4===2)this.hat(t,false);if(i===4||i===12)this.snare(t);if(i===14&&dr>0.6)this.hat(t,true);}
+    if((ARR==='break'||this.wantFill)&&i>=12&&this.drums&&this.drumsOn&&!seqOn)this.hat(t,i===15);
     if(i===15)this.wantFill=false;
     var bp=euclid(16,dr>0.85?16:(dr>0.55?8:4));
-    if(ARR!=='break'&&bp[i]){var bn=this.deg2note(root,0);this.engine.noteOnAt(bn,(i%4===0)?0.95:0.7,t);this.engine.noteOffAt(bn,t+sd*0.9);}
+    if(ARR!=='break'&&!seqOn&&bp[i]){var bn=this.deg2note(root,0);this.engine.noteOnAt(bn,(i%4===0)?0.95:0.7,t);this.engine.noteOffAt(bn,t+sd*0.9);}
     var lp=euclid(16,Math.round(2+dr*6));
     if(ARR!=='intro'&&lp[i]&&this.rnd()<dr*0.7){this.leadDeg+=(this.rnd()<0.5?1:(this.rnd()<0.3?2:-1));if(this.leadDeg>7)this.leadDeg-=7;if(this.leadDeg<0)this.leadDeg+=7;var ln=this.deg2note(root+this.leadDeg,2);this.engine.noteOnAt(ln,0.6,t);this.engine.noteOffAt(ln,t+sd*(this.rnd()<0.3?3:1.5));}
     if(i===0&&(this.bar%2===0)){this.releasePad();var to=[root,root+4];for(var k=0;k<to.length;k++){var pn=this.deg2note(to[k],1);this.engine.noteOnAt(pn,0.35,t);this.padHeld.push(pn);}}
