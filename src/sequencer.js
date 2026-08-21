@@ -7,7 +7,7 @@ class Sequencer {
   constructor(engine) {
     this.engine = engine;
     this.enabled = false; this.hold = false;
-    this.bpm = 141; this.stepIdxDiv = 2;
+    this.bpm = 141; this.stepIdxDiv = 2; this.div = 0.25;
     this.glide = false; this.lastNote = -1; this.selected = -1;
     this.steps = [];
     for (let i = 0; i < SEQ_LEN; i++) this.steps.push({ on: i % 2 === 0, vel: (i % 4 === 0 ? 1 : 0.75), tr: 0, len: 75, tie: false, rat: 1, prob: 100 });
@@ -49,7 +49,8 @@ class Sequencer {
   saveSlot(i) { try { const bank = JSON.parse(localStorage.getItem('psy.seq.v1') || '[]'); bank[i] = { steps: this.steps, drums: this.drums }; localStorage.setItem('psy.seq.v1', JSON.stringify(bank)); } catch (e) {} }
   loadSlot(i) { try { const bank = JSON.parse(localStorage.getItem('psy.seq.v1') || '[]'); if (bank[i]) { this.steps = bank[i].steps; this.drums = bank[i].drums; } } catch (e) {} }
     toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
-  setStep(i, p) { Object.assign(this.steps[i], p); }
+  setDiv(name) { const M = { '1/4': 1, '1/8': 0.5, '1/16': 0.25, '1/32': 0.125, '1/8T': 1 / 3, '1/16T': 1 / 6 }; if (M[name] != null) this.div = M[name]; }
+    setStep(i, p) { Object.assign(this.steps[i], p); }
   toggleDrum(lane, i) { this.drums[lane][i] = !this.drums[lane][i]; return this.drums[lane][i]; }
   noteOn(n, v) { if (!this.enabled) { this.engine.noteOn(n, v); return; } if (!this.held.some(h => h.note === n)) { this.held.push({ note: n, vel: v || 0.8 }); this.held.sort((a, b) => a.note - b.note); } }
   noteOff(n) { if (!this.enabled) { this.engine.noteOff(n); return; } if (this.hold) return; this.held = this.held.filter(h => h.note !== n); }
@@ -99,7 +100,7 @@ class Sequencer {
     if (!this.enabled || !this.engine.ctx) return;
     const ctx = this.engine.ctx;
     if (this.nextTime < ctx.currentTime - 0.05) this.nextTime = ctx.currentTime + 0.05;
-    const stepBeats = (Psy.ARP_STEPS && Psy.ARP_STEPS[this.stepIdxDiv]) ? Psy.ARP_STEPS[this.stepIdxDiv].beats : 0.25;
+    const stepBeats = this.div || 0.25;
     const stepDur = (60 / this.bpm) * stepBeats;
     const oct = ((window.__octShift || 0) | 0) * 12;
     try {
