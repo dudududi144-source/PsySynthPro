@@ -10,7 +10,7 @@ class Sequencer {
     this.bpm = 141; this.stepIdxDiv = 2;
     this.glide = false; this.lastNote = -1; this.selected = -1;
     this.steps = [];
-    for (let i = 0; i < SEQ_LEN; i++) this.steps.push({ on: i % 2 === 0, vel: (i % 4 === 0 ? 1 : 0.75), tr: 0, len: 75, tie: false, rat: 1 });
+    for (let i = 0; i < SEQ_LEN; i++) this.steps.push({ on: i % 2 === 0, vel: (i % 4 === 0 ? 1 : 0.75), tr: 0, len: 75, tie: false, rat: 1, prob: 100 });
     this.drums = { k: [], s: [], hc: [], ho: [], sh: [] };
     for (let i = 0; i < SEQ_LEN; i++) {
       this.drums.k.push(i % 4 === 0);
@@ -32,7 +32,20 @@ class Sequencer {
   setLen(n) { n = (n === 32) ? 32 : 16; while (this.steps.length < n) this.steps.push({ on: false, vel: 0.75, tr: 0, len: 75, tie: false, rat: 1 });
     for (const L of ['k','s','hc','ho','sh']) { while (this.drums[L].length < n) this.drums[L].push(false); }
     this.steps.length = n; for (const L of ['k','s','hc','ho','sh']) this.drums[L].length = n; this.stepPos = this.stepPos % n; }
-  double() { const half = Math.floor(this.steps.length / 2); for (let i = half; i < this.steps.length; i++) { this.steps[i] = Object.assign({}, this.steps[i - half]); for (const L of ['k','s','hc','ho','sh']) this.drums[L][i] = this.drums[L][i - half]; } }
+  mutateSeq() {
+    const degs = [0, 3, 5, 7, 10, 12];
+    for (let i = 0; i < this.steps.length; i++) {
+      const st = this.steps[i];
+      if (Math.random() < 0.3) st.tr = (st.tr + degs[Math.floor(Math.random() * degs.length)] * (Math.random() < 0.5 ? 1 : -1)) % 24;
+      if (Math.random() < 0.15) st.on = !st.on;
+      if (Math.random() < 0.2) st.vel = 0.5 + Math.random() * 0.5;
+      if (Math.random() < 0.12) st.rat = Math.random() < 0.5 ? 2 : 1;
+      if (Math.random() < 0.15) st.prob = 60 + Math.floor(Math.random() * 41);
+    }
+    for (let i = 0; i < this.drums.hc.length; i++) { if (Math.random() < 0.2) this.drums.hc[i] = !this.drums.hc[i]; if (Math.random() < 0.15) this.drums.sh[i] = !this.drums.sh[i]; }
+    for (let i = 0; i < this.drums.k.length; i++) { if (i % 4 !== 0 && Math.random() < 0.08) this.drums.k[i] = !this.drums.k[i]; }
+  }
+    double() { const half = Math.floor(this.steps.length / 2); for (let i = half; i < this.steps.length; i++) { this.steps[i] = Object.assign({}, this.steps[i - half]); for (const L of ['k','s','hc','ho','sh']) this.drums[L][i] = this.drums[L][i - half]; } }
   saveSlot(i) { try { const bank = JSON.parse(localStorage.getItem('psy.seq.v1') || '[]'); bank[i] = { steps: this.steps, drums: this.drums }; localStorage.setItem('psy.seq.v1', JSON.stringify(bank)); } catch (e) {} }
   loadSlot(i) { try { const bank = JSON.parse(localStorage.getItem('psy.seq.v1') || '[]'); if (bank[i]) { this.steps = bank[i].steps; this.drums = bank[i].drums; } } catch (e) {} }
     toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
@@ -107,7 +120,7 @@ class Sequencer {
           if (this.offbass && i % 2 === 1) this._bass(tStep, 440 * Math.pow(2, (this.root - 12 + oct - 69) / 12), 0.5);
         } catch (e) {}
         const src = this.held.length ? this.held : [{ note: this.root + oct, vel: 0.85 }];
-        if (st.on && src.length) {
+        if (st.on && src.length && ((st.prob == null) || st.prob >= 100 || Math.random() * 100 < st.prob)) {
           const base = src[this.notePtr % src.length].note; this.notePtr++;
           const note = base + (st.tr | 0) + oct;
           let vel = Math.max(0.05, Math.min(1, st.vel));
