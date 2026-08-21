@@ -122,7 +122,7 @@ class Sequencer {
     else if (lane === 'rd') this._play(this._rd.rd, t, 0.4); }
   _bass(t, f, vel) { const ctx = this.engine.ctx; const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(700, t); fl.frequency.exponentialRampToValueAtTime(120, t + 0.12); fl.Q.value = 6; const g = ctx.createGain(); g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14); o.connect(fl); fl.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.16); }
   fireDrum(i, t, dur, oct) {
-    const dh = (this.humanDrum || 0) / 100; if (dh > 0) t = t + SEQ_GT[i % 16] * dh * dur * 0.3;
+    const dh = (this.human || 0) / 100; if (dh > 0) t = t + SEQ_GT[i % 16] * dh * dur * 0.3;
     try {
       if (i === 0 && this.crashOn && this.barCount % 4 === 0) this.hit('cr', t);
       if (this.fillOn && this.barCount % 4 === 3 && i >= 14) this._playSn(t, 0.3 + (i - 13) * 0.3);
