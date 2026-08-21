@@ -1329,6 +1329,9 @@ $('bPower').addEventListener('click', function () {
   var av = document.createElement('button'); av.className = 'stb'; av.textContent = 'AI VAR';
   av.addEventListener('click', function () { seq.mutateSeq(); buildGrid(); paint(); });
   tr.appendChild(av);
+  var cvv = document.createElement('select'); cvv.className = 'msel'; cvv.id = 'pcurve'; cvv.name = 'pcurve';
+  ['FLAT', 'ACCENT', 'RAMP', 'PUMP', 'FUNK'].forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = 'VEL:' + n; cvv.appendChild(o); });
+  cvv.addEventListener('change', function () { seq.applyCurve(cvv.value); paint(); }); tr.appendChild(cvv);
   var scs = document.createElement('select'); scs.className = 'msel'; scs.id = 'pscale'; scs.name = 'pscale';
   ['minor', 'phrygian', 'major', 'dorian', 'harmonic', 'lydian', 'mixolydian', 'blues', 'hungarian'].forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n.toUpperCase(); scs.appendChild(o); });
   scs.addEventListener('change', function () { seq.scaleName = scs.value; }); tr.appendChild(scs);
