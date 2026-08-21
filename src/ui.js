@@ -1358,7 +1358,7 @@ $('bPower').addEventListener('click', function () {
   function paint() {
     for (var i = 0; i < Psy.SEQ_LEN; i++) { var st = seq.steps[i];
       cells[i].classList.toggle('on', st.on); cells[i].classList.toggle('sel', i === sel);
-      cells[i].style.opacity = st.on ? (0.45 + st.vel * 0.55) : 1; }
+      if (st.on) { var pc = Math.round(st.vel * 100); cells[i].style.background = 'linear-gradient(to top, #2dd4bf ' + pc + '%, #123c36 ' + pc + '%)'; cells[i].style.opacity = 1; } else { cells[i].style.background = ''; cells[i].style.opacity = 1; } }
     drumCells.forEach(function (d) { d.el.classList.toggle('on', !!seq.drums[d.lane][d.i]); });
   }
   seq.onStep = function (i, note) { cells.forEach(function (c, k) { c.classList.toggle('ph', k === i); }); var r = document.getElementById('seqRead'); if (r) r.textContent = 'BAR ' + (Math.floor(seq.barCount % 4) + 1) + ' · ' + (i + 1); };
