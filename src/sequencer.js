@@ -27,7 +27,7 @@ class Sequencer {
     this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true; this.songOn = false; this.songSlot = 0; this.onPatternChanged = null;
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
     this.noteStep = 0; this.drumStep = 0; this.noteTime = null; this.drumTime = null; this.poly = false;
-    this.root = 45; this.swing = 0; this.human = 0; this.barCount = 0;
+    this.root = 45; this.swing = 0; this.human = 0; this.strum = 0.012; this.barCount = 0;
   }
   setEnabled(on) { this.enabled = on; if (on) { this.stepPos = 0; this.notePtr = 0; if (this.engine.ctx) this.nextTime = this.engine.ctx.currentTime + 0.08; this.startTimer(); } else { this.stopTimer(); if (!this.hold) this.held = []; if (this.lastNote >= 0) { this.engine.noteOff(this.lastNote); this.lastNote = -1; } } }
   startTimer() { if (this.timer) return; const s = this; this.timer = setInterval(function () { s.tick(); }, 25); }
@@ -147,9 +147,9 @@ class Sequencer {
       const jt = tStep + SEQ_GT[gi] * hum * dur * 0.5;
       vel = Math.max(0.05, Math.min(1, vel * (1 + SEQ_GV[gi] * hum)));
       const rat = Math.max(1, Math.min(4, st.rat || 1));
-      if (st.chord) { const sc = this.scale(); const c1 = note + sc[2], c2 = note + sc[4];
-        this.engine.noteOnAt(c1, vel * 0.7, jt); this.engine.noteOnAt(c2, vel * 0.6, jt);
-        if (!st.tie) { this.engine.noteOffAt(c1, jt + gateSec); this.engine.noteOffAt(c2, jt + gateSec); } }
+      if (st.chord) { const sc = this.scale(); const c1 = note + sc[2], c2 = note + sc[4]; const sm = this.strum || 0;
+        this.engine.noteOnAt(c1, vel * 0.7, jt + sm); this.engine.noteOnAt(c2, vel * 0.6, jt + sm * 2);
+        if (!st.tie) { this.engine.noteOffAt(c1, jt + sm + gateSec); this.engine.noteOffAt(c2, jt + sm * 2 + gateSec); } }
       if (rat === 1) { this.engine.noteOnAt(note, vel, jt); if (!st.tie) this.engine.noteOffAt(note, jt + gateSec); }
       else { const sub = dur / rat; for (let r = 0; r < rat; r++) { this.engine.noteOnAt(note, vel, jt + r * sub); this.engine.noteOffAt(note, jt + r * sub + Math.min(gateSec, sub * 0.9)); } }
       this.lastNote = st.tie ? note : -1; if (this.onStep) this.onStep(i, note);
