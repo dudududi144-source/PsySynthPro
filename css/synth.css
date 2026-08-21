@@ -990,3 +990,9 @@ body.perform .wavetable, body.perform .morph { display: none; }
 }
 
 .sqc.chd{outline:2px solid #a78bfa;}
+
+/* MASONRY: pack sections tightly, no rectangular dead gaps */
+.sections{display:block !important;columns:2;column-gap:1px;background:#232932;}
+.sections>.section{break-inside:avoid;width:100% !important;box-sizing:border-box;background:#14171c;margin:0 0 1px;}
+@media (max-width:900px){.sections{columns:2;}}
+@media (max-width:700px){.sections{columns:1;}}
