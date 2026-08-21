@@ -46,6 +46,15 @@ class Sequencer {
       else if (name === 'FUNK') this.steps[i].vel = [1,0.5,0.7,0.5,0.9,0.5,0.7,0.6,1,0.5,0.7,0.5,0.9,0.6,0.7,0.8][i % 16];
     }
   }
+    mutateDrums() {
+    for (let i = 0; i < this.drums.hc.length; i++) {
+      if (i % 2 === 1 && Math.random() < 0.2) this.drums.ho[i] = !this.drums.ho[i];
+      if (Math.random() < 0.18) this.drums.hc[i] = !this.drums.hc[i];
+      if (Math.random() < 0.2) this.drums.sh[i] = !this.drums.sh[i];
+      if (i % 4 === 3 && Math.random() < 0.15) this.drums.k[i] = !this.drums.k[i];
+    }
+    if (this.onPatternChanged) this.onPatternChanged();
+  }
     mutateSeq() {
     const degs = [0, 3, 5, 7, 10, 12];
     for (let i = 0; i < this.steps.length; i++) {
@@ -172,6 +181,7 @@ class Sequencer {
           this.fireNote(this.noteStep, this.noteTime, noteDur, oct);
           this.noteStep = (this.noteStep + 1) % this.steps.length;
           if (this.noteStep === 0) { this.barCount++;
+            if (this.autovar && this.barCount % 8 === 0) this.mutateDrums();
             if (this.songOn && this.barCount % 4 === 0) { this.songSlot = (this.songSlot + 1) % 4; const before = JSON.stringify(this.steps); this.loadSlot(this.songSlot); if (JSON.stringify(this.steps) !== before && this.onPatternChanged) this.onPatternChanged(); } }
           this.noteTime += noteDur;
         } else {
