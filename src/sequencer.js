@@ -23,6 +23,7 @@ class Sequencer {
       this.drums.sh.push(true);
     }
     this.dmix = { k: 1.0, s: 0.7, hc: 0.45, ho: 0.5, sh: 0.35 };
+    this.dtune = { k: 1, s: 1, hc: 1, ho: 1, sh: 1 };
     this.dmute = { k: false, s: false, hc: false, ho: false, sh: false };
     this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true; this.songOn = false; this.songSlot = 0; this.onPatternChanged = null;
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
@@ -117,16 +118,16 @@ class Sequencer {
       cr: mk(1.2, function (t) { return (crM(t)*0.5 + (Math.random()*2-1)*0.5)*Math.exp(-t/0.5)*(1-Math.exp(-t/0.002)); }),
       rd: mk(0.4, function (t) { return (rdM(t)*0.5 + (Math.random()*2-1)*0.3)*Math.exp(-t/0.18) + Math.sin(2*Math.PI*4200*t)*Math.exp(-t/0.01)*0.3; })
     }; }
-  _play(buf, t, lvl) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = buf; const g = ctx.createGain(); g.gain.value = lvl; src.connect(g); g.connect(this._dbus); src.start(t); }
+  _play(buf, t, lvl, rate) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = buf; if (rate && rate !== 1) src.playbackRate.value = rate; const g = ctx.createGain(); g.gain.value = lvl; src.connect(g); g.connect(this._dbus); src.start(t); }
   hit(lane, t, open) { if (this.dmute[lane]) return; this.ensureDrumBus();
     var sb = (window.Psy && Psy.Sampler) ? Psy.Sampler.get(lane) : null;
-    if (sb) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = sb; const g = ctx.createGain(); g.gain.value = this.dmix[lane] != null ? this.dmix[lane] : 0.8; src.connect(g); g.connect(this._dbus); src.start(t); return; }
+    if (sb) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = sb; const g = ctx.createGain(); g.gain.value = this.dmix[lane] != null ? this.dmix[lane] : 0.8; if (this.dtune[lane]) src.playbackRate.value = this.dtune[lane]; src.connect(g); g.connect(this._dbus); src.start(t); return; }
     this._renderDrums(); if (!this._rd) return;
-    if (lane === 'k') { this._play(this._rd.k, t, this.dmix.k); var fx = this.engine.fxInput; if (fx && fx.gain) { fx.gain.cancelScheduledValues(t); fx.gain.setValueAtTime(0.4, t); fx.gain.setTargetAtTime(1.0, t + 0.03, 0.12); } }
-    else if (lane === 's') this._play(this._rd.s, t, this.dmix.s);
-    else if (lane === 'hc') this._play(this._rd.hc, t, this.dmix.hc);
-    else if (lane === 'ho') this._play(this._rd.ho, t, this.dmix.ho);
-    else if (lane === 'sh') this._play(this._rd.sh, t, this.dmix.sh);
+    if (lane === 'k') { this._play(this._rd.k, t, this.dmix.k, this.dtune.k); var fx = this.engine.fxInput; if (fx && fx.gain) { fx.gain.cancelScheduledValues(t); fx.gain.setValueAtTime(0.4, t); fx.gain.setTargetAtTime(1.0, t + 0.03, 0.12); } }
+    else if (lane === 's') this._play(this._rd.s, t, this.dmix.s, this.dtune.s);
+    else if (lane === 'hc') this._play(this._rd.hc, t, this.dmix.hc, this.dtune.hc);
+    else if (lane === 'ho') this._play(this._rd.ho, t, this.dmix.ho, this.dtune.ho);
+    else if (lane === 'sh') this._play(this._rd.sh, t, this.dmix.sh, this.dtune.sh);
     else if (lane === 'cr') this._play(this._rd.cr, t, 0.6);
     else if (lane === 'rd') this._play(this._rd.rd, t, 0.4); }
   _bass(t, f, vel) { const ctx = this.engine.ctx; const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(700, t); fl.frequency.exponentialRampToValueAtTime(120, t + 0.12); fl.Q.value = 6; const g = ctx.createGain(); g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14); o.connect(fl); fl.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.16); }
