@@ -24,7 +24,7 @@ class Sequencer {
     }
     this.dmix = { k: 1.0, s: 0.7, hc: 0.45, ho: 0.5, sh: 0.35 };
     this.dtune = { k: 1, s: 1, hc: 1, ho: 1, sh: 1 };
-    this.dpunch = 50;
+    this.dpunch = 50; this.dswing = 0;
     this.dmute = { k: false, s: false, hc: false, ho: false, sh: false };
     this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true; this.songOn = false; this.songSlot = 0; this.onPatternChanged = null;
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
@@ -138,6 +138,7 @@ class Sequencer {
     else if (lane === 'rd') this._play(this._rd.rd, t, 0.4); }
   _bass(t, f, vel) { const ctx = this.engine.ctx; const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(700, t); fl.frequency.exponentialRampToValueAtTime(120, t + 0.12); fl.Q.value = 6; const g = ctx.createGain(); g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14); o.connect(fl); fl.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.16); }
   fireDrum(i, t, dur, oct) {
+    t = t + ((i % 2 === 1) ? ((this.dswing || 0) / 100) * dur * 0.5 : 0);
     const dh = (this.human || 0) / 100; if (dh > 0) t = t + SEQ_GT[i % 16] * dh * dur * 0.3;
     try {
       if (i === 0 && this.crashOn && this.barCount % 4 === 0) this.hit('cr', t);
