@@ -108,54 +108,63 @@ class Sequencer {
     else if (lane === 'cr') this._play(this._rd.cr, t, 0.6);
     else if (lane === 'rd') this._play(this._rd.rd, t, 0.4); }
   _bass(t, f, vel) { const ctx = this.engine.ctx; const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(700, t); fl.frequency.exponentialRampToValueAtTime(120, t + 0.12); fl.Q.value = 6; const g = ctx.createGain(); g.gain.setValueAtTime(vel, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14); o.connect(fl); fl.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.16); }
+  fireDrum(i, t, dur, oct) {
+    try {
+      if (i === 0 && this.crashOn && this.barCount % 4 === 0) this.hit('cr', t);
+      if (this.fillOn && this.barCount % 4 === 3 && i >= 14) this._playSn(t, 0.3 + (i - 13) * 0.3);
+      if (this.ghostOn && i % 4 === 2 && !this.drums.s[i]) this._playSn(t, 0.18);
+      if (this.drums.k[i]) this.hit('k', t);
+      if (this.drums.s[i]) this.hit('s', t);
+      if (this.drums.hc[i]) this.hit('hc', t);
+      if (this.drums.ho[i]) this.hit('ho', t);
+      if (this.drums.sh[i]) this.hit('sh', t);
+      if (this.offbass && i % 2 === 1) this._bass(t, 440 * Math.pow(2, (this.root - 12 + oct - 69) / 12), 0.5);
+    } catch (e) {}
+  }
+  fireNote(i, t, dur, oct) {
+    const st = this.steps[i];
+    const tStep = t + ((i % 2 === 1) ? (this.swing / 100) * dur * 0.5 : 0);
+    const src = this.held.length ? this.held : [{ note: this.root + oct, vel: 0.85 }];
+    if (st.on && src.length && ((st.prob == null) || st.prob >= 100 || Math.random() * 100 < st.prob)) {
+      const base = src[this.notePtr % src.length].note; this.notePtr++;
+      const note = base + this.snap(st.tr | 0) + oct;
+      let vel = Math.max(0.05, Math.min(1, st.vel));
+      const gateSec = Math.max(0.03, dur * ((st.len == null ? 75 : st.len) / 100));
+      const hum = (this.human || 0) / 100; const gi = i % 16;
+      const jt = tStep + SEQ_GT[gi] * hum * dur * 0.5;
+      vel = Math.max(0.05, Math.min(1, vel * (1 + SEQ_GV[gi] * hum)));
+      const rat = Math.max(1, Math.min(4, st.rat || 1));
+      if (st.chord) { const sc = this.scale(); const c1 = note + sc[2], c2 = note + sc[4];
+        this.engine.noteOnAt(c1, vel * 0.7, jt); this.engine.noteOnAt(c2, vel * 0.6, jt);
+        if (!st.tie) { this.engine.noteOffAt(c1, jt + gateSec); this.engine.noteOffAt(c2, jt + gateSec); } }
+      if (rat === 1) { this.engine.noteOnAt(note, vel, jt); if (!st.tie) this.engine.noteOffAt(note, jt + gateSec); }
+      else { const sub = dur / rat; for (let r = 0; r < rat; r++) { this.engine.noteOnAt(note, vel, jt + r * sub); this.engine.noteOffAt(note, jt + r * sub + Math.min(gateSec, sub * 0.9)); } }
+      this.lastNote = st.tie ? note : -1; if (this.onStep) this.onStep(i, note);
+    } else { this.lastNote = -1; if (this.onStep) this.onStep(i, -1); }
+  }
   tick() {
     if (!this.enabled || !this.engine.ctx) return;
     const ctx = this.engine.ctx;
     if (this.nextTime < ctx.currentTime - 0.05) this.nextTime = ctx.currentTime + 0.05;
-    const stepBeats = this.div || 0.25;
-    const stepDur = (60 / this.bpm) * stepBeats;
+    if (this.noteTime == null) this.noteTime = this.nextTime;
+    if (this.drumTime == null) this.drumTime = this.nextTime;
     const oct = ((window.__octShift || 0) | 0) * 12;
+    const baseDiv = this.div || 0.25;
+    const drumDur = (60 / this.bpm) * baseDiv;
+    const noteDur = (60 / this.bpm) * (this.poly ? (1 / 3) : baseDiv);
     try {
-      while (this.nextTime < ctx.currentTime + 0.12) {
-        const i = this.stepPos;
-        const st = this.steps[i];
-        const tStep = this.nextTime + ((i % 2 === 1) ? (this.swing / 100) * stepDur * 0.5 : 0);
-        // drums (lane-gated)
-        try {
-          if (i === 0 && this.crashOn && this.barCount % 4 === 0) this.hit('cr', tStep);
-          if (this.fillOn && this.barCount % 4 === 3 && i >= 14) this._playSn(tStep, 0.3 + (i - 13) * 0.3);
-          if (this.ghostOn && i % 4 === 2 && !this.drums.s[i]) this._playSn(tStep, 0.18);
-          if (this.drums.k[i]) this.hit('k', tStep);
-          if (this.drums.s[i]) this.hit('s', tStep);
-          if (this.drums.hc[i]) this.hit('hc', tStep);
-          if (this.drums.ho[i]) this.hit('ho', tStep);
-          if (this.drums.sh[i]) this.hit('sh', tStep, );
-          if (this.offbass && i % 2 === 1) this._bass(tStep, 440 * Math.pow(2, (this.root - 12 + oct - 69) / 12), 0.5);
-        } catch (e) {}
-        const src = this.held.length ? this.held : [{ note: this.root + oct, vel: 0.85 }];
-        if (st.on && src.length && ((st.prob == null) || st.prob >= 100 || Math.random() * 100 < st.prob)) {
-          const base = src[this.notePtr % src.length].note; this.notePtr++;
-          const note = base + this.snap(st.tr | 0) + oct;
-          let vel = Math.max(0.05, Math.min(1, st.vel));
-          const gateSec = Math.max(0.03, stepDur * ((st.len == null ? 75 : st.len) / 100));
-          const hum = (this.human || 0) / 100;
-
-          const gi = i % 16;
-          const jt = tStep + SEQ_GT[gi] * hum * stepDur * 0.5;
-          vel = Math.max(0.05, Math.min(1, vel * (1 + SEQ_GV[gi] * hum)));
-          const rat = Math.max(1, Math.min(4, st.rat || 1));
-          if (st.chord) { const sc = this.scale(); const c1 = note + sc[2], c2 = note + sc[4];
-            this.engine.noteOnAt(c1, vel * 0.7, jt); this.engine.noteOnAt(c2, vel * 0.6, jt);
-            if (!st.tie) { this.engine.noteOffAt(c1, jt + gateSec); this.engine.noteOffAt(c2, jt + gateSec); } }
-          if (rat === 1) { this.engine.noteOnAt(note, vel, jt); if (!st.tie) this.engine.noteOffAt(note, jt + gateSec); }
-          else { const sub = stepDur / rat; for (let r = 0; r < rat; r++) { this.engine.noteOnAt(note, vel, jt + r * sub); this.engine.noteOffAt(note, jt + r * sub + Math.min(gateSec, sub * 0.9)); } }
-          this.lastNote = st.tie ? note : -1;
-          if (this.onStep) this.onStep(i, note);
-        } else { this.lastNote = -1; if (this.onStep) this.onStep(i, -1); }
-        this.stepPos = (i + 1) % this.steps.length;
-        if (this.stepPos === 0) { this.barCount++;
-          if (this.songOn && this.barCount % 4 === 0) { this.songSlot = (this.songSlot + 1) % 4; const before = JSON.stringify(this.steps); this.loadSlot(this.songSlot); if (JSON.stringify(this.steps) !== before && this.onPatternChanged) this.onPatternChanged(); } }
-        this.nextTime += stepDur;
+      while (Math.min(this.noteTime, this.drumTime) < ctx.currentTime + 0.12) {
+        if (this.noteTime <= this.drumTime) {
+          this.fireNote(this.noteStep, this.noteTime, noteDur, oct);
+          this.noteStep = (this.noteStep + 1) % this.steps.length;
+          if (this.noteStep === 0) { this.barCount++;
+            if (this.songOn && this.barCount % 4 === 0) { this.songSlot = (this.songSlot + 1) % 4; const before = JSON.stringify(this.steps); this.loadSlot(this.songSlot); if (JSON.stringify(this.steps) !== before && this.onPatternChanged) this.onPatternChanged(); } }
+          this.noteTime += noteDur;
+        } else {
+          this.fireDrum(this.drumStep, this.drumTime, drumDur, oct);
+          this.drumStep = (this.drumStep + 1) % this.steps.length;
+          this.drumTime += drumDur;
+        }
       }
     } catch (e) {}
   }
