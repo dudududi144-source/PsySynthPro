@@ -1333,7 +1333,7 @@ $('bPower').addEventListener('click', function () {
   var host = document.getElementById('seqtop') || document.getElementById('sections');
   var s = document.createElement('div'); s.className = 'section seq2';
   s.innerHTML = '<div class="stitle" style="--c:#2dd4bf">STEP SEQUENCER <span id="seqRead" style="float:right;color:#7ff3ff"></span></div>'
-    + '<div class="seqhint">TAP = on/vel &middot; DRAG = paint &middot; select step then VEL/TR/GATE/RATCH</div>';
+    + '<div class="seqhint"><span id="chordRead" style="color:#a78bfa;font-size:11px;margin-right:8px"></span>TAP = on/vel &middot; DRAG = paint &middot; select step then VEL/TR/GATE/RATCH</div>';
   var seq = new Psy.Sequencer(engine); window.__seq = seq; seq.autorestore();
   var sel = 0; var cells = []; var drumCells = [];
   var tr = document.createElement('div'); tr.className = 'krow';
