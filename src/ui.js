@@ -1310,6 +1310,25 @@ $('bPower').addEventListener('click', function () {
     };
     rd.readAsArrayBuffer(file);
   }
+  function exportKit() {
+    var S = window.__seq; if (!S || !S._rd) return;
+    function monoWav(buf) {
+      var dd = buf.getChannelData(0); var n = dd.length; var sr = buf.sampleRate;
+      var ab = new ArrayBuffer(44 + n * 2); var v = new DataView(ab);
+      function ws(o, s) { for (var q = 0; q < s.length; q++) v.setUint8(o + q, s.charCodeAt(q)); }
+      ws(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+      v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+      v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+      ws(36, 'data'); v.setUint32(40, n * 2, true);
+      var off = 44; for (var i = 0; i < n; i++) { v.setInt16(off, Math.max(-32768, Math.min(32767, dd[i] * 32767)), true); off += 2; }
+      return new Blob([ab], { type: 'audio/wav' });
+    }
+    var names = { k: 'kick', s: 'snare', hc: 'hatc', ho: 'hato', sh: 'shaker', cr: 'crash', rd: 'ride' };
+    var delay = 0;
+    for (var lane in S._rd) { (function (ln) { setTimeout(function () {
+      var blob = monoWav(S._rd[ln]); var u2 = URL.createObjectURL(blob); var a = document.createElement('a');
+      a.href = u2; a.download = (names[ln] || ln) + '.wav'; document.body.appendChild(a); a.click(); a.remove(); }, delay); delay += 300; })(lane); }
+  }
   function buildSeqPanel2() {
   var host = document.getElementById('seqtop') || document.getElementById('sections');
   var s = document.createElement('div'); s.className = 'section seq2';
@@ -1357,6 +1376,7 @@ $('bPower').addEventListener('click', function () {
   var rcs = document.createElement('button'); rcs.className = 'stb'; rcs.textContent = 'REC SEQ';
   rcs.addEventListener('click', function () { seq.recOn = !seq.recOn; rcs.classList.toggle('on', seq.recOn); });
   tr.appendChild(rcs);
+  var ek = document.createElement('button'); ek.className = 'stb'; ek.textContent = 'EXPORT KIT'; ek.addEventListener('click', function () { exportKit(); }); tr.appendChild(ek);
   var im = document.createElement('button'); im.className = 'stb'; im.textContent = 'IMPORT MIDI';
   var fim = document.createElement('input'); fim.type = 'file'; fim.accept = '.mid,.midi'; fim.style.display = 'none';
   im.addEventListener('click', function () { fim.click(); }); fim.addEventListener('change', function () { if (fim.files[0]) importMidi(fim.files[0]); }); tr.appendChild(im); tr.appendChild(fim);
