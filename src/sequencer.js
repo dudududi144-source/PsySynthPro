@@ -84,7 +84,7 @@ class Sequencer {
     }
     this.swing = g.swing;
   }
-  ensureDrumBus() { if (!this.engine.ctx) return; if (this._dbus) return; this._dbus = this.engine.ctx.createGain(); this._dbus.gain.value = 1; this._dbus.connect(this.engine.master || this.engine.fxInput); }
+  ensureDrumBus() { if (!this.engine.ctx) return; if (!this._smpTried) { this._smpTried = true; if (window.Psy && Psy.Sampler) Psy.Sampler.load(this.engine.ctx); } if (this._dbus) return; this._dbus = this.engine.ctx.createGain(); this._dbus.gain.value = 1; this._dbus.connect(this.engine.master || this.engine.fxInput); }
   _metal(f0, dec) { return function (t) { var rs = [1, 1.483, 1.98, 2.54, 3.1, 3.66, 4.2]; var s = 0; for (var q = 0; q < rs.length; q++) s += Math.sin(2 * Math.PI * f0 * rs[q] * t) * Math.exp(-t * dec * (1 + q * 0.4)); return s; }; }
   _renderDrums() { if (this._rd || !this.engine.ctx) return; const ctx = this.engine.ctx; const sr = ctx.sampleRate;
     const mk = function (len, fn) { const n = Math.floor(sr * len); const b = ctx.createBuffer(1, n, sr); const dd = b.getChannelData(0); for (let i = 0; i < n; i++) dd[i] = fn(i / sr); return b; };
@@ -99,7 +99,10 @@ class Sequencer {
       rd: mk(0.4, function (t) { return (rdM(t)*0.5 + (Math.random()*2-1)*0.3)*Math.exp(-t/0.18) + Math.sin(2*Math.PI*4200*t)*Math.exp(-t/0.01)*0.3; })
     }; }
   _play(buf, t, lvl) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = buf; const g = ctx.createGain(); g.gain.value = lvl; src.connect(g); g.connect(this._dbus); src.start(t); }
-  hit(lane, t, open) { if (this.dmute[lane]) return; this.ensureDrumBus(); this._renderDrums(); if (!this._rd) return;
+  hit(lane, t, open) { if (this.dmute[lane]) return; this.ensureDrumBus();
+    var sb = (window.Psy && Psy.Sampler) ? Psy.Sampler.get(lane) : null;
+    if (sb) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = sb; const g = ctx.createGain(); g.gain.value = this.dmix[lane] != null ? this.dmix[lane] : 0.8; src.connect(g); g.connect(this._dbus); src.start(t); return; }
+    this._renderDrums(); if (!this._rd) return;
     if (lane === 'k') { this._play(this._rd.k, t, this.dmix.k); var fx = this.engine.fxInput; if (fx && fx.gain) { fx.gain.cancelScheduledValues(t); fx.gain.setValueAtTime(0.4, t); fx.gain.setTargetAtTime(1.0, t + 0.03, 0.12); } }
     else if (lane === 's') this._play(this._rd.s, t, this.dmix.s);
     else if (lane === 'hc') this._play(this._rd.hc, t, this.dmix.hc);
