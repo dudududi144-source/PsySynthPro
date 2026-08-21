@@ -1476,6 +1476,34 @@ $('bPower').addEventListener('click', function () {
   safeBuild('recents', renderRecents);
   safeBuild('userbank', renderUserBank);
   safeBuild('savebtn', buildSaveBtn);
+  function buildExtras() {
+    var secs = document.querySelectorAll('.section');
+    var zdf = null, morph = null;
+    secs.forEach(function (s) { var t = s.querySelector('.stitle'); if (!t) return; var tx = t.textContent;
+      if (tx.indexOf('ZDF') >= 0) zdf = s; if (tx.indexOf('MORPH') >= 0) morph = s; });
+    if (zdf) { var cv = document.createElement('canvas'); cv.width = 260; cv.height = 90; cv.style.width = '100%'; cv.style.height = '90px'; cv.style.marginTop = '8px'; zdf.appendChild(cv);
+      (function draw() { requestAnimationFrame(draw); if (document.hidden || !window.engine || !engine.params) return;
+        var g = cv.getContext('2d'); var w = cv.width, h = cv.height; g.clearRect(0, 0, w, h);
+        var p = engine.params; var fc = Math.max(40, p.cutoff), q = Math.max(0.3, p.res), ty = p.filterType | 0;
+        g.strokeStyle = '#22d3ee'; g.lineWidth = 2; g.beginPath();
+        for (var i = 0; i < w; i++) { var f = 20 * Math.pow(1000, i / w); var r = f / fc; var m;
+          if (ty === 1) m = Math.sqrt(r * r * r * r / (1 + r * r * r * r + (1 / Math.max(0.5, q)) * r * r));
+          else if (ty === 2) m = (r / Math.max(0.5, q)) / Math.sqrt(1 + Math.pow(r - 1 / r, 2) * 1 + r * r * r * r / (q * q) * 0 );
+          else m = 1 / Math.sqrt(1 + r * r * r * r + (1 / Math.max(0.5, q) - 1) * r * r);
+          m = Math.max(0.02, Math.min(1.4, m * (1 + (q - 0.7) * 0.4 * Math.exp(-Math.pow(Math.log(r) * 2.2, 2)))));
+          var y = h - 6 - (Math.min(1, m) * (h - 14)); if (i === 0) g.moveTo(i, y); else g.lineTo(i, y); }
+        g.stroke(); })(); }
+    if (morph) { var pad = document.createElement('div'); pad.style.cssText = 'position:relative;height:110px;margin:8px 4px 0;border:1px solid #2a3140;border-radius:8px;background:radial-gradient(circle at 50% 50%, #1a2030, #12151c);touch-action:none;';
+      var dot = document.createElement('div'); dot.style.cssText = 'position:absolute;width:18px;height:18px;border-radius:50%;background:#a78bfa;box-shadow:0 0 10px #a78bfa;left:40%;top:50%;'; pad.appendChild(dot);
+      var lb = document.createElement('div'); lb.style.cssText = 'position:absolute;bottom:2px;right:6px;font-size:8px;color:#5b6472;letter-spacing:1px;'; lb.textContent = 'PERFORM X=CUTOFF Y=RES'; pad.appendChild(lb);
+      function mv(e) { var r = pad.getBoundingClientRect(); var x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); var y = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+        dot.style.left = (x * 100) + '%'; dot.style.top = (y * 100) + '%';
+        engine.set('cutoff', Math.round(100 * Math.pow(80, x))); engine.set('res', Math.round((1 - y) * 18 * 10) / 10); }
+      var down = false; pad.addEventListener('pointerdown', function (e) { down = true; try { pad.setPointerCapture(e.pointerId); } catch (er) {} mv(e); });
+      pad.addEventListener('pointermove', function (e) { if (down) mv(e); }); pad.addEventListener('pointerup', function () { down = false; });
+      morph.appendChild(pad); }
+  }
+  safeBuild('extras', buildExtras);
   safeBuild('canvases', setupCanvases);
   safeBuild('keyboard', buildKeyboard);
   safeBuild('octrow', buildOctRow);
