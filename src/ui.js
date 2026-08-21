@@ -1419,6 +1419,7 @@ $('bPower').addEventListener('click', function () {
   new Psy.Knob(mx, { label: 'PUNCH', color: '#f87171', min: 0, max: 100, def: 50, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dpunch = Math.round(v); if (seq._setPunch) seq._setPunch(); } });
   new Psy.Knob(mx, { label: 'D-SWING', color: '#fbbf24', min: 0, max: 60, def: 0, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dswing = Math.round(v); } });
   new Psy.Knob(mx, { label: 'D-WIDTH', color: '#a78bfa', min: 0, max: 100, def: 60, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dwidth = Math.round(v); } });
+  new Psy.Knob(mx, { label: 'SHAPE', color: '#9fe8a8', min: 0, max: 100, def: 30, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dshape = Math.round(v); } });
 
   [['k', 'K'], ['s', 'S'], ['hc', 'H'], ['ho', 'O'], ['sh', 'SH']].forEach(function (M) {
     var mb = document.createElement('button'); mb.className = 'stb on'; mb.textContent = M[1];
