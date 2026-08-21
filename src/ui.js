@@ -1482,7 +1482,9 @@ $('bPower').addEventListener('click', function () {
     secs.forEach(function (s) { var t = s.querySelector('.stitle'); if (!t) return; var tx = t.textContent;
       if (tx.indexOf('ZDF') >= 0) zdf = s; if (tx.indexOf('MORPH') >= 0) morph = s; });
     if (zdf) { var cv = document.createElement('canvas'); cv.width = 260; cv.height = 90; cv.style.width = '100%'; cv.style.height = '90px'; cv.style.marginTop = '8px'; zdf.appendChild(cv);
+      var lastKey = '';
       (function draw() { requestAnimationFrame(draw); if (document.hidden || !window.engine || !engine.params) return;
+        var p0 = engine.params; var key = (p0.cutoff | 0) + '|' + (p0.res) + '|' + (p0.filterType | 0); if (key === lastKey) return; lastKey = key;
         var g = cv.getContext('2d'); var w = cv.width, h = cv.height; g.clearRect(0, 0, w, h);
         var p = engine.params; var fc = Math.max(40, p.cutoff), q = Math.max(0.3, p.res), ty = p.filterType | 0;
         g.strokeStyle = '#22d3ee'; g.lineWidth = 2; g.beginPath();
