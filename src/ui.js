@@ -1330,6 +1330,9 @@ $('bPower').addEventListener('click', function () {
   new Psy.Knob(kr, { label: 'GATE', color: '#2dd4bf', min: 10, max: 100, def: 70, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.steps[sel].len = v; } });
   new Psy.Knob(kr, { label: 'RATCH', color: '#2dd4bf', min: 1, max: 4, def: 1, fmt: function (v) { return 'x' + Math.round(v); }, onChange: function (v) { seq.steps[sel].rat = Math.round(v); } });
   new Psy.Knob(kr, { label: 'PROB', color: '#2dd4bf', min: 10, max: 100, def: 100, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.steps[sel].prob = Math.round(v); } });
+  var chd2 = document.createElement('button'); chd2.className = 'stb'; chd2.textContent = 'CHD';
+  chd2.addEventListener('click', function () { seq.steps[sel].chord = !seq.steps[sel].chord; chd2.classList.toggle('on', seq.steps[sel].chord); paint(); });
+  kr.appendChild(chd2);
   s.appendChild(kr);
   var painting = false, paintOn = true;
   document.addEventListener('pointerup', function () { painting = false; });
@@ -1371,7 +1374,8 @@ $('bPower').addEventListener('click', function () {
   function paint() {
     for (var i = 0; i < Psy.SEQ_LEN; i++) { var st = seq.steps[i];
       cells[i].classList.toggle('on', st.on); cells[i].classList.toggle('sel', i === sel);
-      if (st.on) { var pc = Math.round(st.vel * 100); cells[i].style.background = 'linear-gradient(to top, #2dd4bf ' + pc + '%, #123c36 ' + pc + '%)'; cells[i].style.opacity = 1; } else { cells[i].style.background = ''; cells[i].style.opacity = 1; } }
+      if (st.on) { var pc = Math.round(st.vel * 100); cells[i].style.background = 'linear-gradient(to top, #2dd4bf ' + pc + '%, #123c36 ' + pc + '%)'; cells[i].style.opacity = 1; } else { cells[i].style.background = ''; cells[i].style.opacity = 1; }
+      cells[i].classList.toggle('chd', !!st.chord); }
     drumCells.forEach(function (d) { d.el.classList.toggle('on', !!seq.drums[d.lane][d.i]); });
   }
   seq.onStep = function (i, note) { cells.forEach(function (c, k) { c.classList.toggle('ph', k === i); }); var r = document.getElementById('seqRead'); if (r) r.textContent = 'BAR ' + (Math.floor(seq.barCount % 4) + 1) + ' · ' + (i + 1); };
