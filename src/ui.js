@@ -1285,6 +1285,9 @@ $('bPower').addEventListener('click', function () {
   var av = document.createElement('button'); av.className = 'stb'; av.textContent = 'AI VAR';
   av.addEventListener('click', function () { seq.mutateSeq(); buildGrid(); paint(); });
   tr.appendChild(av);
+  var scs = document.createElement('select'); scs.className = 'msel'; scs.id = 'pscale'; scs.name = 'pscale';
+  ['minor', 'phrygian', 'major', 'dorian', 'harmonic'].forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n.toUpperCase(); scs.appendChild(o); });
+  scs.addEventListener('change', function () { seq.scaleName = scs.value; }); tr.appendChild(scs);
   var dv = document.createElement('select'); dv.className = 'msel'; dv.id = 'pdiv'; dv.name = 'pdiv';
   ['1/4', '1/8', '1/16', '1/32', '1/8T', '1/16T'].forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n; dv.appendChild(o); });
   dv.value = '1/16'; dv.addEventListener('change', function () { seq.setDiv(dv.value); }); tr.appendChild(dv);
