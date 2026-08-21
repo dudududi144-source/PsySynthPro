@@ -1242,11 +1242,11 @@ $('bPower').addEventListener('click', function () {
   var s = document.createElement('div'); s.className = 'section seq2';
   s.innerHTML = '<div class="stitle" style="--c:#2dd4bf">STEP SEQUENCER <span id="seqRead" style="float:right;color:#7ff3ff"></span></div>'
     + '<div class="seqhint">TAP = on/vel &middot; DRAG = paint &middot; select step then VEL/TR/GATE/RATCH</div>';
-  var seq = new Psy.Sequencer(engine); window.__seq = seq;
+  var seq = new Psy.Sequencer(engine); window.__seq = seq; seq.autorestore();
   var sel = 0; var cells = []; var drumCells = [];
   var tr = document.createElement('div'); tr.className = 'krow';
   var run = document.createElement('button'); run.className = 'stb'; run.textContent = 'RUN';
-  run.addEventListener('click', function () { if (window.engine && !engine.ready) { var pb = document.getElementById('bPower'); if (pb) pb.click(); } seq.setEnabled(!seq.enabled); run.textContent = seq.enabled ? 'STOP' : 'RUN'; run.classList.toggle('on', seq.enabled); });
+  run.addEventListener('click', function () { if (window.engine && !engine.ready) { var pb = document.getElementById('bPower'); if (pb) pb.click(); } seq.setEnabled(!seq.enabled); run.textContent = seq.enabled ? 'STOP' : 'RUN'; run.classList.toggle('on', seq.enabled); seq.autosave(); });
   tr.appendChild(run);
   var hold = document.createElement('button'); hold.className = 'stb'; hold.textContent = 'HOLD';
   hold.addEventListener('click', function () { seq.hold = !seq.hold; hold.classList.toggle('on', seq.hold); });
