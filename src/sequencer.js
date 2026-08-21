@@ -24,7 +24,7 @@ class Sequencer {
     }
     this.dmix = { k: 1.0, s: 0.7, hc: 0.45, ho: 0.5, sh: 0.35 };
     this.dtune = { k: 1, s: 1, hc: 1, ho: 1, sh: 1 };
-    this.dpunch = 50; this.dswing = 0; this.dwidth = 60; this.dshape = 30;
+    this.dpunch = 50; this.dswing = 0; this.dwidth = 60; this.dshape = 30; this.recOn = false;
     this.dmute = { k: false, s: false, hc: false, ho: false, sh: false };
     this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true; this.songOn = false; this.songSlot = 0; this.onPatternChanged = null;
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
@@ -48,6 +48,9 @@ class Sequencer {
       else if (name === 'FUNK') this.steps[i].vel = [1,0.5,0.7,0.5,0.9,0.5,0.7,0.6,1,0.5,0.7,0.5,0.9,0.6,0.7,0.8][i % 16];
     }
   }
+    recordNote(note, vel) { if (!this.recOn) return; const i = this.noteStep % this.steps.length; const oct = ((window.__octShift || 0) | 0) * 12;
+    this.steps[i].on = true; this.steps[i].tr = note - (this.root + oct); this.steps[i].vel = Math.max(0.1, Math.min(1, vel || 0.8));
+    if (this.onPatternChanged) this.onPatternChanged(); }
     mutateDrums() {
     for (let i = 0; i < this.drums.hc.length; i++) {
       if (i % 2 === 1 && Math.random() < 0.2) this.drums.ho[i] = !this.drums.ho[i];
