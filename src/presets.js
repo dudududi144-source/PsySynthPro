@@ -180,3 +180,11 @@ Object.assign(Psy.PRESETS, {
  'PRO GATE TRANCE': { wave:0, detune:6, unison:4, spread:20, sub:20, noise:0, fmRatio:2, fmDepth:6, filterType:0, cutoff:2000, res:5, filterEnv:40, attack:2, decay:200, sustain:80, release:250, lfoWave:1, lfoTarget:2, lfoRate:8, lfoDepth:70, lfoAmp:70, master:82, reverb:24, delay:18 },
  'PRO TWILIGHT BASS': { wave:0, detune:2, unison:2, spread:6, sub:70, noise:5, fmRatio:1, fmDepth:10, filterType:0, cutoff:500, res:9, filterEnv:60, attack:3, decay:200, sustain:42, release:160, lfoTarget:0, lfoRate:1.2, lfoDepth:22, lfoCutoff:30, master:85, reverb:10, delay:10 }
 });
+
+Object.assign(Psy.PRESETS, {
+ 'PRO PROG PULSE': { wave:0, detune:3, unison:2, spread:10, sub:55, fmRatio:2, fmDepth:12, filterType:0, cutoff:700, res:10, filterEnv:60, attack:3, decay:220, sustain:45, release:170, lfoRate:1.5, lfoDepth:26, lfoCutoff:34, master:84, reverb:12, delay:12 },
+ 'PRO BREAKS BASS': { wave:0, detune:5, unison:2, spread:12, sub:50, noise:8, fmRatio:2, fmDepth:16, filterType:0, cutoff:800, res:9, filterEnv:58, attack:3, decay:200, sustain:50, release:160, lfoRate:3, lfoDepth:20, lfoCutoff:28, master:84, reverb:14, delay:16 },
+ 'PRO AMBIENT WASH': { wave:0, detune:14, unison:6, spread:34, sub:8, noise:6, fmRatio:2, fmDepth:5, filterType:0, cutoff:900, res:2, filterEnv:25, attack:900, decay:500, sustain:85, release:1600, lfoRate:0.2, lfoDepth:18, lfoCutoff:26, master:76, reverb:65, delay:35, width:85 },
+ 'PRO NIGHT DRIVE': { wave:1, detune:4, unison:3, spread:16, sub:30, fmRatio:2, fmDepth:10, filterType:0, cutoff:1400, res:7, filterEnv:48, attack:4, decay:220, sustain:60, release:280, lfoRate:2.5, lfoDepth:22, lfoCutoff:30, master:82, reverb:22, delay:20 },
+ 'PRO LEAD AURORA': { wave:2, detune:7, unison:4, spread:20, sub:10, fmRatio:2, fmDepth:12, filterType:0, cutoff:2600, res:5, filterEnv:42, attack:5, decay:220, sustain:70, release:320, lfoTarget:1, lfoRate:6, lfoDepth:30, lfoPitch:40, master:80, reverb:30, delay:26 }
+});
