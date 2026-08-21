@@ -11,6 +11,11 @@ class Conductor {
   mutate(){this.reseed(Math.floor(Math.random()*2147483646)+1);this.progOffset=(this.progOffset+1)%4;this.leadDeg=0;}
   fillNext(){this.wantFill=true;}
   setFollow(on){this.follow=on;}
+  writeSeq() { var SQ = window.__seq; if (!SQ) return false;
+    for (var i = 0; i < SQ.steps.length; i++) { SQ.steps[i].on = (i % 2 === 0) || (i === 14); SQ.steps[i].tr = (i % 8 === 6) ? 7 : ((i % 8 === 7) ? 5 : 0); SQ.steps[i].vel = (i % 4 === 0) ? 1 : 0.75; SQ.steps[i].len = 75; SQ.steps[i].rat = 1; SQ.steps[i].prob = 100;
+      SQ.drums.k[i] = (i % 4 === 0); SQ.drums.s[i] = (i === 4 || i === 12); SQ.drums.hc[i] = (i % 2 === 0); SQ.drums.ho[i] = (i % 2 === 1); SQ.drums.sh[i] = true; }
+    if (SQ.onPatternChanged) SQ.onPatternChanged(); return true; }
+
   setEnabled(on){this.enabled=on;if(on)this.startTimer();else{this.stopTimer();this.releasePad();if(this.engine&&this.engine.panic)this.engine.panic();}}
   startTimer(){if(this.timer)return;var s=this;this.nextTime=0;this.timer=setInterval(function(){s.tick();},25);}
   stopTimer(){if(this.timer){clearInterval(this.timer);this.timer=null;}}
