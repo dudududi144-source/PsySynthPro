@@ -166,3 +166,17 @@ Psy.PRESETS = {
   'PRO EUPHORIA LEAD': { wave: 0, unison: 5, spread: 19, detune: 8, filterType: 4, cutoff: 2800, res: 4, filterEnv: 48, fEnvAmt: 52, attack: 6, decay: 380, sustain: 70, release: 900, m1s: 2, m1a: 28, m1d: 2, lfo2Rate: 5, fxChorus: 50, delay: 34, reverb: 48, master: 78 },
   'PRO DEEP SPACE': { wave: 4, unison: 5, spread: 22, wtPos: 55, fmDepth: 20, fmRatio: 2, filterType: 0, cutoff: 1200, res: 2, filterEnv: 20, fEnvAmt: 25, attack: 1500, decay: 1200, sustain: 78, release: 3500, m1s: 1, m1a: 12, m1d: 1, lfo2Rate: 0.3, fxChorus: 52, reverb: 82, delay: 46, master: 72 },
 };
+
+/* ── PRO PSYTRANCE BATCH (v10.13.2) ── */
+Object.assign(Psy.PRESETS, {
+ 'PRO FULLON ROLL': { wave:0, detune:0, unison:1, spread:0, sub:80, noise:0, fmRatio:1, fmDepth:6, filterType:0, cutoff:600, res:8, filterEnv:62, attack:2, decay:170, sustain:40, release:140, fDecay:220, fEnvAmt:70, master:86, reverb:8, delay:10 },
+ 'PRO DARK GROWL': { wave:0, detune:4, unison:2, spread:8, sub:60, noise:10, fmRatio:2, fmDepth:22, filterType:0, cutoff:420, res:12, filterEnv:66, attack:3, decay:220, sustain:45, release:180, lfoTarget:0, lfoRate:0.8, lfoDepth:30, lfoCutoff:40, master:84, reverb:12, delay:12 },
+ 'PRO HI-TECH SCREECH': { wave:1, detune:8, unison:3, spread:14, sub:10, noise:0, fmRatio:3, fmDepth:38, filterType:2, cutoff:1800, res:10, filterEnv:50, attack:2, decay:150, sustain:60, release:200, lfoTarget:1, lfoRate:9, lfoDepth:45, lfoPitch:50, master:80, reverb:20, delay:18 },
+ 'PRO GOA LEAD': { wave:0, detune:6, unison:3, spread:18, sub:15, noise:0, fmRatio:2, fmDepth:14, filterType:0, cutoff:2400, res:6, filterEnv:45, attack:4, decay:200, sustain:70, release:300, lfoTarget:0, lfoRate:5, lfoDepth:25, lfoCutoff:35, master:82, reverb:26, delay:24 },
+ 'PRO ACID 303': { wave:0, detune:0, unison:1, spread:0, sub:40, noise:0, fmRatio:1, fmDepth:0, filterType:0, cutoff:700, res:16, filterEnv:75, attack:2, decay:160, sustain:30, release:120, fDecay:180, fEnvAmt:85, master:84, reverb:8, delay:8 },
+ 'PRO PAD NEBULA': { wave:0, detune:12, unison:6, spread:30, sub:10, noise:5, fmRatio:2, fmDepth:6, filterType:0, cutoff:1200, res:3, filterEnv:30, attack:600, decay:400, sustain:80, release:1200, lfoTarget:0, lfoRate:0.3, lfoDepth:20, lfoCutoff:30, master:78, reverb:55, delay:30, width:80 },
+ 'PRO ARP CRYSTAL': { wave:2, detune:4, unison:2, spread:12, sub:0, noise:0, fmRatio:2, fmDepth:10, filterType:0, cutoff:3200, res:5, filterEnv:40, attack:1, decay:120, sustain:40, release:180, master:80, reverb:30, delay:28 },
+ 'PRO STAB EUPHORIA': { wave:0, detune:9, unison:5, spread:24, sub:20, noise:0, fmRatio:2, fmDepth:8, filterType:0, cutoff:1600, res:6, filterEnv:55, attack:3, decay:240, sustain:60, release:350, lfoAmp:0, master:82, reverb:30, delay:20, width:70 },
+ 'PRO GATE TRANCE': { wave:0, detune:6, unison:4, spread:20, sub:20, noise:0, fmRatio:2, fmDepth:6, filterType:0, cutoff:2000, res:5, filterEnv:40, attack:2, decay:200, sustain:80, release:250, lfoWave:1, lfoTarget:2, lfoRate:8, lfoDepth:70, lfoAmp:70, master:82, reverb:24, delay:18 },
+ 'PRO TWILIGHT BASS': { wave:0, detune:2, unison:2, spread:6, sub:70, noise:5, fmRatio:1, fmDepth:10, filterType:0, cutoff:500, res:9, filterEnv:60, attack:3, decay:200, sustain:42, release:160, lfoTarget:0, lfoRate:1.2, lfoDepth:22, lfoCutoff:30, master:85, reverb:10, delay:10 }
+});
