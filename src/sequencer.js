@@ -24,7 +24,7 @@ class Sequencer {
     }
     this.dmix = { k: 1.0, s: 0.7, hc: 0.45, ho: 0.5, sh: 0.35 };
     this.dtune = { k: 1, s: 1, hc: 1, ho: 1, sh: 1 };
-    this.dpunch = 50; this.dswing = 0; this.dwidth = 60;
+    this.dpunch = 50; this.dswing = 0; this.dwidth = 60; this.dshape = 30;
     this.dmute = { k: false, s: false, hc: false, ho: false, sh: false };
     this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true; this.songOn = false; this.songSlot = 0; this.onPatternChanged = null;
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
@@ -124,13 +124,15 @@ class Sequencer {
       cr: mk(1.2, function (t) { return (crM(t)*0.5 + (Math.random()*2-1)*0.5)*Math.exp(-t/0.5)*(1-Math.exp(-t/0.002)); }),
       rd: mk(0.4, function (t) { return (rdM(t)*0.5 + (Math.random()*2-1)*0.3)*Math.exp(-t/0.18) + Math.sin(2*Math.PI*4200*t)*Math.exp(-t/0.01)*0.3; })
     }; }
-  _play(buf, t, lvl, rate, pan) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = buf; if (rate && rate !== 1) src.playbackRate.value = rate; const g = ctx.createGain(); g.gain.value = lvl;
+  _play(buf, t, lvl, rate, pan) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = buf; if (rate && rate !== 1) src.playbackRate.value = rate; const g = ctx.createGain(); const shp = (this.dshape || 0) / 100;
+    if (shp > 0) { g.gain.setValueAtTime(lvl * (1 + shp), t); g.gain.setTargetAtTime(lvl, t + 0.006, 0.02); } else { g.gain.value = lvl; }
     let out = g; if (pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; g.connect(p); out = p; } src.connect(g); out.connect(this._dbus); src.start(t); }
   hit(lane, t, open) { if (this.dmute[lane]) return; this.ensureDrumBus();
     var sb = (window.Psy && Psy.Sampler) ? Psy.Sampler.get(lane) : null;
     if (sb) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = sb; const g = ctx.createGain(); g.gain.value = this.dmix[lane] != null ? this.dmix[lane] : 0.8; if (this.dtune[lane]) src.playbackRate.value = this.dtune[lane];
       const PANS = { k: 0, s: -0.15, hc: 0.3, ho: 0.45, sh: -0.45 }; let out2 = g;
       if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = (PANS[lane] || 0) * (this.dwidth / 100); g.connect(p); out2 = p; }
+      const shp2 = (this.dshape || 0) / 100; if (shp2 > 0) { g.gain.setValueAtTime((this.dmix[lane] != null ? this.dmix[lane] : 0.8) * (1 + shp2), t); g.gain.setTargetAtTime(this.dmix[lane] != null ? this.dmix[lane] : 0.8, t + 0.006, 0.02); }
       src.connect(g); out2.connect(this._dbus); src.start(t); return; }
     this._renderDrums(); if (!this._rd) return;
     if (lane === 'k') { this._play(this._rd.k, t, this.dmix.k, this.dtune.k, 0 * (this.dwidth / 100)); var fx = this.engine.fxInput; if (fx && fx.gain) { fx.gain.cancelScheduledValues(t); fx.gain.setValueAtTime(0.4, t); fx.gain.setTargetAtTime(1.0, t + 0.03, 0.12); } }
