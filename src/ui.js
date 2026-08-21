@@ -1240,7 +1240,8 @@ $('bPower').addEventListener('click', function () {
   function buildSeqPanel2() {
   var host = document.getElementById('seqtop') || document.getElementById('sections');
   var s = document.createElement('div'); s.className = 'section seq2';
-  s.innerHTML = '<div class="stitle" style="--c:#2dd4bf">STEP SEQUENCER</div>';
+  s.innerHTML = '<div class="stitle" style="--c:#2dd4bf">STEP SEQUENCER <span id="seqRead" style="float:right;color:#7ff3ff"></span></div>'
+    + '<div class="seqhint">TAP = on/vel &middot; DRAG = paint &middot; select step then VEL/TR/GATE/RATCH</div>';
   var seq = new Psy.Sequencer(engine); window.__seq = seq;
   var sel = 0; var cells = []; var drumCells = [];
   var tr = document.createElement('div'); tr.className = 'krow';
@@ -1301,6 +1302,7 @@ $('bPower').addEventListener('click', function () {
   var ng = document.createElement('div'); ng.className = 'seqgrid';
   function buildGrid() { ng.innerHTML = ''; cells.length = 0;
     for (var i = 0; i < seq.steps.length; i++) { (function (i) { var c = document.createElement('button'); c.className = 'sqc';
+      if (i % 4 === 0) c.className += ' beat';
       c.addEventListener('click', function () { var st = seq.steps[i]; if (!st.on) { st.on = true; st.vel = 1; } else if (st.vel > 0.9) st.vel = 0.75; else if (st.vel > 0.6) st.vel = 0.5; else st.on = false; sel = i; paint(); });
       c.addEventListener('pointerdown', function (e) { painting = true; paintOn = !seq.steps[i].on; try { c.releasePointerCapture(e.pointerId); } catch (err) {} });
       c.addEventListener('pointerover', function () { if (painting) { seq.steps[i].on = paintOn; sel = i; paint(); } });
@@ -1311,6 +1313,7 @@ $('bPower').addEventListener('click', function () {
     var row = document.createElement('div'); row.className = 'seqgrid drum';
     var lb = document.createElement('span'); lb.className = 'dl'; lb.textContent = L[1]; lb.style.color = L[2]; row.appendChild(lb);
     for (var i = 0; i < Psy.SEQ_LEN; i++) { (function (i) { var c = document.createElement('button'); c.className = 'sqc d'; c.style.setProperty('--dc', L[2]);
+      if (i % 4 === 0) c.className += ' beat';
       c.addEventListener('click', function () { seq.toggleDrum(L[0], i); paint(); }); row.appendChild(c); drumCells.push({ el: c, lane: L[0], i: i }); })(i); }
     s.appendChild(row);
   });
@@ -1337,7 +1340,7 @@ $('bPower').addEventListener('click', function () {
       cells[i].style.opacity = st.on ? (0.45 + st.vel * 0.55) : 1; }
     drumCells.forEach(function (d) { d.el.classList.toggle('on', !!seq.drums[d.lane][d.i]); });
   }
-  seq.onStep = function (i, note) { cells.forEach(function (c, k) { c.classList.toggle('ph', k === i); }); };
+  seq.onStep = function (i, note) { cells.forEach(function (c, k) { c.classList.toggle('ph', k === i); }); var r = document.getElementById('seqRead'); if (r) r.textContent = 'BAR ' + (Math.floor(seq.barCount % 4) + 1) + ' · ' + (i + 1); };
   paint();
   host.appendChild(s);
 }
