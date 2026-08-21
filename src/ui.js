@@ -1268,6 +1268,12 @@ $('bPower').addEventListener('click', function () {
   tp.addEventListener('click', function () { var now = performance.now(); taps = taps.filter(function (x) { return now - x < 3000; }); taps.push(now);
     if (taps.length >= 2) { var d = 0; for (var i = 1; i < taps.length; i++) d += taps[i] - taps[i - 1]; var ms = d / (taps.length - 1); var bpm = Math.round(60000 / ms); seq.bpm = Math.max(60, Math.min(200, bpm)); if (window.__cond) window.__cond.bpm = seq.bpm; } });
   tr.appendChild(tp);
+  var demo = document.createElement('button'); demo.className = 'stb'; demo.textContent = 'DEMO';
+  demo.addEventListener('click', function () {
+    try { if (typeof loadPreset === 'function') loadPreset('PRO FULLON ROLL'); } catch (e) {}
+    seq.style('PSY FULL-ON'); seq.setEnabled(true);
+    var C = window.__cond; if (C) { C.setEnabled(true); } });
+  tr.appendChild(demo);
   var ex = document.createElement('button'); ex.className = 'stb'; ex.textContent = 'EXPORT MIDI';
   ex.addEventListener('click', function () {
     var ev = []; var sd = (60 / seq.bpm) * (seq.div || 0.25); var N = seq.steps.length;
