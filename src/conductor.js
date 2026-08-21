@@ -31,6 +31,9 @@ class Conductor {
   kick(t){this.playBuf(this.drums.kick,t,1.0,0);var fx=this.engine.fxInput;if(fx){fx.gain.cancelScheduledValues(t);fx.gain.setTargetAtTime(0.55,t,0.004);fx.gain.setTargetAtTime(1.0,t+0.02,0.12);}}
   hat(t,o){this.playBuf(o?this.drums.hatO:this.drums.hatC,t,o?0.3:0.24,0.25);}
   snare(t){this.playBuf(this.drums.snare,t,0.5,-0.15);}
+  riser(t, dur) { if (!this.engine.ctx) return; var ctx = this.engine.ctx; var n = Math.floor(ctx.sampleRate * dur); var b = ctx.createBuffer(1, n, ctx.sampleRate); var dd = b.getChannelData(0); for (var i = 0; i < n; i++) { var tt = i / ctx.sampleRate; var k = i / n; dd[i] = (Math.random() * 2 - 1) * k * k * 0.6; } var src = ctx.createBufferSource(); src.buffer = b; var f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(6000, t + dur); f.Q.value = 1.2; var g = ctx.createGain(); g.gain.value = 0.5; src.connect(f); f.connect(g); g.connect(this.engine.master || this.engine.fxInput); src.start(t); }
+  drop(t) { if (!this.engine.ctx) return; var ctx = this.engine.ctx; var o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(38, t + 0.4); var g = ctx.createGain(); g.gain.setValueAtTime(1.0, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.6); o.connect(g); g.connect(this.engine.master || this.engine.fxInput); o.start(t); o.stop(t + 0.7); if (this.drums) this.playBuf(this.drums.kick, t, 1.0, 0); }
+
   tick(){if(!this.enabled||!this.engine.ctx)return;var ctx=this.engine.ctx;if(this.nextTime<ctx.currentTime-0.05)this.nextTime=ctx.currentTime+0.05;var sd=(60/this.bpm)/4;while(this.nextTime<ctx.currentTime+0.12){this.playStep(this.stepPos,this.nextTime,sd);this.stepPos=(this.stepPos+1)%16;if(this.stepPos===0)this.bar++;this.nextTime+=sd;}}
     setLive(k,v){this.engine.set(k,v);var R=(window.Psy&&Psy.REG)||{};if(R[k])R[k].set(v,true);}
   automate(ARR){var tgt=ARR==='full'?0.9:(ARR==='intro'?0.4:0.15);this.energy=(this.energy==null)?tgt:this.energy+(tgt-this.energy)*0.35;var e=Math.min(1,this.energy*(0.5+this.complexity*0.6));
@@ -46,6 +49,9 @@ playStep(i,t,sd){var PH=CONDUCTOR_PH;var root=PH[(Math.floor(this.bar/2)+this.pr
     var lp=euclid(16,Math.round(2+dr*6));
     if(ARR!=='intro'&&lp[i]&&this.rnd()<dr*0.7){this.leadDeg+=(this.rnd()<0.5?1:(this.rnd()<0.3?2:-1));if(this.leadDeg>7)this.leadDeg-=7;if(this.leadDeg<0)this.leadDeg+=7;var ln=this.deg2note(root+this.leadDeg,2);this.engine.noteOnAt(ln,0.6,t);this.engine.noteOffAt(ln,t+sd*(this.rnd()<0.3?3:1.5));}
     if(i===0&&(this.bar%2===0)){this.releasePad();var to=[root,root+4];for(var k=0;k<to.length;k++){var pn=this.deg2note(to[k],1);this.engine.noteOnAt(pn,0.35,t);this.padHeld.push(pn);}}
-    if(i===0){this.automate(ARR);}}
+    if(i===0){this.automate(ARR);
+      var _nb=(this.bar+1)%9;
+      if(_nb===8&&this.drumsOn&&!seqOn) this.riser(t, sd*16);
+      if(ARR==='full'&&((this.bar%9)===0|| (this.bar%9)===2)&&this.drumsOn&&!seqOn) this.drop(t); }}
 }
 Psy.Conductor = Conductor;
