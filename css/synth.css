@@ -976,3 +976,6 @@ body.perform .wavetable, body.perform .morph { display: none; }
 .seqhint{font-size:9px;color:#5b6472;letter-spacing:1px;margin:2px 0 6px;}
 .sqc.beat{box-shadow:inset 3px 0 0 #39445a;}
 .sqc.d.beat{box-shadow:inset 2px 0 0 #39445a;}
+
+.preset.factory{border-color:#3a4356;color:#9fb0c8;}
+.conductor-section{border:1px solid #24402c;}
