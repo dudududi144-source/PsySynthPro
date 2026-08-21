@@ -59,16 +59,18 @@ class Sequencer {
     this.swing = g.swing;
   }
   ensureDrumBus() { if (!this.engine.ctx) return; if (this._dbus) return; this._dbus = this.engine.ctx.createGain(); this._dbus.gain.value = 1; this._dbus.connect(this.engine.master || this.engine.fxInput); }
+  _metal(f0, dec) { return function (t) { var rs = [1, 1.483, 1.98, 2.54, 3.1, 3.66, 4.2]; var s = 0; for (var q = 0; q < rs.length; q++) s += Math.sin(2 * Math.PI * f0 * rs[q] * t) * Math.exp(-t * dec * (1 + q * 0.4)); return s; }; }
   _renderDrums() { if (this._rd || !this.engine.ctx) return; const ctx = this.engine.ctx; const sr = ctx.sampleRate;
-    const mk = function (len, fn) { const n = Math.floor(sr * len); const b = ctx.createBuffer(1, n, sr); const d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = fn(i / sr); return b; };
+    const mk = function (len, fn) { const n = Math.floor(sr * len); const b = ctx.createBuffer(1, n, sr); const dd = b.getChannelData(0); for (let i = 0; i < n; i++) dd[i] = fn(i / sr); return b; };
+    const hatM = this._metal(620, 90); const crM = this._metal(520, 22); const rdM = this._metal(700, 60);
     this._rd = {
-      k: mk(0.34, function (t) { var click = (Math.random()*2-1)*Math.exp(-t/0.0035)*0.7; var thump = Math.sin(2*Math.PI*(44*t+130*0.04*(1-Math.exp(-t/0.016))))*Math.exp(-t/0.12); var sub = Math.sin(2*Math.PI*48*t)*Math.exp(-t/0.16)*0.6; var x = click+thump+sub; return Math.tanh(x*1.6); }),
-      s: mk(0.22, function (t) { return ((Math.random()*2-1)*0.7*Math.exp(-t/0.07) + Math.sin(2*Math.PI*190*t)*0.35*Math.exp(-t/0.05)); }),
-      hc: mk(0.05, function (t) { return (Math.random()*2-1)*Math.exp(-t/0.015); }),
-      ho: mk(0.3, function (t) { return (Math.random()*2-1)*Math.exp(-t/0.13); }),
-      sh: mk(0.09, function (t) { return (Math.random()*2-1)*Math.exp(-t/0.03)*Math.sin(2*Math.PI*40*t+1); }),
-      cr: mk(0.8, function (t) { return (Math.random()*2-1)*Math.exp(-t/0.35)*0.8; }),
-      rd: mk(0.25, function (t) { return ((Math.random()*2-1)*0.4+Math.sin(2*Math.PI*5200*t)*0.3)*Math.exp(-t/0.09); })
+      k: mk(0.34, function (t) { var click = (Math.random()*2-1)*Math.exp(-t/0.0035)*0.7; var thump = Math.sin(2*Math.PI*(44*t+130*0.04*(1-Math.exp(-t/0.016))))*Math.exp(-t/0.12); var sub = Math.sin(2*Math.PI*48*t)*Math.exp(-t/0.16)*0.6; return Math.tanh((click+thump+sub)*1.6); }),
+      s: mk(0.24, function (t) { var n = (Math.random()*2-1); var bp = n*Math.exp(-t/0.09)*0.8; var body = Math.sin(2*Math.PI*186*t)*Math.exp(-t/0.06)*0.4 + Math.sin(2*Math.PI*240*t)*Math.exp(-t/0.04)*0.2; return bp+body; }),
+      hc: mk(0.06, function (t) { return (hatM(t)*0.6 + (Math.random()*2-1)*0.4)*Math.exp(-t/0.02); }),
+      ho: mk(0.32, function (t) { return (hatM(t)*0.7 + (Math.random()*2-1)*0.3)*Math.exp(-t/0.14); }),
+      sh: mk(0.1, function (t) { return (Math.random()*2-1)*Math.exp(-t/0.035)*(0.5+0.5*Math.sin(2*Math.PI*30*t)); }),
+      cr: mk(1.2, function (t) { return (crM(t)*0.5 + (Math.random()*2-1)*0.5)*Math.exp(-t/0.5)*(1-Math.exp(-t/0.002)); }),
+      rd: mk(0.4, function (t) { return (rdM(t)*0.5 + (Math.random()*2-1)*0.3)*Math.exp(-t/0.18) + Math.sin(2*Math.PI*4200*t)*Math.exp(-t/0.01)*0.3; })
     }; }
   _play(buf, t, lvl) { const ctx = this.engine.ctx; const src = ctx.createBufferSource(); src.buffer = buf; const g = ctx.createGain(); g.gain.value = lvl; src.connect(g); g.connect(this._dbus); src.start(t); }
   hit(lane, t, open) { if (this.dmute[lane]) return; this.ensureDrumBus(); this._renderDrums(); if (!this._rd) return;
