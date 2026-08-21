@@ -988,3 +988,5 @@ body.perform .wavetable, body.perform .morph { display: none; }
   .section{width:auto !important;min-width:0;background:#14171c;}
   .krow{gap:8px 10px;}
 }
+
+.sqc.chd{outline:2px solid #a78bfa;}
