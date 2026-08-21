@@ -21,7 +21,7 @@ class Sequencer {
     }
     this.dmix = { k: 1.0, s: 0.7, hc: 0.45, ho: 0.5, sh: 0.35 };
     this.dmute = { k: false, s: false, hc: false, ho: false, sh: false };
-    this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true;
+    this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true; this.songOn = false; this.songSlot = 0; this.onPatternChanged = null;
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
     this.root = 45; this.swing = 0; this.human = 0; this.barCount = 0;
   }
@@ -120,7 +120,8 @@ class Sequencer {
           if (this.onStep) this.onStep(i, note);
         } else { this.lastNote = -1; if (this.onStep) this.onStep(i, -1); }
         this.stepPos = (i + 1) % this.steps.length;
-        if (this.stepPos === 0) this.barCount++;
+        if (this.stepPos === 0) { this.barCount++;
+          if (this.songOn && this.barCount % 4 === 0) { this.songSlot = (this.songSlot + 1) % 4; const before = JSON.stringify(this.steps); this.loadSlot(this.songSlot); if (JSON.stringify(this.steps) !== before && this.onPatternChanged) this.onPatternChanged(); } }
         this.nextTime += stepDur;
       }
     } catch (e) {}
