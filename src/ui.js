@@ -1263,6 +1263,40 @@ $('bPower').addEventListener('click', function () {
       if (total >= dur * ctx.sampleRate) { sp.disconnect(); silent.disconnect(); engine.master.disconnect(sp); __wavBusy = false;
         var blob = encWav(chunks, ctx.sampleRate); var u = URL.createObjectURL(blob); var a = document.createElement('a'); a.href = u; a.download = 'psysynth-mix.wav'; document.body.appendChild(a); a.click(); a.remove(); } };
   }
+  function parseMidi(buf) {
+    var dv = new DataView(buf); var pos = 8; var ppq = dv.getUint16(12);
+    var evs = [];
+    while (pos + 8 <= dv.byteLength) {
+      var len = dv.getUint32(pos + 4); var type = String.fromCharCode(dv.getUint8(pos), dv.getUint8(pos+1), dv.getUint8(pos+2), dv.getUint8(pos+3));
+      if (type === 'MTrk') {
+        var p = pos + 8; var end = p + len; var t = 0; var run = 0;
+        while (p < end) {
+          var dt = 0; var b; do { b = dv.getUint8(p++); dt = (dt << 7) | (b & 0x7f); } while (b & 0x80);
+          t += dt; var st = dv.getUint8(p); if (st & 0x80) { run = st; p++; } else { st = run; }
+          var cmd = st & 0xf0; var ch = st & 0x0f;
+          if (cmd === 0x90 || cmd === 0x80) { var n = dv.getUint8(p++); var v = dv.getUint8(p++); if (cmd === 0x90 && v > 0) evs.push({ t: t, n: n, ch: ch, on: true }); else evs.push({ t: t, n: n, ch: ch, on: false }); }
+          else if (cmd === 0xC0 || cmd === 0xD0) { p++; }
+          else if (cmd === 0xF0) { if (st === 0xFF) { p++; var l2 = 0; do { b = dv.getUint8(p++); l2 = (l2 << 7) | (b & 0x7f); } while (b & 0x80); p += l2; } else { p = end; } }
+          else { p += 2; }
+        }
+      }
+      pos += 8 + len;
+    }
+    return { ppq: ppq, evs: evs };
+  }
+  function importMidi(file) {
+    var rd = new FileReader();
+    rd.onload = function () {
+      var S = window.__seq; if (!S) return;
+      var m = parseMidi(rd.result); var ons = m.evs.filter(function (e) { return e.on; });
+      if (!ons.length) return; var t0 = ons[0].t; var bar = m.ppq * 4;
+      for (var q = 0; q < ons.length; q++) { var e = ons[q]; var step = Math.floor(((e.t - t0) / bar) * 16); if (step < 0 || step > 15) continue;
+        if (e.ch === 9) { if (e.n === 36) S.drums.k[step] = true; else if (e.n === 38) S.drums.s[step] = true; else if (e.n === 42) S.drums.hc[step] = true; else if (e.n === 46) S.drums.ho[step] = true; else if (e.n === 69) S.drums.sh[step] = true; }
+        else { S.steps[step].on = true; S.steps[step].tr = e.n - S.root; } }
+      if (S.onPatternChanged) S.onPatternChanged();
+    };
+    rd.readAsArrayBuffer(file);
+  }
   function buildSeqPanel2() {
   var host = document.getElementById('seqtop') || document.getElementById('sections');
   var s = document.createElement('div'); s.className = 'section seq2';
@@ -1307,6 +1341,9 @@ $('bPower').addEventListener('click', function () {
     seq.style('PSY FULL-ON'); seq.setEnabled(true);
     var C = window.__cond; if (C) { C.setEnabled(true); } });
   tr.appendChild(demo);
+  var im = document.createElement('button'); im.className = 'stb'; im.textContent = 'IMPORT MIDI';
+  var fim = document.createElement('input'); fim.type = 'file'; fim.accept = '.mid,.midi'; fim.style.display = 'none';
+  im.addEventListener('click', function () { fim.click(); }); fim.addEventListener('change', function () { if (fim.files[0]) importMidi(fim.files[0]); }); tr.appendChild(im); tr.appendChild(fim);
   var wv = document.createElement('button'); wv.className = 'stb'; wv.textContent = 'EXPORT WAV'; wv.addEventListener('click', function () { exportWav(); }); tr.appendChild(wv);
   var ep = document.createElement('button'); ep.className = 'stb'; ep.textContent = 'EXPORT PROJ';
   ep.addEventListener('click', function () { var data = { seq: seq.toJSON(), preset: (window.__lastPreset || ''), build: window.__psyBuild };
