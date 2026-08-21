@@ -1274,7 +1274,7 @@ $('bPower').addEventListener('click', function () {
           var dt = 0; var b; do { b = dv.getUint8(p++); dt = (dt << 7) | (b & 0x7f); } while (b & 0x80);
           t += dt; var st = dv.getUint8(p); if (st & 0x80) { run = st; p++; } else { st = run; }
           var cmd = st & 0xf0; var ch = st & 0x0f;
-          if (cmd === 0x90 || cmd === 0x80) { var n = dv.getUint8(p++); var v = dv.getUint8(p++); if (cmd === 0x90 && v > 0) evs.push({ t: t, n: n, ch: ch, on: true }); else evs.push({ t: t, n: n, ch: ch, on: false }); }
+          if (cmd === 0x90 || cmd === 0x80) { var n = dv.getUint8(p++); var v = dv.getUint8(p++); if (cmd === 0x90 && v > 0) evs.push({ t: t, n: n, ch: ch, on: true, v: v }); else evs.push({ t: t, n: n, ch: ch, on: false }); }
           else if (cmd === 0xC0 || cmd === 0xD0) { p++; }
           else if (cmd === 0xF0) { if (st === 0xFF) { p++; var l2 = 0; do { b = dv.getUint8(p++); l2 = (l2 << 7) | (b & 0x7f); } while (b & 0x80); p += l2; } else { p = end; } }
           else { p += 2; }
@@ -1292,7 +1292,7 @@ $('bPower').addEventListener('click', function () {
       if (!ons.length) return; var t0 = ons[0].t; var bar = m.ppq * 4;
       for (var q = 0; q < ons.length; q++) { var e = ons[q]; var step = Math.floor(((e.t - t0) / bar) * 16); if (step < 0 || step > 15) continue;
         if (e.ch === 9) { if (e.n === 36) S.drums.k[step] = true; else if (e.n === 38) S.drums.s[step] = true; else if (e.n === 42) S.drums.hc[step] = true; else if (e.n === 46) S.drums.ho[step] = true; else if (e.n === 69) S.drums.sh[step] = true; }
-        else { S.steps[step].on = true; S.steps[step].tr = e.n - S.root; } }
+        else { S.steps[step].on = true; S.steps[step].tr = e.n - S.root; if (e.v) S.steps[step].vel = Math.max(0.1, Math.min(1, e.v / 127)); } }
       if (S.onPatternChanged) S.onPatternChanged();
     };
     rd.readAsArrayBuffer(file);
