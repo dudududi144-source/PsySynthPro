@@ -23,7 +23,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     noteOn: function (n, v) {
       if (seq.enabled) seq.noteOn(n, v);
       else if (arp.enabled) arp.noteOn(n, v);
-      else engine.noteOn(n, v);
+      else engine.noteOn(n, v); if (window.__seq && __seq.recOn) __seq.recordNote(n, v);
     },
     noteOff: function (n) {
       if (seq.enabled) seq.noteOff(n);
@@ -1341,6 +1341,9 @@ $('bPower').addEventListener('click', function () {
     seq.style('PSY FULL-ON'); seq.setEnabled(true);
     var C = window.__cond; if (C) { C.setEnabled(true); } });
   tr.appendChild(demo);
+  var rcs = document.createElement('button'); rcs.className = 'stb'; rcs.textContent = 'REC SEQ';
+  rcs.addEventListener('click', function () { seq.recOn = !seq.recOn; rcs.classList.toggle('on', seq.recOn); });
+  tr.appendChild(rcs);
   var im = document.createElement('button'); im.className = 'stb'; im.textContent = 'IMPORT MIDI';
   var fim = document.createElement('input'); fim.type = 'file'; fim.accept = '.mid,.midi'; fim.style.display = 'none';
   im.addEventListener('click', function () { fim.click(); }); fim.addEventListener('change', function () { if (fim.files[0]) importMidi(fim.files[0]); }); tr.appendChild(im); tr.appendChild(fim);
