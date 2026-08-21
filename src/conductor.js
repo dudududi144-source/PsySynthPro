@@ -1,5 +1,5 @@
 var Psy = (window.PsySynth = window.PsySynth || {});
-var CONDUCTOR_PH=[[0,5,3,4],[0,6,5,4],[0,3,5,4],[0,2,5,4]];
+var CONDUCTOR_PH=[[0,5,3,4],[0,6,5,4],[0,3,5,4],[0,2,5,4],[0,5,6,4],[0,3,4,5],[0,5,4,3],[0,7,5,4]];
 Psy.SCALES = { minor:[0,2,3,5,7,8,10], phrygian:[0,1,3,5,7,8,10], harmonic:[0,2,3,5,7,8,11], dorian:[0,2,3,5,7,9,10], major:[0,2,4,5,7,9,11] };
 function euclid(n,k){var r=[],b=0;for(var i=0;i<n;i++){b+=k;if(b>=n){b-=n;r.push(1);}else r.push(0);}return r;}
 class Conductor {
