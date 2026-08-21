@@ -1282,6 +1282,11 @@ $('bPower').addEventListener('click', function () {
     seq.style('PSY FULL-ON'); seq.setEnabled(true);
     var C = window.__cond; if (C) { C.setEnabled(true); } });
   tr.appendChild(demo);
+  var ep = document.createElement('button'); ep.className = 'stb'; ep.textContent = 'EXPORT PROJ';
+  ep.addEventListener('click', function () { var data = { seq: seq.toJSON(), preset: (window.__lastPreset || ''), build: window.__psyBuild };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); var u = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = u; a.download = 'psysynth-project.json'; document.body.appendChild(a); a.click(); a.remove(); });
+  tr.appendChild(ep);
   var ex = document.createElement('button'); ex.className = 'stb'; ex.textContent = 'EXPORT MIDI';
   ex.addEventListener('click', function () {
     var ev = []; var sd = (60 / seq.bpm) * (seq.div || 0.25); var N = seq.steps.length;
@@ -1468,7 +1473,8 @@ $('bPower').addEventListener('click', function () {
     var fb=document.createElement('button'); fb.className='stb'; fb.textContent='FILL'; fb.addEventListener('click',function(){cond.fillNext();}); row.appendChild(fb);
     var mu=document.createElement('button'); mu.className='stb'; mu.textContent='MUTATE'; mu.addEventListener('click',function(){cond.mutate();}); row.appendChild(mu);
     var dr=document.createElement('button'); dr.className='stb on'; dr.textContent='DRUMS ON'; dr.addEventListener('click',function(){cond.drumsOn=!cond.drumsOn; dr.textContent=cond.drumsOn?'DRUMS ON':'DRUMS OFF'; dr.classList.toggle('on',cond.drumsOn);}); row.appendChild(dr);
-    var fw=document.createElement('button'); fw.className='stb on'; fw.textContent='FOLLOW'; fw.addEventListener('click',function(){ cond.follow=(cond.follow===false)?true:false; fw.classList.toggle('on',cond.follow!==false); }); row.appendChild(fw);
+    var ws=document.createElement('button'); ws.className='stb'; ws.textContent='AI→SEQ'; ws.addEventListener('click',function(){ if(cond.writeSeq&&cond.writeSeq()){ ws.classList.add('on'); setTimeout(function(){ws.classList.remove('on');},400);} }); row.appendChild(ws);
+  var fw=document.createElement('button'); fw.className='stb on'; fw.textContent='FOLLOW'; fw.addEventListener('click',function(){ cond.follow=(cond.follow===false)?true:false; fw.classList.toggle('on',cond.follow!==false); }); row.appendChild(fw);
     s.appendChild(row); $('sections').appendChild(s);
   }
   Psy.REG = REG;
