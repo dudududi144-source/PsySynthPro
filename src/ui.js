@@ -1238,6 +1238,30 @@ $('bPower').addEventListener('click', function () {
 
 
   /* ── MINIMAL STEP SEQ (top, smart editor) ─────────────────────── */
+  var __wavBusy = false;
+  function exportWav() {
+    if (__wavBusy || !window.engine || !engine.ctx) return; __wavBusy = true;
+    var ctx = engine.ctx; var sp = ctx.createScriptProcessor(4096, 2, 2);
+    var chunks = []; var total = 0; var dur = 4;
+    var silent = ctx.createGain(); silent.gain.value = 0; sp.connect(silent); silent.connect(ctx.destination);
+    engine.master.connect(sp);
+    function encWav(ch, sr) {
+      var n = 0; for (var q = 0; q < ch.length; q++) n += ch[q][0].length;
+      var buf = new ArrayBuffer(44 + n * 2 * 2); var v = new DataView(buf);
+      function ws(o, s) { for (var q = 0; q < s.length; q++) v.setUint8(o + q, s.charCodeAt(q)); }
+      ws(0, 'RIFF'); v.setUint32(4, 36 + n * 4, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+      v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 2, true);
+      v.setUint32(24, sr, true); v.setUint32(28, sr * 4, true); v.setUint16(32, 4, true); v.setUint16(34, 16, true);
+      ws(36, 'data'); v.setUint32(40, n * 4, true);
+      var off = 44; for (var q = 0; q < ch.length; q++) { var L = ch[q][0], R = ch[q][1]; for (var i = 0; i < L.length; i++) { v.setInt16(off, Math.max(-32768, Math.min(32767, L[i] * 32767)), true); off += 2; v.setInt16(off, Math.max(-32768, Math.min(32767, R[i] * 32767)), true); off += 2; } }
+      return new Blob([buf], { type: 'audio/wav' });
+    }
+    sp.onaudioprocess = function (e) {
+      chunks.push([new Float32Array(e.inputBuffer.getChannelData(0)), new Float32Array(e.inputBuffer.getChannelData(1))]);
+      total += e.inputBuffer.length;
+      if (total >= dur * ctx.sampleRate) { sp.disconnect(); silent.disconnect(); engine.master.disconnect(sp); __wavBusy = false;
+        var blob = encWav(chunks, ctx.sampleRate); var u = URL.createObjectURL(blob); var a = document.createElement('a'); a.href = u; a.download = 'psysynth-mix.wav'; document.body.appendChild(a); a.click(); a.remove(); } };
+  }
   function buildSeqPanel2() {
   var host = document.getElementById('seqtop') || document.getElementById('sections');
   var s = document.createElement('div'); s.className = 'section seq2';
@@ -1282,6 +1306,7 @@ $('bPower').addEventListener('click', function () {
     seq.style('PSY FULL-ON'); seq.setEnabled(true);
     var C = window.__cond; if (C) { C.setEnabled(true); } });
   tr.appendChild(demo);
+  var wv = document.createElement('button'); wv.className = 'stb'; wv.textContent = 'EXPORT WAV'; wv.addEventListener('click', function () { exportWav(); }); tr.appendChild(wv);
   var ep = document.createElement('button'); ep.className = 'stb'; ep.textContent = 'EXPORT PROJ';
   ep.addEventListener('click', function () { var data = { seq: seq.toJSON(), preset: (window.__lastPreset || ''), build: window.__psyBuild };
     var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); var u = URL.createObjectURL(blob);
