@@ -8,6 +8,7 @@ class Sequencer {
     this.engine = engine;
     this.enabled = false; this.hold = false;
     this.bpm = 141; this.stepIdxDiv = 2; this.div = 0.25;
+    this.scaleName = 'minor';
     this.glide = false; this.lastNote = -1; this.selected = -1;
     this.steps = [];
     for (let i = 0; i < SEQ_LEN; i++) this.steps.push({ on: i % 2 === 0, vel: (i % 4 === 0 ? 1 : 0.75), tr: 0, len: 75, tie: false, rat: 1, prob: 100 });
@@ -49,7 +50,10 @@ class Sequencer {
   saveSlot(i) { try { const bank = JSON.parse(localStorage.getItem('psy.seq.v1') || '[]'); bank[i] = { steps: this.steps, drums: this.drums }; localStorage.setItem('psy.seq.v1', JSON.stringify(bank)); } catch (e) {} }
   loadSlot(i) { try { const bank = JSON.parse(localStorage.getItem('psy.seq.v1') || '[]'); if (bank[i]) { this.steps = bank[i].steps; this.drums = bank[i].drums; } } catch (e) {} }
     toggleStep(i) { this.steps[i].on = !this.steps[i].on; return this.steps[i]; }
-  setDiv(name) { const M = { '1/4': 1, '1/8': 0.5, '1/16': 0.25, '1/32': 0.125, '1/8T': 1 / 3, '1/16T': 1 / 6 }; if (M[name] != null) this.div = M[name]; }
+  static get SCALES() { return { minor: [0,2,3,5,7,8,10], phrygian: [0,1,3,5,7,8,10], major: [0,2,4,5,7,9,11], dorian: [0,2,3,5,7,9,10], harmonic: [0,2,3,5,7,8,11] }; }
+  scale() { return Sequencer.SCALES[this.scaleName] || Sequencer.SCALES.minor; }
+  snap(tr) { const sc = this.scale(); const oct = Math.floor(tr / 12) * 12; const n = ((tr % 12) + 12) % 12; let best = sc[0], bd = 99; for (let q = 0; q < sc.length; q++) { const d0 = Math.abs(sc[q] - n); if (d0 < bd) { bd = d0; best = sc[q]; } } return oct + best; }
+    setDiv(name) { const M = { '1/4': 1, '1/8': 0.5, '1/16': 0.25, '1/32': 0.125, '1/8T': 1 / 3, '1/16T': 1 / 6 }; if (M[name] != null) this.div = M[name]; }
     setStep(i, p) { Object.assign(this.steps[i], p); }
   toggleDrum(lane, i) { this.drums[lane][i] = !this.drums[lane][i]; return this.drums[lane][i]; }
   noteOn(n, v) { if (!this.enabled) { this.engine.noteOn(n, v); return; } if (!this.held.some(h => h.note === n)) { this.held.push({ note: n, vel: v || 0.8 }); this.held.sort((a, b) => a.note - b.note); } }
@@ -123,7 +127,7 @@ class Sequencer {
         const src = this.held.length ? this.held : [{ note: this.root + oct, vel: 0.85 }];
         if (st.on && src.length && ((st.prob == null) || st.prob >= 100 || Math.random() * 100 < st.prob)) {
           const base = src[this.notePtr % src.length].note; this.notePtr++;
-          const note = base + (st.tr | 0) + oct;
+          const note = base + this.snap(st.tr | 0) + oct;
           let vel = Math.max(0.05, Math.min(1, st.vel));
           const gateSec = Math.max(0.03, stepDur * ((st.len == null ? 75 : st.len) / 100));
           const hum = (this.human || 0) / 100;
