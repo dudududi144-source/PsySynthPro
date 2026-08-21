@@ -1284,6 +1284,18 @@ $('bPower').addEventListener('click', function () {
     }
     return { ppq: ppq, evs: evs };
   }
+  function detectScale(S, pitches) {
+    if (!pitches.length) return;
+    var root = pitches[0] % 12; var counts = {};
+    for (var q = 0; q < pitches.length; q++) { var iv = ((pitches[q] % 12) - root + 12) % 12; counts[iv] = (counts[iv] || 0) + 1; }
+    var SC = (window.Psy && Psy.Sequencer && Psy.Sequencer.SCALES) ? Psy.Sequencer.SCALES : { minor: [0,2,3,5,7,8,10], major: [0,2,4,5,7,9,11], phrygian: [0,1,3,5,7,8,10], dorian: [0,2,3,5,7,9,10] };
+    var best = 'minor', bs = -1;
+    for (var k in SC) { var sc = SC[k]; var score = 0;
+      for (var iv2 in counts) { if (sc.indexOf(parseInt(iv2, 10)) >= 0) score += counts[iv2]; }
+      if (score > bs) { bs = score; best = k; } }
+    S.scaleName = best; S.root = pitches[0];
+    var sel = document.getElementById('pscale'); if (sel) sel.value = best;
+  }
   function importMidi(file) {
     var rd = new FileReader();
     rd.onload = function () {
@@ -1292,7 +1304,8 @@ $('bPower').addEventListener('click', function () {
       if (!ons.length) return; var t0 = ons[0].t; var bar = m.ppq * 4;
       for (var q = 0; q < ons.length; q++) { var e = ons[q]; var step = Math.floor(((e.t - t0) / bar) * 16); if (step < 0 || step > 15) continue;
         if (e.ch === 9) { if (e.n === 36) S.drums.k[step] = true; else if (e.n === 38) S.drums.s[step] = true; else if (e.n === 42) S.drums.hc[step] = true; else if (e.n === 46) S.drums.ho[step] = true; else if (e.n === 69) S.drums.sh[step] = true; }
-        else { S.steps[step].on = true; S.steps[step].tr = e.n - S.root; if (e.v) S.steps[step].vel = Math.max(0.1, Math.min(1, e.v / 127)); } }
+        else { S.steps[step].on = true; S.steps[step].tr = e.n - S.root; if (e.v) S.steps[step].vel = Math.max(0.1, Math.min(1, e.v / 127)); P.push(e.n); } }
+      detectScale(S, P);
       if (S.onPatternChanged) S.onPatternChanged();
     };
     rd.readAsArrayBuffer(file);
