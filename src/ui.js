@@ -1264,6 +1264,20 @@ $('bPower').addEventListener('click', function () {
   var mel = document.createElement('button'); mel.className = 'stb'; mel.textContent = 'MELODIC';
   mel.addEventListener('click', function () { seq.melodic(); paint(); });
   tr.appendChild(mel);
+  var ex = document.createElement('button'); ex.className = 'stb'; ex.textContent = 'EXPORT MIDI';
+  ex.addEventListener('click', function () {
+    var ev = []; var sd = (60 / seq.bpm) * (seq.div || 0.25); var N = seq.steps.length;
+    for (var i = 0; i < N; i++) { var t = i * sd; var st = seq.steps[i];
+      if (st.on) { var n = seq.root + (st.tr | 0); var g = Math.max(0.03, sd * ((st.len == null ? 75 : st.len) / 100)); ev.push({ on: true, note: n, vel: Math.round(st.vel * 100), t: t }); ev.push({ on: false, note: n, vel: 0, t: t + g }); }
+      if (seq.drums.k[i]) { ev.push({ on: true, note: 36, vel: 100, t: t }); ev.push({ on: false, note: 36, vel: 0, t: t + 0.1 }); }
+      if (seq.drums.s[i]) { ev.push({ on: true, note: 38, vel: 90, t: t }); ev.push({ on: false, note: 38, vel: 0, t: t + 0.1 }); }
+      if (seq.drums.hc[i]) { ev.push({ on: true, note: 42, vel: 70, t: t }); ev.push({ on: false, note: 42, vel: 0, t: t + 0.05 }); }
+      if (seq.drums.ho[i]) { ev.push({ on: true, note: 46, vel: 80, t: t }); ev.push({ on: false, note: 46, vel: 0, t: t + 0.2 }); }
+      if (seq.drums.sh[i]) { ev.push({ on: true, note: 69, vel: 60, t: t }); ev.push({ on: false, note: 69, vel: 0, t: t + 0.05 }); } }
+    var bytes = Psy.buildMidiFile(ev, seq.bpm, 480);
+    if (bytes) { var arr = new Uint8Array(bytes); var blob = new Blob([arr], { type: 'audio/midi' }); var u = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href = u; a.download = 'psysynth-groove.mid'; document.body.appendChild(a); a.click(); a.remove(); } });
+  tr.appendChild(ex);
   var av = document.createElement('button'); av.className = 'stb'; av.textContent = 'AI VAR';
   av.addEventListener('click', function () { seq.mutateSeq(); buildGrid(); paint(); });
   tr.appendChild(av);
