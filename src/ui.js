@@ -1418,6 +1418,7 @@ $('bPower').addEventListener('click', function () {
   new Psy.Knob(mx, { label: 'H-TUNE', color: '#7ff3ff', min: 50, max: 200, def: 100, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dtune.hc = v / 100; seq.dtune.ho = v / 100; } });
   new Psy.Knob(mx, { label: 'PUNCH', color: '#f87171', min: 0, max: 100, def: 50, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dpunch = Math.round(v); if (seq._setPunch) seq._setPunch(); } });
   new Psy.Knob(mx, { label: 'D-SWING', color: '#fbbf24', min: 0, max: 60, def: 0, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dswing = Math.round(v); } });
+  new Psy.Knob(mx, { label: 'D-WIDTH', color: '#a78bfa', min: 0, max: 100, def: 60, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { seq.dwidth = Math.round(v); } });
 
   [['k', 'K'], ['s', 'S'], ['hc', 'H'], ['ho', 'O'], ['sh', 'SH']].forEach(function (M) {
     var mb = document.createElement('button'); mb.className = 'stb on'; mb.textContent = M[1];
