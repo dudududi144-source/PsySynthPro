@@ -1,5 +1,7 @@
 "use strict";
 var Psy = (window.PsySynth = window.PsySynth || {});
+var SEQ_GT = [0, -0.06, 0.04, -0.02, 0, -0.05, 0.03, -0.02, 0, -0.06, 0.04, -0.01, 0, -0.04, 0.03, -0.02];
+var SEQ_GV = [0, 0.05, -0.06, 0.03, 0, 0.04, -0.05, 0.02, 0, 0.05, -0.04, 0.02, 0, 0.04, -0.05, 0.02];
 const SEQ_LEN = 16;
 const LANES = ['k','s','hc','ho','sh'];
 
@@ -131,11 +133,10 @@ class Sequencer {
           let vel = Math.max(0.05, Math.min(1, st.vel));
           const gateSec = Math.max(0.03, stepDur * ((st.len == null ? 75 : st.len) / 100));
           const hum = (this.human || 0) / 100;
-          const GT = [0, -0.06, 0.04, -0.02, 0, -0.05, 0.03, -0.02, 0, -0.06, 0.04, -0.01, 0, -0.04, 0.03, -0.02];
-          const GV = [0, 0.05, -0.06, 0.03, 0, 0.04, -0.05, 0.02, 0, 0.05, -0.04, 0.02, 0, 0.04, -0.05, 0.02];
+
           const gi = i % 16;
-          const jt = tStep + GT[gi] * hum * stepDur * 0.5;
-          vel = Math.max(0.05, Math.min(1, vel * (1 + GV[gi] * hum)));
+          const jt = tStep + SEQ_GT[gi] * hum * stepDur * 0.5;
+          vel = Math.max(0.05, Math.min(1, vel * (1 + SEQ_GV[gi] * hum)));
           const rat = Math.max(1, Math.min(4, st.rat || 1));
           if (rat === 1) { this.engine.noteOnAt(note, vel, jt); if (!st.tie) this.engine.noteOffAt(note, jt + gateSec); }
           else { const sub = stepDur / rat; for (let r = 0; r < rat; r++) { this.engine.noteOnAt(note, vel, jt + r * sub); this.engine.noteOffAt(note, jt + r * sub + Math.min(gateSec, sub * 0.9)); } }
