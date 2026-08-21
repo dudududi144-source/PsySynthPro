@@ -24,6 +24,7 @@ class Sequencer {
     }
     this.dmix = { k: 1.0, s: 0.7, hc: 0.45, ho: 0.5, sh: 0.35 };
     this.dtune = { k: 1, s: 1, hc: 1, ho: 1, sh: 1 };
+    this.dpunch = 50;
     this.dmute = { k: false, s: false, hc: false, ho: false, sh: false };
     this.offbass = true; this.fillOn = true; this.ghostOn = true; this.crashOn = true; this.songOn = false; this.songSlot = 0; this.onPatternChanged = null;
     this.held = []; this.notePtr = 0; this.stepPos = 0; this.nextTime = 0; this.timer = null; this.onStep = null;
@@ -104,7 +105,12 @@ class Sequencer {
     }
     this.swing = g.swing;
   }
-  ensureDrumBus() { if (!this.engine.ctx) return; if (!this._smpTried) { this._smpTried = true; if (window.Psy && Psy.Sampler) Psy.Sampler.load(this.engine.ctx); } if (this._dbus) return; this._dbus = this.engine.ctx.createGain(); this._dbus.gain.value = 1; this._dbus.connect(this.engine.master || this.engine.fxInput); }
+  ensureDrumBus() { if (!this.engine.ctx) return; if (!this._smpTried) { this._smpTried = true; if (window.Psy && Psy.Sampler) Psy.Sampler.load(this.engine.ctx); } if (this._dbus) return;
+    this._dbus = this.engine.ctx.createGain(); this._dbus.gain.value = 1;
+    this._dcomp = this.engine.ctx.createDynamicsCompressor();
+    this._dcomp.attack.value = 0.003; this._dcomp.release.value = 0.15; this._setPunch();
+    this._dbus.connect(this._dcomp); this._dcomp.connect(this.engine.master || this.engine.fxInput); }
+  _setPunch() { if (!this._dcomp) return; const p = (this.dpunch || 0) / 100; this._dcomp.threshold.value = -8 - p * 14; this._dcomp.ratio.value = 2 + p * 6; }
   _metal(f0, dec) { return function (t) { var rs = [1, 1.483, 1.98, 2.54, 3.1, 3.66, 4.2]; var s = 0; for (var q = 0; q < rs.length; q++) s += Math.sin(2 * Math.PI * f0 * rs[q] * t) * Math.exp(-t * dec * (1 + q * 0.4)); return s; }; }
   _renderDrums() { if (this._rd || !this.engine.ctx) return; const ctx = this.engine.ctx; const sr = ctx.sampleRate;
     const mk = function (len, fn) { const n = Math.floor(sr * len); const b = ctx.createBuffer(1, n, sr); const dd = b.getChannelData(0); for (let i = 0; i < n; i++) dd[i] = fn(i / sr); return b; };
