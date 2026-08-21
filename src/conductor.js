@@ -11,6 +11,10 @@ class Conductor {
   mutate(){this.reseed(Math.floor(Math.random()*2147483646)+1);this.progOffset=(this.progOffset+1)%4;this.leadDeg=0;}
   fillNext(){this.wantFill=true;}
   setFollow(on){this.follow=on;}
+  chordName(note) { var N = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']; var pc = ((note % 12) + 12) % 12;
+    var sc = (window.__seq && __seq.scale) ? __seq.scale() : [0,2,3,5,7,8,10]; var q = (sc[3] === 5 || sc[2] === 3 || sc[2] === 4) ? (sc[2] <= 4 && sc[3] >= 5 ? 'm' : 'm') : 'm';
+    var minor = (sc[2] === 1 || sc[2] === 2 || sc[2] === 3); return N[pc] + (minor ? 'm' : ''); }
+
   writeSeq() { var SQ = window.__seq; if (!SQ) return false;
     for (var i = 0; i < SQ.steps.length; i++) { SQ.steps[i].on = (i % 2 === 0) || (i === 14); SQ.steps[i].tr = (i % 8 === 6) ? 7 : ((i % 8 === 7) ? 5 : 0); SQ.steps[i].vel = (i % 4 === 0) ? 1 : 0.75; SQ.steps[i].len = 75; SQ.steps[i].rat = 1; SQ.steps[i].prob = 100;
       SQ.drums.k[i] = (i % 4 === 0); SQ.drums.s[i] = (i === 4 || i === 12); SQ.drums.hc[i] = (i % 2 === 0); SQ.drums.ho[i] = (i % 2 === 1); SQ.drums.sh[i] = true; }
@@ -40,7 +44,7 @@ class Conductor {
     this.setLive('cutoff',Math.round(300+e*6500));this.setLive('res',Math.round(2+e*8));this.setLive('reverb',Math.round(20+(1-e)*25));this.setLive('delay',Math.round(15+e*25));this.setLive('fmDepth',Math.round(e*45));this.setLive('lfoDepth',Math.round(e*60));}
 playStep(i,t,sd){var PH=CONDUCTOR_PH;var root=PH[(Math.floor(this.bar/2)+this.progOffset)%PH.length][this.bar%4];
     var SQ=window.__seq; var seqOn=!!(SQ&&SQ.enabled); var rootNote=this.deg2note(root,0); this.curRoot=rootNote;
-    if(i===0&&seqOn&&this.follow!==false&&SQ)SQ.root=rootNote;var dr=this.complexity;var _ab = this.bar % 9; var ARR = _ab < 2 ? 'intro' : (_ab === 8 ? 'break' : 'full');this.ensureDrums();
+    if(i===0){ var el=document.getElementById('chordRead'); if(el) el.textContent=this.chordName(rootNote); }var dr=this.complexity;var _ab = this.bar % 9; var ARR = _ab < 2 ? 'intro' : (_ab === 8 ? 'break' : 'full');this.ensureDrums();
     if(this.drumsOn&&!seqOn&&this.drums&&ARR==='full'){if(i%4===0)this.kick(t);if(i%4===2)this.hat(t,false);if(i===4||i===12)this.snare(t);if(i===14&&dr>0.6)this.hat(t,true);}
     if((ARR==='break'||this.wantFill)&&i>=12&&this.drums&&this.drumsOn&&!seqOn)this.hat(t,i===15);
     if(i===15)this.wantFill=false;
