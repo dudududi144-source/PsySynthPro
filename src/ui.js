@@ -201,6 +201,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
       h.textContent = dst.label;
       grid.appendChild(h);
     });
+  new Psy.Knob(sfx, { label: 'LOUD', color: '#f472b6', min: 0, max: 100, def: 50, fmt: function (v) { return Math.round(v) + '%'; }, onChange: function (v) { if (engine.setLoudness) engine.setLoudness(v); } });
     sources.forEach(function (src) {
       const rl = document.createElement('div');
       rl.className = 'matrix-rowlabel';
