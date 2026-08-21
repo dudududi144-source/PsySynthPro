@@ -226,7 +226,7 @@ var Psy = (window.PsySynth = window.PsySynth || {});
     const root = $('sections');
     LAYOUT.forEach(function (sec) {
       const s = document.createElement('div');
-      s.className = 'section';
+      s.className = 'section' + (/FM OPERATOR|MOD MATRIX|WAVETABLE|MORPH/.test(sec.title) ? ' adv' : '');
       s.innerHTML = '<div class="stitle" style="--c:' + sec.color + '">' + sec.title + '</div>';
       const row = document.createElement('div');
       row.className = 'krow';
@@ -1245,6 +1245,10 @@ $('bPower').addEventListener('click', function () {
   var seq = new Psy.Sequencer(engine); window.__seq = seq; seq.autorestore();
   var sel = 0; var cells = []; var drumCells = [];
   var tr = document.createElement('div'); tr.className = 'krow';
+  var vm = document.createElement('button'); vm.className = 'stb'; vm.textContent = 'PRO';
+  vm.addEventListener('click', function () { var simple = document.body.classList.toggle('simple'); vm.textContent = simple ? 'SIMPLE' : 'PRO'; vm.classList.toggle('on', !simple); try { localStorage.setItem('psy.view', simple ? 'simple' : 'pro'); } catch (e) {} });
+  tr.appendChild(vm);
+  try { if (localStorage.getItem('psy.view') === 'simple') { document.body.classList.add('simple'); vm.textContent = 'SIMPLE'; } } catch (e) {}
   var run = document.createElement('button'); run.className = 'stb'; run.textContent = 'RUN';
   run.addEventListener('click', function () { if (window.engine && !engine.ready) { var pb = document.getElementById('bPower'); if (pb) pb.click(); } seq.setEnabled(!seq.enabled); run.textContent = seq.enabled ? 'STOP' : 'RUN'; run.classList.toggle('on', seq.enabled); seq.autosave(); });
   tr.appendChild(run);
@@ -1268,6 +1272,9 @@ $('bPower').addEventListener('click', function () {
   tp.addEventListener('click', function () { var now = performance.now(); taps = taps.filter(function (x) { return now - x < 3000; }); taps.push(now);
     if (taps.length >= 2) { var d = 0; for (var i = 1; i < taps.length; i++) d += taps[i] - taps[i - 1]; var ms = d / (taps.length - 1); var bpm = Math.round(60000 / ms); seq.bpm = Math.max(60, Math.min(200, bpm)); if (window.__cond) window.__cond.bpm = seq.bpm; } });
   tr.appendChild(tp);
+  var pl = document.createElement('button'); pl.className = 'stb'; pl.textContent = 'POLY 3:2';
+  pl.addEventListener('click', function () { seq.poly = !seq.poly; pl.classList.toggle('on', seq.poly); });
+  tr.appendChild(pl);
   var demo = document.createElement('button'); demo.className = 'stb'; demo.textContent = 'DEMO';
   demo.addEventListener('click', function () {
     try { if (typeof loadPreset === 'function') loadPreset('PRO FULLON ROLL'); } catch (e) {}
