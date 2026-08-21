@@ -36,7 +36,17 @@ class Sequencer {
   setLen(n) { n = (n === 32) ? 32 : 16; while (this.steps.length < n) this.steps.push({ on: false, vel: 0.75, tr: 0, len: 75, tie: false, rat: 1 });
     for (const L of ['k','s','hc','ho','sh']) { while (this.drums[L].length < n) this.drums[L].push(false); }
     this.steps.length = n; for (const L of ['k','s','hc','ho','sh']) this.drums[L].length = n; this.stepPos = this.stepPos % n; }
-  mutateSeq() {
+  applyCurve(name) {
+    const N = this.steps.length;
+    for (let i = 0; i < N; i++) {
+      if (name === 'FLAT') this.steps[i].vel = 0.8;
+      else if (name === 'ACCENT') this.steps[i].vel = (i % 4 === 0) ? 1 : 0.6;
+      else if (name === 'RAMP') this.steps[i].vel = 0.4 + 0.6 * (i / (N - 1));
+      else if (name === 'PUMP') this.steps[i].vel = (i % 4 === 2) ? 1 : 0.6;
+      else if (name === 'FUNK') this.steps[i].vel = [1,0.5,0.7,0.5,0.9,0.5,0.7,0.6,1,0.5,0.7,0.5,0.9,0.6,0.7,0.8][i % 16];
+    }
+  }
+    mutateSeq() {
     const degs = [0, 3, 5, 7, 10, 12];
     for (let i = 0; i < this.steps.length; i++) {
       const st = this.steps[i];
