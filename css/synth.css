@@ -996,3 +996,5 @@ body.perform .wavetable, body.perform .morph { display: none; }
 .sections>.section{break-inside:avoid;width:100% !important;box-sizing:border-box;background:#14171c;margin:0 0 1px;}
 @media (max-width:900px){.sections{columns:2;}}
 @media (max-width:700px){.sections{columns:1;}}
+
+body.simple .section.adv{display:none;}
