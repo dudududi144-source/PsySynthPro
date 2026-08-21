@@ -31,7 +31,7 @@ class Conductor {
     this.setLive('cutoff',Math.round(300+e*6500));this.setLive('res',Math.round(2+e*8));this.setLive('reverb',Math.round(20+(1-e)*25));this.setLive('delay',Math.round(15+e*25));this.setLive('fmDepth',Math.round(e*45));this.setLive('lfoDepth',Math.round(e*60));}
 playStep(i,t,sd){var PH=[[0,5,3,4],[0,6,5,4],[0,3,5,4],[0,2,5,4]];var root=PH[(Math.floor(this.bar/2)+this.progOffset)%PH.length][this.bar%4];
     var SQ=window.__seq; var seqOn=!!(SQ&&SQ.enabled); var rootNote=this.deg2note(root,0); this.curRoot=rootNote;
-    if(seqOn&&this.follow!==false&&SQ)SQ.root=rootNote;var dr=this.complexity;var _ab = this.bar % 9; var ARR = _ab < 2 ? 'intro' : (_ab === 8 ? 'break' : 'full');this.ensureDrums();
+    if(i===0&&seqOn&&this.follow!==false&&SQ)SQ.root=rootNote;var dr=this.complexity;var _ab = this.bar % 9; var ARR = _ab < 2 ? 'intro' : (_ab === 8 ? 'break' : 'full');this.ensureDrums();
     if(this.drumsOn&&!seqOn&&this.drums&&ARR==='full'){if(i%4===0)this.kick(t);if(i%4===2)this.hat(t,false);if(i===4||i===12)this.snare(t);if(i===14&&dr>0.6)this.hat(t,true);}
     if((ARR==='break'||this.wantFill)&&i>=12&&this.drums&&this.drumsOn&&!seqOn)this.hat(t,i===15);
     if(i===15)this.wantFill=false;
