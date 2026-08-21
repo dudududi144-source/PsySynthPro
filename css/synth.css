@@ -972,3 +972,7 @@ body.perform .wavetable, body.perform .morph { display: none; }
 .sqc.d{height:22px;background:#141821;}
 .sqc.d.on{background:var(--dc,#2dd4bf);border-color:var(--dc,#2dd4bf);box-shadow:0 0 6px var(--dc,#2dd4bf);}
 @media (max-width:700px){ .seqgrid{grid-template-columns:repeat(8,1fr);} .seqgrid.drum{grid-template-columns:auto repeat(8,1fr);} .sqc{height:30px;} }
+
+.seqhint{font-size:9px;color:#5b6472;letter-spacing:1px;margin:2px 0 6px;}
+.sqc.beat{box-shadow:inset 3px 0 0 #39445a;}
+.sqc.d.beat{box-shadow:inset 2px 0 0 #39445a;}
